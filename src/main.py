@@ -68,7 +68,7 @@ try:
     payment_server.initialize()
 
     payment_routes = {
-        "GET /v1/indicators/{symbol}": RouteConfig(
+        "GET /v1/indicators/*": RouteConfig(
             accepts=[
                 PaymentOption(
                     scheme="exact",
@@ -92,7 +92,7 @@ try:
             mime_type="application/json",
             description="Top DeFi yield pools by TVL",
         ),
-        "GET /v1/metadata?url={url}": RouteConfig(
+        "GET /v1/metadata": RouteConfig(
             accepts=[
                 PaymentOption(
                     scheme="exact",
