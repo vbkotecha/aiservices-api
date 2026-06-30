@@ -23,11 +23,30 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from crypto_data import get_price, get_multi_price, get_indicators, get_fear_greed, get_defi_yields
 from geo_data import get_ip_geo
+from web_data import get_url_metadata
+
+WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
+
+app = FastAPI(
+    title="AIServices",
+    version="1.0.0",
+    description="""Paid data APIs for AI agents — crypto prices, technical indicators, DeFi yields, IP geolocation, URL metadata.
+
+All paid endpoints use x402 protocol with USDC on Base.
+""",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- x402 Payment Protocol (Base Mainnet) ---
-X402_WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
+X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
 X402_NETWORK = "eip155:8453"
-X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
 
 X402_ENABLED = False
 try:
@@ -37,9 +56,6 @@ try:
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
     from x402.server import x402ResourceServer
     from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
-
-    CDP_API_KEY_ID = os.environ.get("CDP_API_KEY_ID", "")
-    CDP_API_KEY_SECRET = os.environ.get("CDP_API_KEY_SECRET", "")
 
     auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
     facilitator = HTTPFacilitatorClient(
@@ -98,28 +114,6 @@ try:
 except ImportError as e:
     print(f"[x402] NOT installed — running in free mode. Error: {e}", flush=True)
     X402_ENABLED = False
-
-
-from web_data import get_url_metadata
-
-WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
-
-app = FastAPI(
-    title="AIServices",
-    version="1.0.0",
-    description="""Paid data APIs for AI agents — crypto prices, technical indicators, DeFi yields, IP geolocation, URL metadata.
-
-All paid endpoints use x402 protocol with USDC on Base.
-""",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 # --- Market Data ---
@@ -194,6 +188,7 @@ async def health():
     return {
         "status": "ok",
         "version": "1.0.0",
+        "x402_enabled": X402_ENABLED,
         "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata"],
     }
 
