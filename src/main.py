@@ -79,6 +79,15 @@ try:
             ],
             mime_type="application/json",
             description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
+            extensions={
+                "bazaar": {
+                    "discoverable": True,
+                    "category": "market-data",
+                    "tags": ["crypto", "indicators", "RSI", "bollinger", "ATR"],
+                    "serviceName": "AIServices Indicators",
+                    "inputSchema": {"pathParams": {"symbol": {"type": "string", "description": "Crypto symbol e.g. BTC, ETH"}}},
+                }
+            },
         ),
         "GET /v1/yields": RouteConfig(
             accepts=[
@@ -91,6 +100,15 @@ try:
             ],
             mime_type="application/json",
             description="Top DeFi yield pools by TVL",
+            extensions={
+                "bazaar": {
+                    "discoverable": True,
+                    "category": "defi",
+                    "tags": ["defi", "yields", "farming", "TVL", "staking"],
+                    "serviceName": "AIServices DeFi Yields",
+                    "inputSchema": {"queryParams": {"limit": {"type": "integer", "description": "Max results (default 20)"}, "chain": {"type": "string", "description": "Filter by chain (default all)"}}},
+                }
+            },
         ),
         "GET /v1/metadata": RouteConfig(
             accepts=[
@@ -103,6 +121,15 @@ try:
             ],
             mime_type="application/json",
             description="URL metadata extraction and unfurling",
+            extensions={
+                "bazaar": {
+                    "discoverable": True,
+                    "category": "web-data",
+                    "tags": ["metadata", "og", "preview", "unfurl", "url"],
+                    "serviceName": "AIServices URL Metadata",
+                    "inputSchema": {"queryParams": {"url": {"type": "string", "description": "URL to extract metadata from"}}},
+                }
+            },
         ),
     }
 
