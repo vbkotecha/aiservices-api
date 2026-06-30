@@ -57,13 +57,15 @@ try:
     from x402.server import x402ResourceServer
     from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
 
-    auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
     facilitator = HTTPFacilitatorClient(
-        facilitator_config=FacilitatorConfig(url=CDP_FACILITATOR_URL),
-        auth_provider=auth_provider,
+        FacilitatorConfig(
+            url=CDP_FACILITATOR_URL,
+            auth_provider=CreateHeadersAuthProvider(create_cdp_auth_headers),
+        )
     )
     payment_server = x402ResourceServer(facilitator)
     payment_server.register(X402_NETWORK, ExactEvmServerScheme())
+    payment_server.initialize()
 
     payment_routes = {
         "GET /v1/indicators/{symbol}": RouteConfig(
