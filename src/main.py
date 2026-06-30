@@ -111,8 +111,8 @@ try:
     )
     print(f"[x402] Payment middleware enabled — indicators/yields ($0.02), metadata ($0.01)", flush=True)
     X402_ENABLED = True
-except ImportError as e:
-    print(f"[x402] NOT installed — running in free mode. Error: {e}", flush=True)
+except Exception as e:
+    print(f"[x402] NOT loaded — running in free mode. Error: {e}", flush=True)
     X402_ENABLED = False
 
 

@@ -14,9 +14,14 @@ _SYMBOL_MAP = {
 }
 
 def _fetch(url, timeout=10):
-    req = urllib.request.Request(url, headers={"User-Agent": "AgentCourt/1.0"})
-    resp = urllib.request.urlopen(req, timeout=timeout)
-    return json.loads(resp.read())
+    req = urllib.request.Request(url, headers={"User-Agent": "AIServices/1.0"})
+    try:
+        resp = urllib.request.urlopen(req, timeout=timeout)
+        return json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        if e.code == 429:
+            raise HTTPException(status_code=429, detail="Rate limited by upstream data provider. Please retry in a moment.")
+        raise HTTPException(status_code=502, detail=f"Upstream error: {e.code}")
 
 def get_price(symbol):
     coin_id = _SYMBOL_MAP.get(symbol.upper(), symbol.lower())
