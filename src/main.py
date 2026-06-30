@@ -23,6 +23,83 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from crypto_data import get_price, get_multi_price, get_indicators, get_fear_greed, get_defi_yields
 from geo_data import get_ip_geo
+
+# --- x402 Payment Protocol (Base Mainnet) ---
+X402_WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
+X402_NETWORK = "eip155:8453"
+X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
+
+X402_ENABLED = False
+try:
+    from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption, CreateHeadersAuthProvider
+    from x402.http.middleware.fastapi import PaymentMiddlewareASGI
+    from x402.http.types import RouteConfig
+    from x402.mechanisms.evm.exact import ExactEvmServerScheme
+    from x402.server import x402ResourceServer
+    from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
+
+    CDP_API_KEY_ID = os.environ.get("CDP_API_KEY_ID", "")
+    CDP_API_KEY_SECRET = os.environ.get("CDP_API_KEY_SECRET", "")
+
+    auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
+    facilitator = HTTPFacilitatorClient(
+        facilitator_config=FacilitatorConfig(url=CDP_FACILITATOR_URL),
+        auth_provider=auth_provider,
+    )
+    payment_server = x402ResourceServer(facilitator)
+    payment_server.register(X402_NETWORK, ExactEvmServerScheme())
+
+    payment_routes = {
+        "GET /v1/indicators/{symbol}": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.02",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
+        ),
+        "GET /v1/yields": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.02",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Top DeFi yield pools by TVL",
+        ),
+        "GET /v1/metadata?url={url}": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.01",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="URL metadata extraction and unfurling",
+        ),
+    }
+
+    app.add_middleware(
+        PaymentMiddlewareASGI,
+        routes=payment_routes,
+        server=payment_server,
+    )
+    print(f"[x402] Payment middleware enabled — indicators/yields ($0.02), metadata ($0.01)", flush=True)
+    X402_ENABLED = True
+except ImportError as e:
+    print(f"[x402] NOT installed — running in free mode. Error: {e}", flush=True)
+    X402_ENABLED = False
+
+
 from web_data import get_url_metadata
 
 WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")

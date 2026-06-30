@@ -2,3 +2,5 @@ fastapi==0.104.1
 uvicorn[standard]==0.24.0
 pydantic==2.5.2
 requests==2.31.0
+x402[fastapi,httpx,evm]
+cryptography>=41.0.0
