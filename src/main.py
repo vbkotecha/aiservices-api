@@ -137,8 +137,40 @@ async def crypto_indicators(symbol: str):
 
 @app.get("/v1/yields", tags=["Market Data"],
          response_model=dict,
-         responses={200: {"content": {"application/json": {"schema": {"type": "object", "properties": {"pools": {"type": "array"}}}}}}})
-async def defi_yields():
+         responses={
+             200: {
+                 "content": {
+                     "application/json": {
+                         "schema": {
+                             "type": "object",
+                             "properties": {
+                                 "pools": {
+                                     "type": "array",
+                                     "items": {
+                                         "type": "object",
+                                         "properties": {
+                                             "protocol": {"type": "string"},
+                                             "pool": {"type": "string"},
+                                             "apy": {"type": "number"},
+                                             "tvl_usd": {"type": "number"},
+                                             "chain": {"type": "string"},
+                                         }
+                                     }
+                                 }
+                             }
+                         }
+                     }
+                 },
+                 "description": "Top DeFi yield pools ranked by TVL"
+             },
+             402: {"description": "Payment required — $0.02 USDC on Base"}
+         },
+         summary="Top DeFi Yield Pools",
+         description="Returns top DeFi yield farming pools ranked by TVL across major protocols. Costs $0.02 USDC via x402.")
+async def defi_yields(
+    limit: int = 20,
+    chain: str = "all"
+):
     """Top DeFi yield pools by TVL ($0.02)"""
     return get_defi_yields()
 
