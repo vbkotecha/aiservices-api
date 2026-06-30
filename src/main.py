@@ -135,7 +135,9 @@ async def crypto_indicators(symbol: str):
     """Technical indicators: RSI, BB, ATR, S/R ($0.02)"""
     return get_indicators(symbol)
 
-@app.get("/v1/yields", tags=["Market Data"])
+@app.get("/v1/yields", tags=["Market Data"],
+         response_model=dict,
+         responses={200: {"content": {"application/json": {"schema": {"type": "object", "properties": {"pools": {"type": "array"}}}}}}})
 async def defi_yields():
     """Top DeFi yield pools by TVL ($0.02)"""
     return get_defi_yields()
