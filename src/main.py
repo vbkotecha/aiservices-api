@@ -46,7 +46,111 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- x402 Payment Protocol (Base Mainnet) ---\nX402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)\nX402_NETWORK = "eip155:8453"\n\nX402_ENABLED = False\ntry:\n    from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption\n    from x402.http.middleware.fastapi import PaymentMiddlewareASGI\n    from x402.http.types import RouteConfig\n    from x402.mechanisms.evm.exact import ExactEvmServerScheme\n    from x402.server import x402ResourceServer\n\n    # Use CDP facilitator if credentials available, otherwise community facilitator\n    _facilitator_url = "https://x402.org/facilitator"\n    _facilitator_kwargs = {}\n    try:\n        from x402.http import CreateHeadersAuthProvider\n        from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL\n        if os.environ.get("CDP_API_KEY_ID") and os.environ.get("CDP_API_KEY_SECRET"):\n            _facilitator_url = CDP_FACILITATOR_URL\n            _facilitator_kwargs["auth_provider"] = CreateHeadersAuthProvider(create_cdp_auth_headers)\n            print("[x402] Using CDP facilitator with auth headers", flush=True)\n    except ImportError:\n        print("[x402] CDP auth not available, using community facilitator", flush=True)\n\n    facilitator = HTTPFacilitatorClient(\n        FacilitatorConfig(url=_facilitator_url, **_facilitator_kwargs)\n    )\n    payment_server = x402ResourceServer(facilitator)\n    payment_server.register(X402_NETWORK, ExactEvmServerScheme())\n\n    # Optional: register bazaar extension for discovery\n    try:\n        from x402.extensions.bazaar import bazaar_resource_server_extension\n        payment_server.register_extension(bazaar_resource_server_extension)\n        print("[x402] Bazaar discovery extension registered", flush=True)\n    except ImportError:\n        print("[x402] Bazaar extension not available (OK, continuing)", flush=True)\n\n    payment_server.initialize()\n\n    payment_routes = {\n        "POST /v1/disputes": RouteConfig(\n            accepts=[\n                PaymentOption(\n                    scheme="exact",\n                    pay_to=X402_WALLET,\n                    price="$0.05",\n                    network=X402_NETWORK,\n                ),\n            ],\n            mime_type="application/json",\n            description="Submit a dispute for policy-driven ruling (AgentCourt engine)",\n        ),\n        "GET /v1/indicators/*": RouteConfig(\n            accepts=[\n                PaymentOption(\n                    scheme="exact",\n                    pay_to=X402_WALLET,\n                    price="$0.02",\n                    network=X402_NETWORK,\n                ),\n            ],\n            mime_type="application/json",\n            description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",\n        ),\n        "GET /v1/yields": RouteConfig(\n            accepts=[\n                PaymentOption(\n                    scheme="exact",\n                    pay_to=X402_WALLET,\n                    price="$0.02",\n                    network=X402_NETWORK,\n                ),\n            ],\n            mime_type="application/json",\n            description="Top DeFi yield pools by TVL",\n        ),\n        "GET /v1/metadata": RouteConfig(\n            accepts=[\n                PaymentOption(\n                    scheme="exact",\n                    pay_to=X402_WALLET,\n                    price="$0.01",\n                    network=X402_NETWORK,\n                ),\n            ],\n            mime_type="application/json",\n            description="URL metadata extraction and unfurling",\n        ),\n    }\n\n    app.add_middleware(\n        PaymentMiddlewareASGI,\n        routes=payment_routes,\n        server=payment_server,\n    )\n    print(f"[x402] Payment middleware enabled — disputes ($0.05), indicators/yields ($0.02), metadata ($0.01)", flush=True)\n    X402_ENABLED = True\nexcept Exception as e:\n    import traceback\n    print(f"[x402] NOT loaded — running in free mode. Error: {e}", flush=True)\n    traceback.print_exc()\n    X402_ENABLED = False
+# --- x402 Payment Protocol (Base Mainnet) ---
+X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
+X402_NETWORK = "eip155:8453"
+
+X402_ENABLED = False
+try:
+    from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption
+    from x402.http.middleware.fastapi import PaymentMiddlewareASGI
+    from x402.http.types import RouteConfig
+    from x402.mechanisms.evm.exact import ExactEvmServerScheme
+    from x402.server import x402ResourceServer
+
+    # Use CDP facilitator if credentials available, otherwise community facilitator
+    _facilitator_url = "https://x402.org/facilitator"
+    _facilitator_kwargs = {}
+    try:
+        from x402.http import CreateHeadersAuthProvider
+        from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
+        if os.environ.get("CDP_API_KEY_ID") and os.environ.get("CDP_API_KEY_SECRET"):
+            _facilitator_url = CDP_FACILITATOR_URL
+            _facilitator_kwargs["auth_provider"] = CreateHeadersAuthProvider(create_cdp_auth_headers)
+            print("[x402] Using CDP facilitator with auth headers", flush=True)
+    except ImportError:
+        print("[x402] CDP auth not available, using community facilitator", flush=True)
+
+    facilitator = HTTPFacilitatorClient(
+        FacilitatorConfig(url=_facilitator_url, **_facilitator_kwargs)
+    )
+    payment_server = x402ResourceServer(facilitator)
+    payment_server.register(X402_NETWORK, ExactEvmServerScheme())
+
+    # Optional: register bazaar extension for discovery
+    try:
+        from x402.extensions.bazaar import bazaar_resource_server_extension
+        payment_server.register_extension(bazaar_resource_server_extension)
+        print("[x402] Bazaar discovery extension registered", flush=True)
+    except ImportError:
+        print("[x402] Bazaar extension not available (OK, continuing)", flush=True)
+
+    payment_server.initialize()
+
+    payment_routes = {
+        "POST /v1/disputes": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.05",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Submit a dispute for policy-driven ruling (AgentCourt engine)",
+        ),
+        "GET /v1/indicators/*": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.02",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
+        ),
+        "GET /v1/yields": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.02",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Top DeFi yield pools by TVL",
+        ),
+        "GET /v1/metadata": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.01",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="URL metadata extraction and unfurling",
+        ),
+    }
+
+    app.add_middleware(
+        PaymentMiddlewareASGI,
+        routes=payment_routes,
+        server=payment_server,
+    )
+    print(f"[x402] Payment middleware enabled — disputes ($0.05), indicators/yields ($0.02), metadata ($0.01)", flush=True)
+    X402_ENABLED = True
+except Exception as e:
+    import traceback
+    print(f"[x402] NOT loaded — running in free mode. Error: {e}", flush=True)
+    traceback.print_exc()
+    X402_ENABLED = False
+
 
 
 # --- Market Data ---
