@@ -55,6 +55,7 @@ try:
     from x402.http.types import RouteConfig
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
     from x402.server import x402ResourceServer
+    from x402.extensions.bazaar import declare_discovery_extension, OutputConfig, bazaar_resource_server_extension
     from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
 
     facilitator = HTTPFacilitatorClient(
@@ -65,6 +66,7 @@ try:
     )
     payment_server = x402ResourceServer(facilitator)
     payment_server.register(X402_NETWORK, ExactEvmServerScheme())
+    payment_server.register_extension(bazaar_resource_server_extension)
     payment_server.initialize()
 
     payment_routes = {
@@ -80,13 +82,37 @@ try:
             mime_type="application/json",
             description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
             extensions={
-                "bazaar": {
-                    "discoverable": True,
-                    "category": "market-data",
-                    "tags": ["crypto", "indicators", "RSI", "bollinger", "ATR"],
-                    "serviceName": "AIServices Indicators",
-                    "inputSchema": {"pathParams": {"symbol": {"type": "string", "description": "Crypto symbol e.g. BTC, ETH"}}},
-                }
+                **declare_discovery_extension(
+                    input={"symbol": "BTC"},
+                    input_schema={
+                        "properties": {
+                            "symbol": {"type": "string", "description": "Crypto symbol e.g. BTC, ETH"},
+                        },
+                        "required": ["symbol"],
+                    },
+                    output=OutputConfig(
+                        example={
+                            "symbol": "BTC",
+                            "rsi": 65.3,
+                            "bollinger_bands": {"upper": 71000, "middle": 68000, "lower": 65000},
+                            "atr": 1200,
+                            "support": 64000,
+                            "resistance": 72000,
+                        },
+                        schema={
+                            "type": "object",
+                            "properties": {
+                                "symbol": {"type": "string"},
+                                "rsi": {"type": "number"},
+                                "bollinger_bands": {"type": "object"},
+                                "atr": {"type": "number"},
+                                "support": {"type": "number"},
+                                "resistance": {"type": "number"},
+                            },
+                            "required": ["symbol", "rsi"],
+                        },
+                    ),
+                ),
             },
         ),
         "GET /v1/yields": RouteConfig(
@@ -101,13 +127,42 @@ try:
             mime_type="application/json",
             description="Top DeFi yield pools by TVL",
             extensions={
-                "bazaar": {
-                    "discoverable": True,
-                    "category": "defi",
-                    "tags": ["defi", "yields", "farming", "TVL", "staking"],
-                    "serviceName": "AIServices DeFi Yields",
-                    "inputSchema": {"queryParams": {"limit": {"type": "integer", "description": "Max results (default 20)"}, "chain": {"type": "string", "description": "Filter by chain (default all)"}}},
-                }
+                **declare_discovery_extension(
+                    input={"limit": 20, "chain": "all"},
+                    input_schema={
+                        "properties": {
+                            "limit": {"type": "integer", "description": "Max results (default 20)"},
+                            "chain": {"type": "string", "description": "Filter by chain (default all)"},
+                        },
+                    },
+                    output=OutputConfig(
+                        example={
+                            "pools": [
+                                {"protocol": "Aave V3", "pool": "USDC", "apy": 5.2, "tvl_usd": 1250000000, "chain": "Ethereum"},
+                                {"protocol": "Uniswap V3", "pool": "ETH/USDC", "apy": 12.8, "tvl_usd": 450000000, "chain": "Base"},
+                            ]
+                        },
+                        schema={
+                            "type": "object",
+                            "properties": {
+                                "pools": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "protocol": {"type": "string"},
+                                            "pool": {"type": "string"},
+                                            "apy": {"type": "number"},
+                                            "tvl_usd": {"type": "number"},
+                                            "chain": {"type": "string"},
+                                        },
+                                    },
+                                },
+                            },
+                            "required": ["pools"],
+                        },
+                    ),
+                ),
             },
         ),
         "GET /v1/metadata": RouteConfig(
@@ -122,13 +177,33 @@ try:
             mime_type="application/json",
             description="URL metadata extraction and unfurling",
             extensions={
-                "bazaar": {
-                    "discoverable": True,
-                    "category": "web-data",
-                    "tags": ["metadata", "og", "preview", "unfurl", "url"],
-                    "serviceName": "AIServices URL Metadata",
-                    "inputSchema": {"queryParams": {"url": {"type": "string", "description": "URL to extract metadata from"}}},
-                }
+                **declare_discovery_extension(
+                    input={"url": "https://example.com"},
+                    input_schema={
+                        "properties": {
+                            "url": {"type": "string", "description": "URL to extract metadata from"},
+                        },
+                        "required": ["url"],
+                    },
+                    output=OutputConfig(
+                        example={
+                            "title": "Example Domain",
+                            "description": "This domain is for use in illustrative examples.",
+                            "image": "https://example.com/og-image.png",
+                            "url": "https://example.com",
+                        },
+                        schema={
+                            "type": "object",
+                            "properties": {
+                                "title": {"type": "string"},
+                                "description": {"type": "string"},
+                                "image": {"type": "string"},
+                                "url": {"type": "string"},
+                            },
+                            "required": ["title", "url"],
+                        },
+                    ),
+                ),
             },
         ),
     }
@@ -280,6 +355,111 @@ async def x402_manifest():
         "contact": "https://github.com/vbkotecha",
         "website": "https://api.aiservices.to",
         "license": "MIT",
+    }
+
+
+@app.get("/.well-known/agent.json")
+async def agent_json():
+    """Agent discovery manifest for AI agent platforms and crawlers."""
+    return {
+        "name": "AIServices",
+        "version": "1.0.0",
+        "description": "Paid data APIs for AI agents — crypto prices, indicators, DeFi yields, geolocation, URL metadata",
+        "url": "https://api.aiservices.to",
+        "capabilities": [
+            "crypto-market-data",
+            "technical-indicators",
+            "defi-yields",
+            "ip-geolocation",
+            "url-metadata",
+        ],
+        "payment": {
+            "protocol": "x402",
+            "currency": "USDC",
+            "network": "base-mainnet",
+            "chain_id": 8453,
+        },
+        "endpoints": {
+            "free": [
+                "GET /v1/price/{symbol}",
+                "GET /v1/prices?symbols=BTC,ETH",
+                "GET /v1/fear-greed",
+                "GET /v1/geo/{ip}",
+            ],
+            "paid": [
+                {"path": "GET /v1/indicators/{symbol}", "price": "$0.02"},
+                {"path": "GET /v1/yields", "price": "$0.02"},
+                {"path": "GET /v1/metadata", "price": "$0.01"},
+            ],
+        },
+        "docs": "https://api.aiservices.to/docs",
+        "github": "https://github.com/vbkotecha/aiservices-api",
+        "wallet": WALLET,
+    }
+
+
+@app.get("/llms.txt")
+async def llms_txt():
+    """LLM-friendly API description for agent crawlers and AI discovery."""
+    lines = [
+        "# AIServices",
+        "",
+        "> Paid data APIs for AI agents. Crypto prices, technical indicators, DeFi yields, IP geolocation, URL metadata.",
+        "",
+        "## Base URL",
+        "https://api.aiservices.to",
+        "",
+        "## Authentication",
+        "Paid endpoints use x402 protocol (USDC on Base Mainnet). Free endpoints require no auth.",
+        "",
+        "## Free Endpoints",
+        "- GET /v1/price/{symbol} — Current crypto price (e.g., BTC, ETH)",
+        "- GET /v1/prices?symbols=BTC,ETH,SOL — Batch crypto prices",
+        "- GET /v1/fear-greed — Crypto Fear & Greed Index (0-100)",
+        "- GET /v1/geo/{ip} — IP geolocation lookup",
+        "",
+        "## Paid Endpoints (x402 / USDC on Base)",
+        "- GET /v1/indicators/{symbol} — RSI, Bollinger Bands, ATR, Support/Resistance ($0.02)",
+        "- GET /v1/yields — Top DeFi yield pools by TVL ($0.02)",
+        "- GET /v1/metadata?url=... — URL metadata extraction and unfurling ($0.01)",
+        "",
+        "## Example Usage",
+        "```",
+        "# Free: Get BTC price",
+        "curl https://api.aiservices.to/v1/price/BTC",
+        "",
+        "# Paid: Get BTC indicators (requires x402 payment)",
+        "curl https://api.aiservices.to/v1/indicators/BTC",
+        "```",
+        "",
+        f"## Payment Wallet\n{WALLET}",
+        "",
+        "## Links",
+        "- API Docs: https://api.aiservices.to/docs",
+        "- GitHub: https://github.com/vbkotecha/aiservices-api",
+    ]
+    from starlette.responses import PlainTextResponse
+    return PlainTextResponse(content="\n".join(lines), media_type="text/plain")
+
+
+@app.get("/schema.json")
+async def openapi_schema():
+    """Explicit OpenAPI schema endpoint for crawlers that prefer /schema.json over /openapi.json."""
+    return app.openapi()
+
+
+@app.get("/manifest.json")
+async def web_manifest():
+    """Web app manifest for browser/agent discovery."""
+    return {
+        "name": "AIServices",
+        "short_name": "AIServices",
+        "description": "Paid data APIs for AI agents — crypto, DeFi, geo, web metadata",
+        "start_url": "https://api.aiservices.to",
+        "scope": "/",
+        "display": "standalone",
+        "categories": ["developer", "finance", "data"],
+        "icons": [],
     }
 
 
