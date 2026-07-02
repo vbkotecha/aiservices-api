@@ -1,0 +1,18 @@
+{
+  "name": "AIServices",
+  "description": "Paid APIs for AI agents — crypto market data, DeFi yields, technical indicators, IP geolocation, URL metadata, and AI-powered dispute resolution. Free + x402 monetized endpoints.",
+  "category": "Finance",
+  "repository": "https://github.com/vbkotecha/aiservices-api",
+  "homepage": "https://api.aiservices.to",
+  "environmentVariables": [],
+  "tools": [
+    {"name": "crypto_prices", "description": "Get current crypto prices (FREE)"},
+    {"name": "technical_indicators", "description": "RSI, MACD for any crypto ($0.02 x402)"},
+    {"name": "defi_yields", "description": "DeFi yield rates ($0.02 x402)"},
+    {"name": "fear_greed", "description": "Crypto Fear & Greed index (FREE)"},
+    {"name": "ip_geolocation", "description": "IP geolocation (FREE)"},
+    {"name": "url_metadata", "description": "Extract metadata from URL ($0.01 x402)"},
+    {"name": "resolve_dispute", "description": "AI dispute resolution ($0.05 x402)"},
+    {"name": "list_policies", "description": "List dispute policies (FREE)"}
+  ]
+}
