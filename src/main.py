@@ -415,9 +415,9 @@ async def root():
 async def health():
     return {
         "status": "ok",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "x402_enabled": X402_ENABLED,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "disputes", "policies"],
     }
 
 
