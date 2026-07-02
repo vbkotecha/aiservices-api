@@ -49,43 +49,29 @@ app.add_middleware(
 # --- x402 Payment Protocol (Base Mainnet) ---
 X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
 X402_NETWORK = "eip155:8453"
+X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
 
 X402_ENABLED = False
 try:
-    from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption
+    from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption, CreateHeadersAuthProvider
     from x402.http.middleware.fastapi import PaymentMiddlewareASGI
     from x402.http.types import RouteConfig
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
     from x402.server import x402ResourceServer
+    from x402.extensions.bazaar import bazaar_resource_server_extension
+    from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
 
-    # Use CDP facilitator if credentials available, otherwise community facilitator
-    _facilitator_url = "https://x402.org/facilitator"
-    _facilitator_kwargs = {}
-    try:
-        from x402.http import CreateHeadersAuthProvider
-        from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
-        if os.environ.get("CDP_API_KEY_ID") and os.environ.get("CDP_API_KEY_SECRET"):
-            _facilitator_url = CDP_FACILITATOR_URL
-            _facilitator_kwargs["auth_provider"] = CreateHeadersAuthProvider(create_cdp_auth_headers)
-            print("[x402] Using CDP facilitator with auth headers", flush=True)
-    except ImportError:
-        print("[x402] CDP auth not available, using community facilitator", flush=True)
+    auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
 
     facilitator = HTTPFacilitatorClient(
-        FacilitatorConfig(url=_facilitator_url, **_facilitator_kwargs)
+        FacilitatorConfig(
+            url=CDP_FACILITATOR_URL,
+            auth_provider=auth_provider,
+        )
     )
     payment_server = x402ResourceServer(facilitator)
     payment_server.register(X402_NETWORK, ExactEvmServerScheme())
-
-    # Optional: register bazaar extension for discovery
-    try:
-        from x402.extensions.bazaar import bazaar_resource_server_extension
-        payment_server.register_extension(bazaar_resource_server_extension)
-        print("[x402] Bazaar discovery extension registered", flush=True)
-    except ImportError:
-        print("[x402] Bazaar extension not available (OK, continuing)", flush=True)
-
-    payment_server.initialize()
+    payment_server.register_extension(bazaar_resource_server_extension)
 
     payment_routes = {
         "POST /v1/disputes": RouteConfig(
@@ -145,9 +131,12 @@ try:
     )
     print(f"[x402] Payment middleware enabled — disputes ($0.05), indicators/yields ($0.02), metadata ($0.01)", flush=True)
     X402_ENABLED = True
+except ImportError as e:
+    print(f"[x402] NOT installed — running in free mode. Error: {e}", flush=True)
+    X402_ENABLED = False
 except Exception as e:
     import traceback
-    print(f"[x402] NOT loaded — running in free mode. Error: {e}", flush=True)
+    print(f"[x402] Failed to initialize — running in free mode. Error: {e}", flush=True)
     traceback.print_exc()
     X402_ENABLED = False
 
