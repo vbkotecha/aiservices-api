@@ -1,0 +1,91 @@
+name: milestone-payment
+version: "1.0"
+description: "Dispute resolution for milestone-based payment contracts — staged deliverables with payment gates"
+
+rules:
+  - id: milestone-completed-paid
+    condition: |
+      milestone_completed == true AND
+      payment_received == true
+    ruling_template: |
+      Milestone {milestone_id} was completed and payment was received.
+      Both parties fulfilled obligations for this milestone.
+      No remedy is owed.
+    confidence: high
+    remedy: none
+    facts_required:
+      - milestone_completed
+      - payment_received
+
+  - id: milestone-completed-unpaid
+    condition: |
+      milestone_completed == true AND
+      payment_received == false AND
+      days_since_completion > payment_terms_days
+    ruling_template: |
+      Milestone {milestone_id} was completed on {completion_date}.
+      Payment of {amount_due} is {days_overdue} days overdue.
+      Respondent is in material breach of payment terms.
+    confidence: high
+    remedy: full_payment_plus_penalty
+    facts_required:
+      - milestone_completed
+      - payment_received
+      - completion_date
+      - amount_due
+
+  - id: milestone-incomplete-payment-demanded
+    condition: |
+      milestone_completed == false AND
+      payment_demanded == true
+    ruling_template: |
+      Milestone {milestone_id} was not completed but payment is being demanded.
+      No payment is owed until milestone criteria are met.
+    confidence: high
+    remedy: deny_payment
+    facts_required:
+      - milestone_completed
+      - payment_demanded
+
+  - id: milestone-partially-complete
+    condition: |
+      milestone_completed == false AND
+      milestone_progress_pct >= 50 AND
+      dispute_type == "quality"
+    ruling_template: |
+      Milestone {milestone_id} is {milestone_progress_pct}% complete.
+      Quality disputes on partial work require evidence review.
+      Recommend partial payment proportional to completed work.
+    confidence: medium
+    remedy: proportional_payment
+    facts_required:
+      - milestone_completed
+      - milestone_progress_pct
+      - quality_issues_documented
+
+  - id: milestone-disputed-completion
+    condition: |
+      milestone_completed == null
+    ruling_template: |
+      Whether milestone {milestone_id} was completed is disputed.
+      Evidence is insufficient to determine completion status.
+      Recommend escalation with technical review.
+    confidence: low
+    remedy: escalate
+    facts_required:
+      - milestone_completed
+
+evidence_weights:
+  contract: 1.0
+  payment_record: 0.95
+  project_management_log: 0.85
+  git_commit: 0.8
+  message_log: 0.65
+  email: 0.65
+  screenshot: 0.5
+  testimonial: 0.3
+
+thresholds:
+  payment_grace_days: 7
+  late_payment_penalty_pct: 5    # 5% of milestone value per week overdue
+  partial_complete_threshold: 50  # below this % = no payment

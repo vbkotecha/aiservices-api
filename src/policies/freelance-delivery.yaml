@@ -1,0 +1,94 @@
+name: freelance-delivery
+version: "1.0"
+description: "Dispute resolution for freelance delivery contracts — work for hire with deadlines and deliverables"
+
+# Decision rules evaluated in order. First match wins.
+rules:
+  - id: delivery-on-time-accepted
+    condition: |
+      deliverable_was_accepted == true AND
+      delivery_was_on_time == true
+    ruling_template: |
+      The respondent fulfilled all contractual obligations.
+      Deliverable(s) were accepted on {acceptance_date}.
+      No remedy is owed.
+    confidence: high
+    remedy: none
+    facts_required:
+      - deliverable_was_accepted
+      - delivery_was_on_time
+
+  - id: late-delivery-accepted
+    condition: |
+      deliverable_was_accepted == true AND
+      delivery_was_on_time == false
+    ruling_template: |
+      The deliverable was accepted but delivered {days_late} days late.
+      Per contract terms, late delivery warrants {late_penalty}.
+    confidence: medium
+    remedy: partial
+    facts_required:
+      - deliverable_was_accepted
+      - delivery_was_on_time
+      - days_late
+
+  - id: non-delivery
+    condition: |
+      deliverable_was_accepted == false AND
+      evidence_of_delivery == false
+    ruling_template: |
+      The respondent failed to deliver the agreed-upon work.
+      No deliverable was produced or submitted.
+      Full remedy owed to claimant.
+    confidence: high
+    remedy: full_refund
+    facts_required:
+      - deliverable_was_accepted
+      - evidence_of_delivery
+
+  - id: rejected-quality
+    condition: |
+      deliverable_was_accepted == false AND
+      evidence_of_delivery == true AND
+      quality_issues_documented == true
+    ruling_template: |
+      Work was delivered but did not meet quality standards.
+      {quality_issue_summary}
+      Remedy: {quality_remedy}.
+    confidence: medium
+    remedy: rework_or_partial_refund
+    facts_required:
+      - deliverable_was_accepted
+      - evidence_of_delivery
+      - quality_issues_documented
+
+  - id: disputed-acceptance
+    condition: |
+      deliverable_was_accepted == null AND
+      evidence_of_delivery == true
+    ruling_template: |
+      Work appears to have been delivered but acceptance is disputed.
+      Cannot determine if deliverable met requirements.
+      Recommend escalation or additional evidence.
+    confidence: low
+    remedy: escalate
+    facts_required:
+      - deliverable_was_accepted
+      - evidence_of_delivery
+
+# Evidence weights — how much each evidence type influences fact-finding
+evidence_weights:
+  contract: 1.0
+  payment_record: 0.9
+  git_commit: 0.85
+  message_log: 0.7
+  email: 0.7
+  screenshot: 0.5
+  testimonial: 0.3
+  claim: 0.1
+
+# Materiality thresholds
+thresholds:
+  minor_delay_days: 2          # < 2 days late = minor
+  major_delay_days: 7          # > 7 days = material breach
+  partial_refund_pct: 25       # default partial refund for minor issues

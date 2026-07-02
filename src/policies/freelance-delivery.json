@@ -1,0 +1,91 @@
+{
+  "name": "freelance-delivery",
+  "version": "1.0",
+  "description": "Dispute resolution for freelance delivery contracts \u2014 work for hire with deadlines and deliverables",
+  "rules": [
+    {
+      "id": "delivery-on-time-accepted",
+      "condition": "deliverable_was_accepted == true AND\ndelivery_was_on_time == true\n",
+      "ruling_template": "The respondent fulfilled all contractual obligations.\nDeliverable(s) were accepted on {acceptance_date}.\nNo remedy is owed.\n",
+      "confidence": "high",
+      "remedy": "none",
+      "facts_required": [
+        "deliverable_was_accepted",
+        "delivery_was_on_time"
+      ]
+    },
+    {
+      "id": "late-delivery-accepted",
+      "condition": "deliverable_was_accepted == true AND\ndelivery_was_on_time == false\n",
+      "ruling_template": "The deliverable was accepted but delivered {days_late} days late.\nPer contract terms, late delivery warrants {late_penalty}.\n",
+      "confidence": "medium",
+      "remedy": "partial",
+      "facts_required": [
+        "deliverable_was_accepted",
+        "delivery_was_on_time",
+        "days_late"
+      ]
+    },
+    {
+      "id": "non-delivery",
+      "condition": "deliverable_was_accepted == false AND\nevidence_of_delivery == false\n",
+      "ruling_template": "The respondent failed to deliver the agreed-upon work.\nNo deliverable was produced or submitted.\nFull remedy owed to claimant.\n",
+      "confidence": "high",
+      "remedy": "full_refund",
+      "facts_required": [
+        "deliverable_was_accepted",
+        "evidence_of_delivery"
+      ]
+    },
+    {
+      "id": "rejected-quality",
+      "condition": "deliverable_was_accepted == false AND\nevidence_of_delivery == true AND\nquality_issues_documented == true\n",
+      "ruling_template": "Work was delivered but did not meet quality standards.\n{quality_issue_summary}\nRemedy: {quality_remedy}.\n",
+      "confidence": "medium",
+      "remedy": "rework_or_partial_refund",
+      "facts_required": [
+        "deliverable_was_accepted",
+        "evidence_of_delivery",
+        "quality_issues_documented"
+      ]
+    },
+    {
+      "id": "partial-delivery",
+      "condition": "evidence_of_delivery == true AND\npartial_delivery_detected == true\n",
+      "ruling_template": "Only partial work was delivered. {partial_summary}\nRemedy: proportional refund.\n",
+      "confidence": "medium",
+      "remedy": "partial_refund",
+      "facts_required": [
+        "deliverable_was_accepted",
+        "evidence_of_delivery",
+        "partial_delivery_detected"
+      ]
+    },
+    {
+      "id": "disputed-acceptance",
+      "condition": "deliverable_was_accepted == null AND\nevidence_of_delivery == true\n",
+      "ruling_template": "Work appears to have been delivered but acceptance is disputed.\nCannot determine if deliverable met requirements.\nRecommend escalation or additional evidence.\n",
+      "confidence": "low",
+      "remedy": "escalate",
+      "facts_required": [
+        "deliverable_was_accepted",
+        "evidence_of_delivery"
+      ]
+    }
+  ],
+  "evidence_weights": {
+    "contract": 1,
+    "payment_record": 0.9,
+    "git_commit": 0.85,
+    "message_log": 0.7,
+    "email": 0.7,
+    "screenshot": 0.5,
+    "testimonial": 0.3,
+    "claim": 0.1
+  },
+  "thresholds": {
+    "minor_delay_days": 2,
+    "major_delay_days": 7,
+    "partial_refund_pct": 25
+  }
+}

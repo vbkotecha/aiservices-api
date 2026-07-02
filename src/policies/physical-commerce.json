@@ -1,0 +1,84 @@
+{
+  "name": "physical-commerce",
+  "version": "1.0",
+  "description": "Dispute resolution for agent-purchased physical products — wrong items, damage, non-delivery, returns. Designed for x402 commerce platforms like Rye + AgentCash.",
+  "rules": [
+    {
+      "id": "non-delivery",
+      "condition": "delivery_confirmed == false AND\ndays_since_order > delivery_window_days\n",
+      "ruling_template": "Product was never delivered.\nOrder date: {order_date}\nExpected delivery window: {delivery_window_days} days\nDays elapsed: {days_since_order}\n\nNo delivery confirmation received. Full refund owed.\n",
+      "confidence": "high",
+      "remedy": "full_refund",
+      "facts_required": [
+        "delivery_confirmed",
+        "days_since_order",
+        "delivery_window_days"
+      ]
+    },
+    {
+      "id": "wrong-product",
+      "condition": "delivery_confirmed == true AND\nreceived_matches_order == false\n",
+      "ruling_template": "Wrong product delivered.\nOrdered: {ordered_product}\nReceived: {received_product}\n\nThe delivered item does not match the order. Full refund and return label owed.\n",
+      "confidence": "high",
+      "remedy": "full_refund",
+      "facts_required": [
+        "delivery_confirmed",
+        "received_matches_order",
+        "ordered_product",
+        "received_product"
+      ]
+    },
+    {
+      "id": "damaged-in-transit",
+      "condition": "delivery_confirmed == true AND\nshipping_damage == true\n",
+      "ruling_template": "Product arrived damaged.\nProduct: {ordered_product}\nDamage documented: {damage_description}\n\nDamage occurred during shipping. Full refund owed.\n",
+      "confidence": "high",
+      "remedy": "full_refund",
+      "facts_required": [
+        "delivery_confirmed",
+        "shipping_damage",
+        "damage_description"
+      ]
+    },
+    {
+      "id": "not-as-described",
+      "condition": "delivery_confirmed == true AND\nreceived_matches_order == true AND\nproduct_as_described == false\n",
+      "ruling_template": "Product does not match listing description.\nOrdered: {ordered_product}\nListing claims: {listing_claims}\nActual condition: {actual_condition}\n\nProduct was the correct item but did not match the description. Partial refund owed.\n",
+      "confidence": "medium",
+      "remedy": "partial_refund",
+      "facts_required": [
+        "delivery_confirmed",
+        "received_matches_order",
+        "product_as_described",
+        "listing_claims",
+        "actual_condition"
+      ]
+    },
+    {
+      "id": "return-denied-unjustified",
+      "condition": "return_requested == true AND\nreturn_approved == false AND\nreturn_window_active == true\n",
+      "ruling_template": "Return request denied while within the return window.\nReturn window: {return_window_days} days\nDays since delivery: {days_since_delivery}\nReturn denied without stated reason.\n\nReturn should have been accepted. Full refund owed.\n",
+      "confidence": "medium",
+      "remedy": "full_refund",
+      "facts_required": [
+        "return_requested",
+        "return_approved",
+        "return_window_active",
+        "return_window_days",
+        "days_since_delivery"
+      ]
+    },
+    {
+      "id": "delivery-confirmed-satisfactory",
+      "condition": "delivery_confirmed == true AND\nreceived_matches_order == true AND\nproduct_as_described == true\n",
+      "ruling_template": "Product delivered as expected.\nProduct: {ordered_product}\nDelivery confirmed on: {delivery_date}\nNo remedy is owed.\n",
+      "confidence": "high",
+      "remedy": "none",
+      "facts_required": [
+        "delivery_confirmed",
+        "received_matches_order",
+        "product_as_described"
+      ]
+    }
+  ]
+}

@@ -13,7 +13,8 @@ if env_file.exists():
             key, val = line.split("=", 1)
             os.environ.setdefault(key.strip(), val.strip())
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Field
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from typing import List
@@ -24,15 +25,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from crypto_data import get_price, get_multi_price, get_indicators, get_fear_greed, get_defi_yields
 from geo_data import get_ip_geo
 from web_data import get_url_metadata
+from engine.policy_engine import evaluate_dispute, list_policies
 
 WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
 
 app = FastAPI(
     title="AIServices",
-    version="1.0.0",
-    description="""Paid data APIs for AI agents — crypto prices, technical indicators, DeFi yields, IP geolocation, URL metadata.
+    version="2.0.0",
+    description="""Paid APIs for AI agents — crypto market data, DeFi yields, IP geolocation, URL metadata, AND dispute resolution.
 
-All paid endpoints use x402 protocol with USDC on Base.
+All paid endpoints use x402 protocol with USDC on Base. Powered by AgentCourt policy engine.
 """,
 )
 
@@ -70,6 +72,58 @@ try:
     payment_server.initialize()
 
     payment_routes = {
+        "POST /v1/disputes": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.05",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Submit a dispute for policy-driven ruling (AgentCourt engine)",
+            extensions={
+                **declare_discovery_extension(
+                    input={
+                        "policy": "freelance-delivery",
+                        "claimant": "agent-0x123",
+                        "respondent": "agent-0x456",
+                        "claim": "Service delivered but payment refused",
+                        "desired_remedy": "Payment of 0.5 ETH",
+                        "evidence": [],
+                    },
+                    input_schema={
+                        "properties": {
+                            "policy": {"type": "string", "description": "Policy template name"},
+                            "claimant": {"type": "string", "description": "Plaintiff address or ID"},
+                            "respondent": {"type": "string", "description": "Respondent address or ID"},
+                            "evidence": {"type": "array", "description": "Evidence items"},
+                        },
+                    },
+                    output=OutputConfig(
+                        example={
+                            "case_id": "abc123def456",
+                            "status": "resolved",
+                            "confidence": "high",
+                            "ruling": "Claimant prevails",
+                            "remedy": "Payment of 0.5 ETH due to claimant",
+                        },
+                        schema={
+                            "type": "object",
+                            "properties": {
+                                "case_id": {"type": "string"},
+                                "status": {"type": "string"},
+                                "confidence": {"type": "string"},
+                                "ruling": {"type": "string"},
+                                "remedy": {"type": "string"},
+                            },
+                            "required": ["case_id", "status", "ruling"],
+                        },
+                    ),
+                ),
+            },
+        ),
         "GET /v1/indicators/*": RouteConfig(
             accepts=[
                 PaymentOption(
@@ -298,14 +352,46 @@ async def url_metadata(url: str):
     return get_url_metadata(url)
 
 
+# --- Dispute Resolution (AgentCourt engine) ---
+
+class DisputeRequest(BaseModel):
+    policy: str = Field(description="Policy template name (e.g. freelance-delivery)")
+    claimant: str = Field(description="Plaintiff address or agent ID")
+    respondent: str = Field(description="Respondent address or agent ID")
+    claim: str = Field("", description="What happened")
+    desired_remedy: str = Field("", description="What the claimant wants")
+    evidence: list = Field(default_factory=list, description="Evidence items")
+
+@app.post("/v1/disputes", tags=["Dispute Resolution"])
+async def resolve_dispute(req: DisputeRequest):
+    """Submit a dispute for policy-driven ruling ($0.05 via x402)"""
+    dispute_dict = {
+        "claimant": req.claimant,
+        "respondent": req.respondent,
+        "claim": req.claim,
+        "desired_remedy": req.desired_remedy,
+    }
+    ruling = evaluate_dispute(
+        dispute=dispute_dict,
+        evidence=req.evidence,
+        policy_name=req.policy,
+    )
+    return ruling
+
+@app.get("/v1/policies", tags=["Dispute Resolution"])
+async def get_policies():
+    """List available dispute policy templates (FREE)"""
+    return list_policies()
+
+
 # --- Health & Discovery ---
 
 @app.get("/")
 async def root():
     return {
         "name": "AIServices",
-        "tagline": "Paid data APIs for AI agents",
-        "version": "1.0.0",
+        "tagline": "Paid APIs for AI agents — market data + dispute resolution",
+        "version": "2.0.0",
         "payment": "x402 / USDC on Base",
         "wallet": WALLET,
         "services": {
@@ -315,6 +401,10 @@ async def root():
                 "indicators": {"endpoint": "GET /v1/indicators/{symbol}", "price": "$0.02", "desc": "RSI, Bollinger Bands, ATR, Support/Resistance"},
                 "yields": {"endpoint": "GET /v1/yields", "price": "$0.02", "desc": "Top DeFi yield pools by TVL"},
                 "fear_greed": {"endpoint": "GET /v1/fear-greed", "price": "free", "desc": "Crypto Fear & Greed Index"},
+            },
+            "dispute_resolution": {
+                "file_dispute": {"endpoint": "POST /v1/disputes", "price": "$0.05", "desc": "Submit dispute for policy-driven ruling (AgentCourt engine)"},
+                "policies": {"endpoint": "GET /v1/policies", "price": "free", "desc": "List dispute policy templates"},
             },
         },
         "live": True,

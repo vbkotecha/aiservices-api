@@ -1,0 +1,78 @@
+{
+  "name": "scope-dispute",
+  "version": "1.0",
+  "description": "Dispute resolution for agent mandate/scope violations — when an agent acted within payment authorization but outside its behavioral mandate",
+  "rules": [
+    {
+      "id": "mandate-exceeded-full-refund",
+      "condition": "mandate_violated == true AND\nunauthorized_action == true AND\nno_prior_consent == true\n",
+      "ruling_template": "Agent exceeded its mandate. Evidence shows the agent took action '{unauthorized_action_detail}' which was not within the authorized scope.\nThe principal did not provide prior consent for this action.\nFull refund is owed.\n",
+      "confidence": "high",
+      "remedy": "full_refund",
+      "facts_required": [
+        "mandate_violated",
+        "unauthorized_action",
+        "no_prior_consent"
+      ]
+    },
+    {
+      "id": "mandate-exceeded-partial",
+      "condition": "mandate_violated == true AND\nunauthorized_action == true AND\nprior_consent_exists == true\n",
+      "ruling_template": "Agent acted outside its stated scope, but prior consent for similar actions exists.\nUnauthorized action: '{unauthorized_action_detail}'.\nPartial refund based on scope violation severity.\n",
+      "confidence": "medium",
+      "remedy": "partial_refund",
+      "facts_required": [
+        "mandate_violated",
+        "unauthorized_action",
+        "prior_consent_exists"
+      ]
+    },
+    {
+      "id": "budget-exceeded",
+      "condition": "budget_exceeded == true AND\nbudget_limit != null AND\nactual_spend > budget_limit\n",
+      "ruling_template": "Agent exceeded the authorized budget limit.\nAuthorized: {budget_limit}\nActual spend: {actual_spend}\nOverage: {budget_overage}\nThe principal is liable only up to the authorized limit.\n",
+      "confidence": "high",
+      "remedy": "partial_refund",
+      "facts_required": [
+        "budget_exceeded",
+        "budget_limit",
+        "actual_spend"
+      ]
+    },
+    {
+      "id": "within-mandate-no-violation",
+      "condition": "mandate_violated == false AND\nmandate_scope != null\n",
+      "ruling_template": "Agent acted within its authorized mandate.\nScope: '{mandate_scope}'\nAction was within defined parameters.\nNo refund is owed.\n",
+      "confidence": "high",
+      "remedy": "deny_refund",
+      "facts_required": [
+        "mandate_violated",
+        "mandate_scope"
+      ]
+    },
+    {
+      "id": "ambiguous-mandate",
+      "condition": "mandate_violated == null OR\nmandate_scope == null\n",
+      "ruling_template": "Mandate scope is ambiguous or undefined.\nCannot determine if the agent acted within authorization.\nRecommend human review of the delegation agreement.\n",
+      "confidence": "low",
+      "remedy": "escalate",
+      "facts_required": [
+        "mandate_violated"
+      ]
+    }
+  ],
+  "evidence_weights": {
+    "mandate_document": 1.0,
+    "agent_config": 0.9,
+    "authorization_log": 0.85,
+    "audit_trail": 0.8,
+    "notification_log": 0.7,
+    "chat_history": 0.6,
+    "testimonial": 0.3
+  },
+  "thresholds": {
+    "budget_tolerance_pct": 10,
+    "consent_grace_hours": 24,
+    "max_unauthorized_actions": 1
+  }
+}

@@ -1,0 +1,95 @@
+name: bug-bounty
+version: "1.0"
+description: "Dispute resolution for bug bounty programs — severity disputes, reproducibility, and disclosure compliance"
+
+rules:
+  - id: valid-bug-full-payout
+    condition: |
+      bug_is_reproducible == true AND
+      severity_meets_threshold == true AND
+      disclosure_compliant == true
+    ruling_template: |
+      Bug report validated. Reproducible {bug_type} with {severity} severity.
+      Disclosure followed program rules.
+      Full bounty payout of {bounty_amount} is owed.
+    confidence: high
+    remedy: full_payout
+    facts_required:
+      - bug_is_reproducible
+      - severity_meets_threshold
+      - disclosure_compliant
+
+  - id: valid-bug-partial-severity
+    condition: |
+      bug_is_reproducible == true AND
+      severity_meets_threshold == false AND
+      actual_severity != null AND
+      disclosure_compliant == true
+    ruling_template: |
+      Bug is reproducible but severity is disputed.
+      Reported as {reported_severity}, evaluated as {actual_severity}.
+      Adjusted payout based on actual severity: {adjusted_amount}.
+    confidence: medium
+    remedy: partial_payout
+    facts_required:
+      - bug_is_reproducible
+      - severity_meets_threshold
+      - actual_severity
+
+  - id: non-reproducible-bug
+    condition: |
+      bug_is_reproducible == false AND
+      reproduction_attempts >= 3
+    ruling_template: |
+      Bug could not be reproduced after {reproduction_attempts} attempts.
+      Report does not meet reproducibility standard.
+      No payout is owed unless new evidence is provided.
+    confidence: high
+    remedy: deny_payout
+    facts_required:
+      - bug_is_reproducible
+      - reproduction_attempts
+
+  - id: disclosure-violation
+    condition: |
+      bug_is_reproducible == true AND
+      severity_meets_threshold == true AND
+      disclosure_compliant == false
+    ruling_template: |
+      Bug is valid but disclosure rules were violated.
+      {violation_detail}
+      Payout reduced or denied per program terms.
+    confidence: medium
+    remedy: reduced_or_denied
+    facts_required:
+      - bug_is_reproducible
+      - severity_meets_threshold
+      - disclosure_compliant
+
+  - id: disputed-reproducibility
+    condition: |
+      bug_is_reproducible == null
+    ruling_template: |
+      Reproducibility is disputed and cannot be determined from evidence.
+      Recommend technical review or third-party verification.
+    confidence: low
+    remedy: escalate
+    facts_required:
+      - bug_is_reproducible
+
+evidence_weights:
+  reproducibility_report: 1.0
+  poc_video: 0.9
+  poc_code: 0.85
+  commit_hash: 0.8
+  message_log: 0.6
+  screenshot: 0.5
+  testimonial: 0.3
+
+thresholds:
+  min_reproduction_attempts: 3
+  critical_severity: "critical"
+  high_severity: "high"
+  medium_severity: "medium"
+  disclosure_grace_hours: 72
+  payout_reduction_pct: 50  # reduced payout for disclosure violations
