@@ -1,0 +1,35 @@
+{
+  "name": "aiservices-mcp",
+  "version": "2.0.0",
+  "description": "MCP server for AIServices — paid APIs for AI agents with crypto data, DeFi yields, indicators, and AI dispute resolution",
+  "main": "index.js",
+  "bin": {
+    "aiservices-mcp": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-agents",
+    "crypto",
+    "defi",
+    "x402",
+    "dispute-resolution",
+    "base",
+    "usdc",
+    "claude",
+    "langchain"
+  ],
+  "author": "Vivek Kotecha",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vbkotecha/aiservices-api"
+  },
+  "homepage": "https://api.aiservices.to",
+  "engines": {
+    "node": ">=18"
+  }
+}

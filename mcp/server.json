@@ -1,0 +1,61 @@
+{
+  "name": "aiservices",
+  "version": "2.0.0",
+  "description": "Paid APIs for AI agents — crypto market data, DeFi yields, technical indicators, IP geolocation, URL metadata, and AI-powered dispute resolution. Free + x402 monetized endpoints.",
+  "homepage": "https://api.aiservices.to",
+  "repository": "https://github.com/vbkotecha/aiservices-api",
+  "license": "MIT",
+  "categories": ["finance", "data", "crypto", "defi", "legal", "governance"],
+  "tools": [
+    {
+      "name": "crypto_prices",
+      "description": "Get current crypto prices for BTC, ETH, XRP, SOL and more (FREE)",
+      "tags": ["crypto", "finance", "free"]
+    },
+    {
+      "name": "technical_indicators",
+      "description": "RSI, MACD, Bollinger Bands and more for any crypto asset ($0.02 x402)",
+      "tags": ["crypto", "finance", "trading"]
+    },
+    {
+      "name": "defi_yields",
+      "description": "DeFi yield rates across protocols and chains ($0.02 x402)",
+      "tags": ["defi", "finance", "yields"]
+    },
+    {
+      "name": "fear_greed",
+      "description": "Crypto Fear & Greed sentiment index (FREE)",
+      "tags": ["crypto", "sentiment", "free"]
+    },
+    {
+      "name": "ip_geolocation",
+      "description": "IP geolocation lookup for any IP address (FREE)",
+      "tags": ["geo", "data", "free"]
+    },
+    {
+      "name": "url_metadata",
+      "description": "Extract metadata, OpenGraph, and content info from any URL ($0.01 x402)",
+      "tags": ["web", "data", "metadata"]
+    },
+    {
+      "name": "resolve_dispute",
+      "description": "AI-powered dispute resolution with 7 policy templates — freelance, milestone, SLA, bug bounty, API quality, scope disputes ($0.05 x402)",
+      "tags": ["dispute", "governance", "trust", "legal"]
+    },
+    {
+      "name": "list_policies",
+      "description": "List all available dispute resolution policy templates (FREE)",
+      "tags": ["dispute", "governance", "free"]
+    }
+  ],
+  "install": {
+    "command": "npx",
+    "args": ["aiservices-mcp"]
+  },
+  "pricing": {
+    "model": "freemium + x402",
+    "free_tier": "Crypto prices, Fear & Greed, IP geolocation, policy listing",
+    "paid_tier": "Indicators ($0.02), DeFi yields ($0.02), URL metadata ($0.01), Dispute resolution ($0.05)",
+    "payment": "USDC via x402 on Base mainnet"
+  }
+}
