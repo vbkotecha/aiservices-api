@@ -1,0 +1,11 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+  command: python3
+  args:
+    - mcp/server.py
+description: "Paid APIs for AI agents — crypto data, DeFi yields, indicators, dispute resolution"
+displayName: AIServices
+icon: https://api.aiservices.to/icon.png

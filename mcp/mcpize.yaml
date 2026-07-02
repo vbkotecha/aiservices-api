@@ -1,0 +1,45 @@
+name: aiservices
+description: "Paid APIs for AI agents — crypto market data, DeFi yields, technical indicators, IP geolocation, URL metadata, and AI-powered dispute resolution. Free + x402 monetized endpoints."
+category: "Finance"
+tags:
+  - crypto
+  - defi
+  - x402
+  - payments
+  - dispute-resolution
+  - base
+  - usdc
+visibility: public
+
+pricing:
+  - name: "Free"
+    price: 0
+    description: "Crypto prices, Fear & Greed index, IP geolocation, policy listing"
+    features:
+      - "Real-time crypto prices (BTC, ETH, XRP, SOL)"
+      - "Fear & Greed sentiment index"
+      - "IP geolocation"
+      - "Dispute policy templates"
+  
+  - name: "Pro"
+    price: 29
+    period: "month"
+    description: "Paid endpoints with x402 micro-payments + higher rate limits"
+    features:
+      - "Technical indicators (RSI, MACD, Bollinger)"
+      - "DeFi yield rates"
+      - "URL metadata extraction"
+      - "AI dispute resolution (100 included)"
+      - "10,000 calls/month"
+
+  - name: "Enterprise"
+    price: 299
+    period: "month"
+    description: "Unlimited calls + custom policies + priority resolution"
+    features:
+      - "Everything in Pro"
+      - "Unlimited API calls"
+      - "Custom dispute policies"
+      - "Priority dispute resolution"
+      - "SLA guarantees"
+      - "Dedicated support"
