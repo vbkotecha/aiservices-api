@@ -59,10 +59,11 @@ try:
     from x402.http.types import RouteConfig
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
     from x402.server import x402ResourceServer
-    from x402.extensions.bazaar import bazaar_resource_server_extension
     from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
+    print("[x402] All imports successful", flush=True)
 
     auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
+    print("[x402] Auth provider created", flush=True)
 
     facilitator = HTTPFacilitatorClient(
         FacilitatorConfig(
@@ -70,9 +71,26 @@ try:
             auth_provider=auth_provider,
         )
     )
+    print("[x402] Facilitator client created", flush=True)
+
     payment_server = x402ResourceServer(facilitator)
     payment_server.register(X402_NETWORK, ExactEvmServerScheme())
-    payment_server.register_extension(bazaar_resource_server_extension)
+    print("[x402] Server registered with network", flush=True)
+
+    # Try bazaar extension but don't fail if it breaks
+    try:
+        from x402.extensions.bazaar import bazaar_resource_server_extension
+        payment_server.register_extension(bazaar_resource_server_extension)
+        print("[x402] Bazaar extension registered", flush=True)
+    except Exception as bazaar_err:
+        print(f"[x402] Bazaar extension skipped: {bazaar_err}", flush=True)
+
+    # Initialize the server to fetch supported schemes from facilitator
+    try:
+        payment_server.initialize()
+        print("[x402] Server initialized", flush=True)
+    except Exception as init_err:
+        print(f"[x402] Server initialize() warning: {init_err}", flush=True)
 
     payment_routes = {
         "POST /v1/disputes": RouteConfig(
