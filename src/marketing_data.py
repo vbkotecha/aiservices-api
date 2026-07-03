@@ -62,8 +62,6 @@ def _heuristic_response(prompt: str, error: str = "") -> str:
     return json.dumps({
         "note": f"AI analysis unavailable — {error or 'configure OPENAI_API_KEY'}",
         "prompt_used": prompt[:200],
-        "openai_key_present": bool(OPENAI_API_KEY),
-        "openai_key_len": len(OPENAI_API_KEY),
     })
 
 
