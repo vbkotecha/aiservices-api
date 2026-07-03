@@ -20,7 +20,7 @@ OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 def _ai_analyze(prompt: str, system: str = "You are a marketing intelligence analyst. Return ONLY raw JSON. No markdown, no code blocks, no explanations.") -> str:
     """Call OpenAI for analysis."""
     if not OPENAI_API_KEY:
-        return _heuristic_response(prompt)
+        return _heuristic_response(prompt, str(e))
 
     try:
         body = json.dumps({
@@ -55,14 +55,16 @@ def _ai_analyze(prompt: str, system: str = "You are a marketing intelligence ana
                 content = "\n".join(lines).strip()
             return content
     except Exception:
-        return _heuristic_response(prompt)
+        return _heuristic_response(prompt, str(e))
 
 
-def _heuristic_response(prompt: str) -> str:
-    """Fallback when no OpenAI key."""
+def _heuristic_response(prompt: str, error: str = "") -> str:
+    """Fallback when no OpenAI key or API call fails."""
     return json.dumps({
-        "note": "AI analysis unavailable — configure OPENAI_API_KEY for full results",
+        "note": f"AI analysis unavailable — {error or 'configure OPENAI_API_KEY'}",
         "prompt_used": prompt[:200],
+        "openai_key_present": bool(OPENAI_API_KEY),
+        "openai_key_len": len(OPENAI_API_KEY),
     })
 
 
