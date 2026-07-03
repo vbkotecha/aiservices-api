@@ -1,0 +1,26 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "name": "aiservices",
+  "display_name": "AIServices — Paid APIs for AI Agents",
+  "description": "Paid data APIs for AI agents with built-in trust and x402 dispute resolution. Crypto prices, technical indicators, DeFi yields, Fear & Greed index, IP geolocation, URL metadata search, AI-powered dispute resolution with 7 policy templates, and marketing intelligence tools. Micropayments via x402 USDC on Base.",
+  "repository": "https://github.com/vbkotecha/aiservices-api",
+  "license": "MIT",
+  "maintainers": ["vbkotecha"],
+  "server": {
+    "transport": "sse",
+    "url": "https://api.aiservices.to/mcp"
+  },
+  "tools": [
+    {"name": "crypto_prices", "description": "Get current crypto prices for one or more symbols. FREE."},
+    {"name": "technical_indicators", "description": "Get technical indicators (RSI, MACD, Bollinger Bands) for a crypto symbol. $0.02 via x402."},
+    {"name": "defi_yields", "description": "Get top DeFi yield pools ranked by TVL. $0.02 via x402."},
+    {"name": "fear_greed", "description": "Get crypto Fear & Greed sentiment index. FREE."},
+    {"name": "ip_geolocation", "description": "Get geolocation data for any IP address. FREE."},
+    {"name": "url_metadata", "description": "Extract metadata from a URL — title, description, images. $0.01 via x402."},
+    {"name": "resolve_dispute", "description": "Submit a dispute for AI-powered policy-driven ruling. 7 policy templates. $0.05 via x402."},
+    {"name": "list_policies", "description": "List all available dispute resolution policy templates. FREE."},
+    {"name": "marketing_sentiment", "description": "AI-powered brand sentiment analysis across platforms. FREE beta."},
+    {"name": "marketing_trends", "description": "Detect trending marketing topics in any industry. FREE beta."},
+    {"name": "marketing_ad_copy", "description": "Generate ad copy for Google, Meta, TikTok, or Taboola. FREE beta."}
+  ]
+}
