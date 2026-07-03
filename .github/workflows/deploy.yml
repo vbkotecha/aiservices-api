@@ -1,0 +1,74 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Railway Deploy
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE_ID: e7d88b8a-d2aa-4113-aafa-061615ed4c43
+          RAILWAY_ENV_ID: ac26fe55-88a1-4f24-9777-a142af59373b
+        run: |
+          # Trigger a new deployment via Railway GraphQL API
+          RESPONSE=$(curl -s -X POST \
+            "https://backboard.railway.app/graphql/v2" \
+            -H "Authorization: Bearer ${RAILWAY_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"query\": \"mutation { serviceInstanceDeployV2(serviceId: \\\"${RAILWAY_SERVICE_ID}\\\", environmentId: \\\"${RAILWAY_ENV_ID}\\\") }\"
+            }")
+
+          echo "Deploy response: $RESPONSE"
+
+          # Check if deploy was triggered
+          DEPLOY_ID=$(echo "$RESPONSE" | jq -r '.data.serviceInstanceDeployV2 // empty')
+          if [ -z "$DEPLOY_ID" ]; then
+            echo "::error::Failed to trigger Railway deploy"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          echo "Deploy triggered: $DEPLOY_ID"
+          echo "deploy_id=$DEPLOY_ID" >> $GITHUB_ENV
+
+      - name: Wait for deploy to complete
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE_ID: e7d88b8a-d2aa-4113-aafa-061615ed4c43
+        run: |
+          DEPLOY_ID="${{ env.deploy_id }}"
+          echo "Waiting for deployment $DEPLOY_ID..."
+
+          for i in $(seq 1 40); do
+            sleep 15
+            STATUS=$(curl -s -X POST \
+              "https://backboard.railway.app/graphql/v2" \
+              -H "Authorization: Bearer ${RAILWAY_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{
+                \"query\": \"query { deployment(id: \\\"${DEPLOY_ID}\\\") { status } }\"
+              }" | jq -r '.data.deployment.status')
+
+            echo "  [$i] Status: $STATUS"
+
+            if [ "$STATUS" = "SUCCESS" ] || [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "CRASHED" ]; then
+              break
+            fi
+          done
+
+          if [ "$STATUS" != "SUCCESS" ]; then
+            echo "::error::Deploy $STATUS"
+            exit 1
+          fi
+
+          echo "Deploy successful!"
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl -sf https://api.aiservices.to/health | jq . || echo "Health check failed"
