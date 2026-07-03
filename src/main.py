@@ -25,6 +25,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from crypto_data import get_price, get_multi_price, get_indicators, get_fear_greed, get_defi_yields
 from geo_data import get_ip_geo
 from web_data import get_url_metadata
+from search_data import web_search
+from dex_data import get_swap_quote, get_trending_tokens, get_gas_tracker
+from prediction_data import get_polymarket_markets, get_polymarket_market, get_prediction_summary
+from news_data import get_crypto_news, get_social_trending, get_global_market
 from engine.policy_engine import evaluate_dispute, list_policies
 from mcp_endpoint import router as mcp_router
 
@@ -32,8 +36,8 @@ WALLET = os.environ.get("WALLET_ADDRESS", "0x1830DAdb0A16eb569B5f8526AADDF47ce85
 
 app = FastAPI(
     title="AIServices",
-    version="2.0.0",
-    description="""Paid APIs for AI agents — crypto market data, DeFi yields, IP geolocation, URL metadata, AND dispute resolution.
+    version="3.0.0",
+    description="""Paid APIs for AI agents — crypto market data, DeFi yields, DEX quotes, prediction markets, news, search, IP geolocation, URL metadata, and dispute resolution.
 
 All paid endpoints use x402 protocol with USDC on Base. Powered by AgentCourt policy engine.
 """,
@@ -134,6 +138,18 @@ try:
             mime_type="application/json",
             description="URL metadata extraction and unfurling",
         ),
+        "GET /v1/search": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.01",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="AI-powered web search with structured results",
+        ),
     }
 
     app.add_middleware(
@@ -141,7 +157,7 @@ try:
         routes=payment_routes,
         server=payment_server,
     )
-    print(f"[x402] Payment middleware enabled — disputes ($0.05), indicators/yields ($0.02), metadata ($0.01)", flush=True)
+    print(f"[x402] Payment middleware enabled — disputes ($0.05), indicators/yields ($0.02), metadata/search ($0.01)", flush=True)
     X402_ENABLED = True
     X402_ERROR = None
 except ImportError as e:
@@ -270,6 +286,91 @@ async def get_policies():
     return list_policies()
 
 
+# --- Web Search ---
+
+@app.get("/v1/search", tags=["Search"],
+         summary="Web Search",
+         description="AI-powered web search. Returns structured results with titles, URLs, and snippets. Uses Exa if API key available, otherwise DuckDuckGo.")
+async def search_web(q: str, num: int = 5):
+    """Web search — structured results ($0.01 via x402)"""
+    return web_search(q, num)
+
+
+# --- DEX / Trading ---
+
+@app.get("/v1/swap/quote", tags=["DEX"],
+         summary="DEX Swap Quote",
+         description="Get a swap quote from 0x API across Ethereum, Base, Polygon, Arbitrum, Optimism, BSC.")
+async def swap_quote(
+    chain: str = "ethereum",
+    sellToken: str = "WETH",
+    buyToken: str = "USDC",
+    sellAmount: str = "1000000000000000000",
+):
+    """Get DEX swap quote from 0x API (FREE)"""
+    return get_swap_quote(chain, sellToken, buyToken, sell_amount=sellAmount)
+
+
+@app.get("/v1/trending", tags=["Market Data"],
+         summary="Trending Tokens",
+         description="Get trending tokens and coins being searched right now on CoinGecko.")
+async def trending_tokens():
+    """Trending tokens — most searched right now (FREE)"""
+    return get_trending_tokens()
+
+
+@app.get("/v1/gas", tags=["Market Data"],
+         summary="Gas Tracker",
+         description="Current gas prices for Ethereum (slow, standard, fast) in Gwei.")
+async def gas_tracker():
+    """Current gas prices (FREE)"""
+    return get_gas_tracker()
+
+
+# --- Prediction Markets ---
+
+@app.get("/v1/predictions", tags=["Prediction Markets"],
+         summary="Prediction Markets",
+         description="Get active prediction markets from Polymarket ranked by 24h volume.")
+async def prediction_markets(limit: int = 20):
+    """Active prediction markets from Polymarket (FREE)"""
+    return get_polymarket_markets(limit=limit)
+
+
+@app.get("/v1/predictions/{slug}", tags=["Prediction Markets"],
+         summary="Prediction Market Details",
+         description="Get details for a specific Polymarket prediction market.")
+async def prediction_market_detail(slug: str):
+    """Specific prediction market details (FREE)"""
+    return get_polymarket_market(slug)
+
+
+# --- News & Social ---
+
+@app.get("/v1/news", tags=["News"],
+         summary="Crypto News",
+         description="Latest crypto and blockchain news from multiple sources.")
+async def crypto_news(limit: int = 20):
+    """Latest crypto news (FREE)"""
+    return get_crypto_news(limit=limit)
+
+
+@app.get("/v1/social", tags=["News"],
+         summary="Social Trending",
+         description="Trending crypto topics: coins, categories, and NFTs being discussed.")
+async def social_trending():
+    """Social trending — coins, categories, NFTs (FREE)"""
+    return get_social_trending()
+
+
+@app.get("/v1/global", tags=["Market Data"],
+         summary="Global Market Stats",
+         description="Global crypto market data: total market cap, volume, BTC dominance.")
+async def global_market():
+    """Global market stats (FREE)"""
+    return get_global_market()
+
+
 # --- Health & Discovery ---
 
 _landing_html = None
@@ -292,7 +393,7 @@ async def root(request: Request):
         return {
             "name": "AIServices",
             "tagline": "Paid APIs for AI agents — market data + dispute resolution",
-            "version": "2.1.0",
+            "version": "3.0.0",
             "payment": "x402 / USDC on Base",
             "wallet": WALLET,
             "services": {
@@ -302,6 +403,23 @@ async def root(request: Request):
                     "indicators": {"endpoint": "GET /v1/indicators/{symbol}", "price": "$0.02", "desc": "RSI, Bollinger Bands, ATR, Support/Resistance"},
                     "yields": {"endpoint": "GET /v1/yields", "price": "$0.02", "desc": "Top DeFi yield pools by TVL"},
                     "fear_greed": {"endpoint": "GET /v1/fear-greed", "price": "free", "desc": "Crypto Fear & Greed Index"},
+                    "global": {"endpoint": "GET /v1/global", "price": "free", "desc": "Global market cap, volume, BTC dominance"},
+                    "trending": {"endpoint": "GET /v1/trending", "price": "free", "desc": "Trending tokens right now"},
+                    "gas": {"endpoint": "GET /v1/gas", "price": "free", "desc": "Current ETH gas prices"},
+                },
+                "search": {
+                    "web_search": {"endpoint": "GET /v1/search?q=...", "price": "$0.01", "desc": "AI-powered web search"},
+                },
+                "dex": {
+                    "swap_quote": {"endpoint": "GET /v1/swap/quote", "price": "free", "desc": "DEX swap quote (0x API, 6 chains)"},
+                },
+                "prediction_markets": {
+                    "markets": {"endpoint": "GET /v1/predictions", "price": "free", "desc": "Active Polymarket prediction markets"},
+                    "detail": {"endpoint": "GET /v1/predictions/{slug}", "price": "free", "desc": "Specific market details"},
+                },
+                "news_social": {
+                    "news": {"endpoint": "GET /v1/news", "price": "free", "desc": "Latest crypto news"},
+                    "social_trending": {"endpoint": "GET /v1/social", "price": "free", "desc": "Trending coins, categories, NFTs"},
                 },
                 "dispute_resolution": {
                     "file_dispute": {"endpoint": "POST /v1/disputes", "price": "$0.05", "desc": "Submit dispute for policy-driven ruling (AgentCourt engine)"},
@@ -319,7 +437,7 @@ async def api_discovery():
     return {
         "name": "AIServices",
         "tagline": "Paid APIs for AI agents — market data + dispute resolution",
-        "version": "2.1.0",
+        "version": "3.0.0",
         "payment": "x402 / USDC on Base",
         "wallet": WALLET,
         "services": {
@@ -329,6 +447,23 @@ async def api_discovery():
                 "indicators": {"endpoint": "GET /v1/indicators/{symbol}", "price": "$0.02", "desc": "RSI, Bollinger Bands, ATR, Support/Resistance"},
                 "yields": {"endpoint": "GET /v1/yields", "price": "$0.02", "desc": "Top DeFi yield pools by TVL"},
                 "fear_greed": {"endpoint": "GET /v1/fear-greed", "price": "free", "desc": "Crypto Fear & Greed Index"},
+                "global": {"endpoint": "GET /v1/global", "price": "free", "desc": "Global market cap, volume, BTC dominance"},
+                "trending": {"endpoint": "GET /v1/trending", "price": "free", "desc": "Trending tokens right now"},
+                "gas": {"endpoint": "GET /v1/gas", "price": "free", "desc": "Current ETH gas prices"},
+            },
+            "search": {
+                "web_search": {"endpoint": "GET /v1/search?q=...", "price": "$0.01", "desc": "AI-powered web search"},
+            },
+            "dex": {
+                "swap_quote": {"endpoint": "GET /v1/swap/quote", "price": "free", "desc": "DEX swap quote (0x API, 6 chains)"},
+            },
+            "prediction_markets": {
+                "markets": {"endpoint": "GET /v1/predictions", "price": "free", "desc": "Active Polymarket prediction markets"},
+                "detail": {"endpoint": "GET /v1/predictions/{slug}", "price": "free", "desc": "Specific market details"},
+            },
+            "news_social": {
+                "news": {"endpoint": "GET /v1/news", "price": "free", "desc": "Latest crypto news"},
+                "social_trending": {"endpoint": "GET /v1/social", "price": "free", "desc": "Trending coins, categories, NFTs"},
             },
             "dispute_resolution": {
                 "file_dispute": {"endpoint": "POST /v1/disputes", "price": "$0.05", "desc": "Submit dispute for policy-driven ruling (AgentCourt engine)"},
@@ -343,10 +478,10 @@ async def api_discovery():
 async def health():
     return {
         "status": "ok",
-        "version": "2.1.0",
+        "version": "3.0.0",
         "x402_enabled": X402_ENABLED,
         "x402_error": X402_ERROR,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "disputes", "policies"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies"],
     }
 
 
@@ -356,7 +491,7 @@ async def x402_manifest():
     return {
         "version": "1.0",
         "name": "AIServices",
-        "description": "Paid data APIs for AI agents — crypto prices, indicators, DeFi yields, geolocation, URL metadata",
+        "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata",
         "network": "base-mainnet",
         "chain_id": "eip155:8453",
         "currency": "USDC",
@@ -366,10 +501,18 @@ async def x402_manifest():
             {"path": "/v1/indicators/{symbol}", "method": "GET", "price": "$0.02", "description": "Technical indicators: RSI, BB, ATR, S/R"},
             {"path": "/v1/yields", "method": "GET", "price": "$0.02", "description": "Top DeFi yield pools by TVL"},
             {"path": "/v1/fear-greed", "method": "GET", "price": "$0.00", "description": "Crypto Fear and Greed Index (FREE)"},
+            {"path": "/v1/global", "method": "GET", "price": "$0.00", "description": "Global market cap, volume, dominance (FREE)"},
+            {"path": "/v1/trending", "method": "GET", "price": "$0.00", "description": "Trending tokens (FREE)"},
+            {"path": "/v1/gas", "method": "GET", "price": "$0.00", "description": "Current ETH gas prices (FREE)"},
             {"path": "/v1/geo/{ip}", "method": "GET", "price": "$0.00", "description": "IP geolocation lookup (FREE)"},
             {"path": "/v1/metadata", "method": "GET", "price": "$0.01", "description": "URL metadata extraction and unfurling"},
+            {"path": "/v1/search", "method": "GET", "price": "$0.01", "description": "AI-powered web search"},
+            {"path": "/v1/swap/quote", "method": "GET", "price": "$0.00", "description": "DEX swap quote across 6 chains (FREE)"},
+            {"path": "/v1/predictions", "method": "GET", "price": "$0.00", "description": "Active prediction markets (FREE)"},
+            {"path": "/v1/news", "method": "GET", "price": "$0.00", "description": "Latest crypto news (FREE)"},
+            {"path": "/v1/social", "method": "GET", "price": "$0.00", "description": "Trending coins, categories, NFTs (FREE)"},
         ],
-        "categories": ["Data", "Market Data", "Geolocation"],
+        "categories": ["Data", "Market Data", "Geolocation", "DEX", "Prediction Markets", "Search", "News"],
         "payTo": WALLET,
         "contact": "https://github.com/vbkotecha",
         "website": "https://api.aiservices.to",
@@ -382,8 +525,8 @@ async def agent_json():
     """Agent discovery manifest for AI agent platforms and crawlers."""
     return {
         "name": "AIServices",
-        "version": "1.0.0",
-        "description": "Paid data APIs for AI agents — crypto prices, indicators, DeFi yields, geolocation, URL metadata",
+        "version": "3.0.0",
+        "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata",
         "url": "https://api.aiservices.to",
         "capabilities": [
             "crypto-market-data",
@@ -391,6 +534,12 @@ async def agent_json():
             "defi-yields",
             "ip-geolocation",
             "url-metadata",
+            "web-search",
+            "dex-swap-quotes",
+            "prediction-markets",
+            "crypto-news",
+            "social-trending",
+            "global-market-stats",
         ],
         "payment": {
             "protocol": "x402",
@@ -404,11 +553,19 @@ async def agent_json():
                 "GET /v1/prices?symbols=BTC,ETH",
                 "GET /v1/fear-greed",
                 "GET /v1/geo/{ip}",
+                "GET /v1/global",
+                "GET /v1/trending",
+                "GET /v1/gas",
+                "GET /v1/swap/quote",
+                "GET /v1/predictions",
+                "GET /v1/news",
+                "GET /v1/social",
             ],
             "paid": [
                 {"path": "GET /v1/indicators/{symbol}", "price": "$0.02"},
                 {"path": "GET /v1/yields", "price": "$0.02"},
                 {"path": "GET /v1/metadata", "price": "$0.01"},
+                {"path": "GET /v1/search", "price": "$0.01"},
             ],
         },
         "docs": "https://api.aiservices.to/docs",
@@ -436,11 +593,20 @@ async def llms_txt():
         "- GET /v1/prices?symbols=BTC,ETH,SOL — Batch crypto prices",
         "- GET /v1/fear-greed — Crypto Fear & Greed Index (0-100)",
         "- GET /v1/geo/{ip} — IP geolocation lookup",
+        "- GET /v1/global — Global market cap, volume, BTC dominance",
+        "- GET /v1/trending — Trending tokens being searched right now",
+        "- GET /v1/gas — Current Ethereum gas prices (slow/standard/fast)",
+        "- GET /v1/swap/quote — DEX swap quote (0x API, 6 chains)",
+        "- GET /v1/predictions — Active Polymarket prediction markets",
+        "- GET /v1/predictions/{slug} — Specific prediction market details",
+        "- GET /v1/news — Latest crypto and blockchain news",
+        "- GET /v1/social — Trending coins, categories, NFTs",
         "",
         "## Paid Endpoints (x402 / USDC on Base)",
         "- GET /v1/indicators/{symbol} — RSI, Bollinger Bands, ATR, Support/Resistance ($0.02)",
         "- GET /v1/yields — Top DeFi yield pools by TVL ($0.02)",
         "- GET /v1/metadata?url=... — URL metadata extraction and unfurling ($0.01)",
+        "- GET /v1/search?q=... — AI-powered web search ($0.01)",
         "",
         "## Example Usage",
         "```",
