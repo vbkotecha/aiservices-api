@@ -52,6 +52,7 @@ X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
 X402_NETWORK = "eip155:8453"
 
 X402_ENABLED = False
+X402_ERROR = "Not attempted yet"
 try:
     from x402 import x402ResourceServer
     from x402.http import HTTPFacilitatorClient
@@ -132,11 +133,13 @@ try:
 except ImportError as e:
     print(f"[x402] NOT installed — running in free mode. Error: {e}", flush=True)
     X402_ENABLED = False
+    X402_ERROR = f"ImportError: {e}"
 except Exception as e:
     import traceback
     print(f"[x402] Failed to initialize — running in free mode. Error: {e}", flush=True)
     traceback.print_exc()
     X402_ENABLED = False
+    X402_ERROR = f"Exception: {type(e).__name__}: {e}"
 
 # --- MCP Remote Transport ---
 app.include_router(mcp_router)
@@ -286,6 +289,7 @@ async def health():
         "status": "ok",
         "version": "2.0.0",
         "x402_enabled": X402_ENABLED,
+        "x402_error": X402_ERROR,
         "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "disputes", "policies"],
     }
 
