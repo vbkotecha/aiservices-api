@@ -1,6 +1,6 @@
 """
-AIServices — Paid data APIs for AI agents
-Crypto market data, IP geolocation, URL metadata
+AgentServices — Paid APIs for AI agents
+Crypto market data, IP geolocation, URL metadata, marketing intelligence
 """
 import os
 from pathlib import Path
@@ -31,12 +31,16 @@ from prediction_data import get_polymarket_markets, get_polymarket_market, get_p
 from news_data import get_crypto_news, get_social_trending, get_global_market
 from engine.policy_engine import evaluate_dispute, list_policies
 from mcp_endpoint import router as mcp_router
+from marketing_data import (
+    SentimentRequest, TrendRequest, CompetitorRequest, ContentGapRequest, AdCopyRequest,
+    analyze_sentiment, detect_trends, analyze_competitors, find_content_gaps, generate_ad_copy,
+)
 
 WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
 
 app = FastAPI(
-    title="AIServices",
-    version="3.0.0",
+    title="AgentServices",
+    version="4.0.0",
     description="""Paid APIs for AI agents — crypto market data, DeFi yields, DEX quotes, prediction markets, news, search, IP geolocation, URL metadata, and dispute resolution.
 
 All paid endpoints use x402 protocol with USDC on Base. Powered by AgentCourt policy engine.
@@ -152,7 +156,7 @@ except Exception as e:
 
 # --- MCP Remote Transport ---
 app.include_router(mcp_router)
-print(f"[mcp] Remote MCP endpoint mounted at /mcp — 8 tools available", flush=True)
+print(f"[mcp] Remote MCP endpoint mounted at /mcp — 13 tools available", flush=True)
 
 
 # --- Market Data ---
@@ -350,17 +354,55 @@ async def global_market():
     return get_global_market()
 
 
+# --- Marketing Intelligence (AI-Powered) ---
+
+@app.post("/v1/marketing/sentiment", tags=["Marketing Intelligence"],
+          summary="Brand Sentiment Analysis",
+          description="AI-powered brand sentiment analysis across platforms. Uses GPT-4o-mini for real-time analysis.")
+async def marketing_sentiment(req: SentimentRequest):
+    """Brand sentiment analysis (FREE during beta)"""
+    return analyze_sentiment(req.brand, req.platforms)
+
+@app.post("/v1/marketing/trends", tags=["Marketing Intelligence"],
+          summary="Industry Trend Detection",
+          description="Detect trending marketing topics in any industry with velocity scores and content recommendations.")
+async def marketing_trends(req: TrendRequest):
+    """Industry trend detection (FREE during beta)"""
+    return detect_trends(req.industry, req.limit)
+
+@app.post("/v1/marketing/competitors", tags=["Marketing Intelligence"],
+          summary="Competitive Intelligence",
+          description="AI-powered competitor analysis: keywords, channels, content strategy, and actionable recommendations.")
+async def marketing_competitors(req: CompetitorRequest):
+    """Competitive intelligence (FREE during beta)"""
+    return analyze_competitors(req.competitor_url, req.your_url)
+
+@app.post("/v1/marketing/content-gaps", tags=["Marketing Intelligence"],
+          summary="Content Gap Analysis",
+          description="Find SEO content gaps between you and competitors. Includes keyword opportunities with difficulty scores.")
+async def marketing_content_gaps(req: ContentGapRequest):
+    """Content gap analysis (FREE during beta)"""
+    return find_content_gaps(req.your_domain, req.competitor_domains)
+
+@app.post("/v1/marketing/ad-copy", tags=["Marketing Intelligence"],
+          summary="AI Ad Copy Generator",
+          description="Generate ad copy variations for Google, Meta, TikTok, or Taboola. Platform-specific constraints and tone control.")
+async def marketing_ad_copy(req: AdCopyRequest):
+    """AI ad copy generation (FREE during beta)"""
+    return generate_ad_copy(req.product, req.platform, req.tone, req.count)
+
+
 # --- Health & Discovery ---
 
 _landing_html = None
 def _get_landing():
     global _landing_html
     if _landing_html is None:
-        landing_path = Path(__file__).parent / "landing.html"
+        landing_path = Path(__file__).parent / "landing.html"  # TODO: Update to AgentServices branding
         if landing_path.exists():
             _landing_html = landing_path.read_text()
         else:
-            _landing_html = "<h1>AIServices</h1>"
+            _landing_html = "<h1>AgentServices</h1>"
     return _landing_html
 
 
@@ -370,8 +412,8 @@ async def root(request: Request):
     host = request.headers.get("host", "").split(":")[0].lower()
     if host.startswith("api."):
         return {
-            "name": "AIServices",
-            "tagline": "Paid APIs for AI agents — market data + dispute resolution",
+            "name": "AgentServices",
+            "tagline": "Paid APIs for AI agents — market data, marketing intelligence + dispute resolution",
             "version": "3.0.0",
             "payment": "x402 / USDC on Base",
             "wallet": WALLET,
@@ -414,8 +456,8 @@ async def root(request: Request):
 async def api_discovery():
     """API discovery JSON for agents and crawlers."""
     return {
-        "name": "AIServices",
-        "tagline": "Paid APIs for AI agents — market data + dispute resolution",
+        "name": "AgentServices",
+        "tagline": "Paid APIs for AI agents — market data, marketing intelligence + dispute resolution",
         "version": "3.0.0",
         "payment": "x402 / USDC on Base",
         "wallet": WALLET,
@@ -448,6 +490,13 @@ async def api_discovery():
                 "file_dispute": {"endpoint": "POST /v1/disputes", "price": "$0.05", "desc": "Submit dispute for policy-driven ruling (AgentCourt engine)"},
                 "policies": {"endpoint": "GET /v1/policies", "price": "free", "desc": "List dispute policy templates"},
             },
+            "marketing_intelligence": {
+                "sentiment": {"endpoint": "POST /v1/marketing/sentiment", "price": "free", "desc": "Brand sentiment analysis (AI-powered)"},
+                "trends": {"endpoint": "POST /v1/marketing/trends", "price": "free", "desc": "Industry trend detection"},
+                "competitors": {"endpoint": "POST /v1/marketing/competitors", "price": "free", "desc": "Competitive intelligence"},
+                "content_gaps": {"endpoint": "POST /v1/marketing/content-gaps", "price": "free", "desc": "SEO content gap analysis"},
+                "ad_copy": {"endpoint": "POST /v1/marketing/ad-copy", "price": "free", "desc": "AI ad copy generation"},
+            },
         },
         "live": True,
     }
@@ -457,12 +506,12 @@ async def api_discovery():
 async def health():
     return {
         "status": "ok",
-        "version": "3.0.0",
+        "version": "4.0.0",
         "x402_enabled": X402_ENABLED,
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,
         "x402_facilitator": X402_FACILITATOR_URL,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy"],
     }
 
 
@@ -471,7 +520,7 @@ async def x402_manifest():
     """x402 payment manifest for agent discovery."""
     return {
         "version": "1.0",
-        "name": "AIServices",
+        "name": "AgentServices",
         "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata",
         "networks": X402_NETWORKS,
         "chain_id": X402_NETWORKS[0] if X402_NETWORKS else "eip155:8453",
@@ -494,14 +543,19 @@ async def x402_manifest():
             {"path": "/v1/social", "method": "GET", "price": "$0.00", "description": "Trending coins, categories, NFTs (FREE)"},
             {"path": "/v1/disputes", "method": "POST", "price": "$0.05", "description": "Policy-driven dispute resolution (7 policies: freelance, milestone, SLA, API quality, bug bounty, scope, commerce)"},
             {"path": "/v1/policies", "method": "GET", "price": "$0.00", "description": "List dispute resolution policy templates (FREE)"},
-            {"path": "/mcp", "method": "POST", "price": "$0.00", "description": "MCP server with 8 tools for AI agent integration (FREE)"},
+            {"path": "/v1/marketing/sentiment", "method": "POST", "price": "$0.00", "description": "AI brand sentiment analysis (FREE beta)"},
+            {"path": "/v1/marketing/trends", "method": "POST", "price": "$0.00", "description": "Industry trend detection (FREE beta)"},
+            {"path": "/v1/marketing/competitors", "method": "POST", "price": "$0.00", "description": "Competitive intelligence (FREE beta)"},
+            {"path": "/v1/marketing/content-gaps", "method": "POST", "price": "$0.00", "description": "SEO content gap analysis (FREE beta)"},
+            {"path": "/v1/marketing/ad-copy", "method": "POST", "price": "$0.00", "description": "AI ad copy generator (FREE beta)"},
+            {"path": "/mcp", "method": "POST", "price": "$0.00", "description": "MCP server with 13 tools for AI agent integration (FREE)"},
         ],
-        "categories": ["Data", "Market Data", "Geolocation", "DEX", "Prediction Markets", "Search", "News", "Governance", "Dispute Resolution", "MCP"],
+        "categories": ["Data", "Market Data", "Geolocation", "DEX", "Prediction Markets", "Search", "News", "Governance", "Dispute Resolution", "MCP", "Marketing Intelligence"],
         "payTo": "0x9863aB6242663FCc84c33632741711dB78f8Fd15",
         "contact": "https://github.com/vbkotecha",
-        "website": "https://api.aiservices.to",
+        "website": "https://api.agentservices.to",
         "repository": "https://github.com/vbkotecha/aiservices-api",
-        "homepage": "https://api.aiservices.to",
+        "homepage": "https://api.agentservices.to",
         "license": "MIT",
         "spec": "x402-service-manifest/1",
     }
@@ -511,10 +565,10 @@ async def x402_manifest():
 async def agent_json():
     """Agent discovery manifest for AI agent platforms and crawlers."""
     return {
-        "name": "AIServices",
+        "name": "AgentServices",
         "version": "3.0.0",
         "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata",
-        "url": "https://api.aiservices.to",
+        "url": "https://api.agentservices.to",
         "capabilities": [
             "crypto-market-data",
             "technical-indicators",
@@ -527,6 +581,11 @@ async def agent_json():
             "crypto-news",
             "social-trending",
             "global-market-stats",
+            "marketing-sentiment",
+            "marketing-trends",
+            "marketing-competitors",
+            "marketing-content-gaps",
+            "marketing-ad-copy",
         ],
         "payment": {
             "protocol": "x402",
@@ -547,6 +606,11 @@ async def agent_json():
                 "GET /v1/predictions",
                 "GET /v1/news",
                 "GET /v1/social",
+                "POST /v1/marketing/sentiment",
+                "POST /v1/marketing/trends",
+                "POST /v1/marketing/competitors",
+                "POST /v1/marketing/content-gaps",
+                "POST /v1/marketing/ad-copy",
             ],
             "paid": [
                 {"path": "GET /v1/indicators/{symbol}", "price": "$0.02"},
@@ -555,7 +619,7 @@ async def agent_json():
                 {"path": "GET /v1/search", "price": "$0.01"},
             ],
         },
-        "docs": "https://api.aiservices.to/docs",
+        "docs": "https://api.agentservices.to/docs",
         "github": "https://github.com/vbkotecha/aiservices-api",
         "wallet": WALLET,
     }
@@ -565,12 +629,12 @@ async def agent_json():
 async def llms_txt():
     """LLM-friendly API description for agent crawlers and AI discovery."""
     lines = [
-        "# AIServices",
+        "# AgentServices",
         "",
         "> Paid data APIs for AI agents. Crypto prices, technical indicators, DeFi yields, IP geolocation, URL metadata.",
         "",
         "## Base URL",
-        "https://api.aiservices.to",
+        "https://api.agentservices.to",
         "",
         "## Authentication",
         "Paid endpoints use x402 protocol (USDC on Base Mainnet). Free endpoints require no auth.",
@@ -598,16 +662,16 @@ async def llms_txt():
         "## Example Usage",
         "```",
         "# Free: Get BTC price",
-        "curl https://api.aiservices.to/v1/price/BTC",
+        "curl https://api.agentservices.to/v1/price/BTC",
         "",
         "# Paid: Get BTC indicators (requires x402 payment)",
-        "curl https://api.aiservices.to/v1/indicators/BTC",
+        "curl https://api.agentservices.to/v1/indicators/BTC",
         "```",
         "",
         f"## Payment Wallet\n{WALLET}",
         "",
         "## Links",
-        "- API Docs: https://api.aiservices.to/docs",
+        "- API Docs: https://api.agentservices.to/docs",
         "- GitHub: https://github.com/vbkotecha/aiservices-api",
     ]
     from starlette.responses import PlainTextResponse
@@ -624,10 +688,10 @@ async def openapi_schema():
 async def web_manifest():
     """Web app manifest for browser/agent discovery."""
     return {
-        "name": "AIServices",
-        "short_name": "AIServices",
+        "name": "AgentServices",
+        "short_name": "AgentServices",
         "description": "Paid data APIs for AI agents — crypto, DeFi, geo, web metadata",
-        "start_url": "https://api.aiservices.to",
+        "start_url": "https://api.agentservices.to",
         "scope": "/",
         "display": "standalone",
         "categories": ["developer", "finance", "data"],
@@ -675,7 +739,7 @@ a:hover{text-decoration:underline}
 <body>
 <div class="container">
 <header>
-<h1>AIServices</h1>
+<h1>AgentServices</h1>
 <p class="tagline">Paid APIs for AI Agents — Market Data + Dispute Resolution</p>
 <div style="margin-top:10px">
 <span class="badge badge-x402">x402 / USDC on Base</span>
@@ -688,16 +752,16 @@ a:hover{text-decoration:underline}
 <h2>Quick Start</h2>
 <p>No signup. No API keys. Free endpoints work immediately. Paid endpoints use x402 micropayments.</p>
 <pre><code># Free: Get BTC price
-curl https://api.aiservices.to/v1/price/BTC
+curl https://api.agentservices.to/v1/price/BTC
 
 # Free: Batch prices
-curl "https://api.aiservices.to/v1/prices?symbols=BTC,ETH,SOL"
+curl "https://api.agentservices.to/v1/prices?symbols=BTC,ETH,SOL"
 
 # Free: Fear & Greed Index
-curl https://api.aiservices.to/v1/fear-greed
+curl https://api.agentservices.to/v1/fear-greed
 
 # MCP: Connect your AI tool
-# URL: https://api.aiservices.to/mcp (Streamable HTTP)</code></pre>
+# URL: https://api.agentservices.to/mcp (Streamable HTTP)</code></pre>
 </section>
 
 <section>
@@ -751,7 +815,7 @@ curl https://api.aiservices.to/v1/fear-greed
 <section>
 <h2>MCP Integration</h2>
 <p>Connect AIServices directly to Claude, Cursor, or any MCP client:</p>
-<pre><code>MCP Server URL: https://api.aiservices.to/mcp
+<pre><code>MCP Server URL: https://api.agentservices.to/mcp
 Transport: Streamable HTTP</code></pre>
 <p>8 tools available immediately. No installation required.</p>
 </section>

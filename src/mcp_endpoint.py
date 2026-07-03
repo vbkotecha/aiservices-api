@@ -101,6 +101,49 @@ MCP_TOOLS = [
         "name": "list_policies",
         "description": "List all available dispute resolution policy templates (FREE)",
         "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+        "name": "marketing_sentiment",
+        "description": "AI-powered brand sentiment analysis across platforms (FREE beta)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "brand": {"type": "string", "description": "Brand name to analyze"},
+                "platforms": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Platforms to check",
+                    "default": ["twitter", "reddit", "tiktok"]
+                }
+            },
+            "required": ["brand"]
+        }
+    },
+    {
+        "name": "marketing_trends",
+        "description": "Detect trending marketing topics in any industry (FREE beta)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "industry": {"type": "string", "description": "Industry (e.g. fintech, ecommerce)"},
+                "limit": {"type": "integer", "description": "Max results", "default": 5}
+            },
+            "required": ["industry"]
+        }
+    },
+    {
+        "name": "marketing_ad_copy",
+        "description": "Generate ad copy for Google, Meta, TikTok, or Taboola (FREE beta)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "product": {"type": "string", "description": "Product/service name"},
+                "platform": {"type": "string", "description": "Ad platform", "default": "google"},
+                "tone": {"type": "string", "description": "Tone", "default": "professional"},
+                "count": {"type": "integer", "description": "Number of variations", "default": 3}
+            },
+            "required": ["product"]
+        }
     }
 ]
 
