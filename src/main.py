@@ -63,8 +63,15 @@ async def add_security_headers(request, call_next):
 
 # --- x402 Payment Protocol (Base Mainnet) ---
 X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
-X402_NETWORK = "eip155:8453"
+X402_BASE_NETWORK = "eip155:8453"
+X402_BSC_NETWORK = "eip155:56"
 X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
+
+# Multi-chain: Dexter facilitator (x402.dexter.cash) supports Base + BSC + more.
+# CDP facilitator supports Base only. We detect and register accordingly.
+X402_IS_MULTICHAIN = any(d in X402_FACILITATOR_URL.lower() for d in ("dexter", "infra402", "aeon"))
+X402_NETWORKS = [X402_BASE_NETWORK] + ([X402_BSC_NETWORK] if X402_IS_MULTICHAIN else [])
+X402_NETWORK_LABEL = "Base + BSC" if X402_IS_MULTICHAIN else "Base"
 
 X402_ENABLED = False
 X402_ERROR = "Not initialized"
@@ -75,78 +82,50 @@ try:
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
     from x402.server import x402ResourceServer
     from x402.extensions.bazaar import bazaar_resource_server_extension
-    from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
 
-    auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
+    # Build facilitator — CDP needs JWT auth headers, others (Dexter) are open
+    facilitator_config_kwargs = {"url": X402_FACILITATOR_URL}
+    if not X402_IS_MULTICHAIN:
+        from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
+        facilitator_config_kwargs["url"] = CDP_FACILITATOR_URL
+        facilitator_config_kwargs["auth_provider"] = CreateHeadersAuthProvider(create_cdp_auth_headers)
 
-    facilitator = HTTPFacilitatorClient(
-        FacilitatorConfig(
-            url=CDP_FACILITATOR_URL,
-            auth_provider=auth_provider,
-        )
-    )
+    facilitator = HTTPFacilitatorClient(FacilitatorConfig(**facilitator_config_kwargs))
     payment_server = x402ResourceServer(facilitator)
-    payment_server.register(X402_NETWORK, ExactEvmServerScheme())
+    for net in X402_NETWORKS:
+        payment_server.register(net, ExactEvmServerScheme())
     payment_server.register_extension(bazaar_resource_server_extension)
+
+    def _payment_options(wallet: str, price: str) -> list:
+        """Generate PaymentOption for every supported network (multi-chain)."""
+        return [
+            PaymentOption(scheme="exact", pay_to=wallet, price=price, network=net)
+            for net in X402_NETWORKS
+        ]
 
     payment_routes = {
         "POST /v1/disputes": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.05",
-                    network=X402_NETWORK,
-                ),
-            ],
+            accepts=_payment_options(X402_WALLET, "$0.05"),
             mime_type="application/json",
             description="Submit a dispute for policy-driven ruling (AgentCourt engine)",
         ),
         "GET /v1/indicators/*": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.02",
-                    network=X402_NETWORK,
-                ),
-            ],
+            accepts=_payment_options(X402_WALLET, "$0.02"),
             mime_type="application/json",
             description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
         ),
         "GET /v1/yields": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.02",
-                    network=X402_NETWORK,
-                ),
-            ],
+            accepts=_payment_options(X402_WALLET, "$0.02"),
             mime_type="application/json",
             description="Top DeFi yield pools by TVL",
         ),
         "GET /v1/metadata": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.01",
-                    network=X402_NETWORK,
-                ),
-            ],
+            accepts=_payment_options(X402_WALLET, "$0.01"),
             mime_type="application/json",
             description="URL metadata extraction and unfurling",
         ),
         "GET /v1/search": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.01",
-                    network=X402_NETWORK,
-                ),
-            ],
+            accepts=_payment_options(X402_WALLET, "$0.01"),
             mime_type="application/json",
             description="AI-powered web search with structured results",
         ),
@@ -157,7 +136,7 @@ try:
         routes=payment_routes,
         server=payment_server,
     )
-    print(f"[x402] Payment middleware enabled — disputes ($0.05), indicators/yields ($0.02), metadata/search ($0.01)", flush=True)
+    print(f"[x402] Payment middleware enabled on {X402_NETWORK_LABEL} — disputes ($0.05), indicators/yields ($0.02), metadata/search ($0.01)", flush=True)
     X402_ENABLED = True
     X402_ERROR = None
 except ImportError as e:
@@ -481,6 +460,8 @@ async def health():
         "version": "3.0.0",
         "x402_enabled": X402_ENABLED,
         "x402_error": X402_ERROR,
+        "x402_networks": X402_NETWORKS,
+        "x402_facilitator": X402_FACILITATOR_URL,
         "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies"],
     }
 
@@ -492,8 +473,8 @@ async def x402_manifest():
         "version": "1.0",
         "name": "AIServices",
         "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata",
-        "network": "base-mainnet",
-        "chain_id": "eip155:8453",
+        "networks": X402_NETWORKS,
+        "chain_id": X402_NETWORKS[0] if X402_NETWORKS else "eip155:8453",
         "currency": "USDC",
         "endpoints": [
             {"path": "/v1/price/{symbol}", "method": "GET", "price": "$0.00", "description": "Current crypto price (FREE)"},
