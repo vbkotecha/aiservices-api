@@ -392,6 +392,20 @@ async def marketing_ad_copy(req: AdCopyRequest):
     return generate_ad_copy(req.product, req.platform, req.tone, req.count)
 
 
+
+@app.get("/debug/env")
+async def debug_env():
+    """Temporary debug endpoint to check env vars."""
+    import os as _os
+    return {
+        "OPENAI_API_KEY": "SET" if _os.environ.get("OPENAI_API_KEY") else "NOT SET",
+        "OPENAI_API_KEY_LEN": len(_os.environ.get("OPENAI_API_KEY", "")),
+        "TEST_VAR": _os.environ.get("TEST_VAR", "NOT SET"),
+        "WALLET_ADDRESS": _os.environ.get("WALLET_ADDRESS", "NOT SET"),
+        "all_keys": sorted([k for k in _os.environ.keys() if not k.startswith("_") and k.isupper()]),
+    }
+
+
 # --- Health & Discovery ---
 
 _landing_html = None
