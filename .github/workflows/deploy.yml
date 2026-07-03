@@ -17,7 +17,7 @@ jobs:
           # Deploy with latestCommit=true to pull fresh code from GitHub
           RESPONSE=$(curl -s -X POST \
             "https://backboard.railway.app/graphql/v2" \
-            -H "Authorization: Bearer ${RAILWAY_TOKEN}" \
+            -H "Project-Access-Token: ${RAILWAY_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "{
               \"query\": \"mutation { serviceInstanceDeploy(latestCommit: true, serviceId: \\\"${RAILWAY_SERVICE_ID}\\\", environmentId: \\\"${RAILWAY_ENV_ID}\\\") }\"
@@ -44,7 +44,7 @@ jobs:
             sleep 15
             STATUS=$(curl -s -X POST \
               "https://backboard.railway.app/graphql/v2" \
-              -H "Authorization: Bearer ${RAILWAY_TOKEN}" \
+              -H "Project-Access-Token: ${RAILWAY_TOKEN}" \
               -H "Content-Type: application/json" \
               -d "{
                 \"query\": \"query { service(id: \\\"${RAILWAY_SERVICE_ID}\\\") { deployments(first: 1) { edges { node { status meta } } } } }\"
