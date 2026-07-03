@@ -22,3 +22,9 @@ def test_x402_manifest_advertises_base_mainnet():
     assert '"chain_id": "eip155:8453"' in source
     assert "base-sepolia-testnet" not in source
     assert "eip155:84532" not in source
+
+
+def test_requirements_include_x402_extensions_extra():
+    requirements = (MAIN.parents[1] / "requirements.txt").read_text()
+
+    assert "x402[fastapi,httpx,evm,extensions]" in requirements
