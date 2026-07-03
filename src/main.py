@@ -66,7 +66,20 @@ try:
     )
     payment_server = x402ResourceServer(facilitator)
     payment_server.register(X402_NETWORK, ExactEvmServerScheme())
-    payment_server.register_extension(bazaar_resource_server_extension)
+
+    # Try bazaar extension (non-blocking)
+    try:
+        from x402.extensions.bazaar import bazaar_resource_server_extension
+        payment_server.register_extension(bazaar_resource_server_extension)
+    except Exception:
+        pass
+
+    # Initialize server (fetches supported schemes from facilitator)
+    try:
+        payment_server.initialize()
+        print("[x402] Server initialized", flush=True)
+    except Exception as init_err:
+        print(f"[x402] Initialize warning: {init_err}", flush=True)
 
     payment_routes = {
         "POST /v1/disputes": {
