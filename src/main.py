@@ -28,7 +28,7 @@ from web_data import get_url_metadata
 from engine.policy_engine import evaluate_dispute, list_policies
 from mcp_endpoint import router as mcp_router
 
-WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
+WALLET = os.environ.get("WALLET_ADDRESS", "0x1830DAdb0A16eb569B5f8526AADDF47ce85aC8e0")
 
 app = FastAPI(
     title="AIServices",
@@ -50,88 +50,80 @@ app.add_middleware(
 # --- x402 Payment Protocol (Base Mainnet) ---
 X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
 X402_NETWORK = "eip155:8453"
+X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
 
 X402_ENABLED = False
-X402_ERROR = "Not attempted yet"
+X402_ERROR = "Not initialized"
 try:
-    from x402 import x402ResourceServer
-    from x402.http import HTTPFacilitatorClient
+    from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption, CreateHeadersAuthProvider
     from x402.http.middleware.fastapi import PaymentMiddlewareASGI
+    from x402.http.types import RouteConfig
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
-    print("[x402] All imports successful", flush=True)
+    from x402.server import x402ResourceServer
+    from x402.extensions.bazaar import bazaar_resource_server_extension
+    from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
 
-    # HTTPFacilitatorClient auto-detects CDP_API_KEY_ID and CDP_API_KEY_SECRET from env
-    # But we don't call it at startup to avoid blocking/crashing
-    cdp_key_id = os.environ.get("CDP_API_KEY_ID", "")
-    cdp_secret = os.environ.get("CDP_API_KEY_SECRET", "")
-    
-    if not cdp_key_id or not cdp_secret:
-        raise ValueError("CDP_API_KEY_ID and CDP_API_KEY_SECRET must be set for x402")
-
-    from x402.http import FacilitatorConfig, HTTPFacilitatorClient
-    from x402.http.types import AuthProvider, AuthHeaders
-
-    # Simple CDP auth: use API key in Authorization header
-    class CDPSimpleAuth(AuthProvider):
-        def get_auth_headers(self) -> AuthHeaders:
-            return AuthHeaders(
-                verify={"Authorization": f"Bearer {cdp_key_id}"},
-                settle={"Authorization": f"Bearer {cdp_key_id}"},
-                supported={"Authorization": f"Bearer {cdp_key_id}"},
-            )
+    auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
 
     facilitator = HTTPFacilitatorClient(
         FacilitatorConfig(
-            url="https://api.cdp.coinbase.com/platform/v2/x402",
-            auth_provider=CDPSimpleAuth(),
+            url=CDP_FACILITATOR_URL,
+            auth_provider=auth_provider,
         )
     )
-    print("[x402] Facilitator client created with CDP auth", flush=True)
-
     payment_server = x402ResourceServer(facilitator)
     payment_server.register(X402_NETWORK, ExactEvmServerScheme())
-    print("[x402] Server registered", flush=True)
+    payment_server.register_extension(bazaar_resource_server_extension)
 
-    # Skip initialize() - it makes a network call that can block/crash startup
-
-    # Route config using dict format (matches x402 v2 API)
     payment_routes = {
-        "POST /v1/disputes": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.05",
-                "network": X402_NETWORK,
-            },
-            "description": "Submit a dispute for policy-driven ruling (AgentCourt engine)",
-        },
-        "GET /v1/indicators/*": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.02",
-                "network": X402_NETWORK,
-            },
-            "description": "Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
-        },
-        "GET /v1/yields": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.02",
-                "network": X402_NETWORK,
-            },
-            "description": "Top DeFi yield pools by TVL",
-        },
-        "GET /v1/metadata": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.01",
-                "network": X402_NETWORK,
-            },
-            "description": "URL metadata extraction and unfurling",
-        },
+        "POST /v1/disputes": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.05",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Submit a dispute for policy-driven ruling (AgentCourt engine)",
+        ),
+        "GET /v1/indicators/*": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.02",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
+        ),
+        "GET /v1/yields": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.02",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Top DeFi yield pools by TVL",
+        ),
+        "GET /v1/metadata": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.01",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="URL metadata extraction and unfurling",
+        ),
     }
 
     app.add_middleware(
@@ -139,18 +131,20 @@ try:
         routes=payment_routes,
         server=payment_server,
     )
-    print(f"[x402] Payment middleware ENABLED — disputes ($0.05), indicators/yields ($0.02), metadata ($0.01)", flush=True)
+    print(f"[x402] Payment middleware enabled — disputes ($0.05), indicators/yields ($0.02), metadata ($0.01)", flush=True)
     X402_ENABLED = True
 except ImportError as e:
     print(f"[x402] NOT installed — running in free mode. Error: {e}", flush=True)
     X402_ENABLED = False
     X402_ERROR = f"ImportError: {e}"
+X402_ERROR = "Not initialized"
 except Exception as e:
     import traceback
     print(f"[x402] Failed to initialize — running in free mode. Error: {e}", flush=True)
     traceback.print_exc()
     X402_ENABLED = False
-    X402_ERROR = f"Exception: {type(e).__name__}: {e}"
+    X402_ERROR = f"{type(e).__name__}: {e}"
+X402_ERROR = "Not initialized"
 
 # --- MCP Remote Transport ---
 app.include_router(mcp_router)
@@ -567,7 +561,7 @@ Transport: Streamable HTTP</code></pre>
 <li>Agent pays in USDC on Base Mainnet</li>
 <li>Server verifies and returns data</li>
 </ol>
-<p class="wallet">Wallet: 0x9863aB6242663FCc84c33632741711dB78f8Fd15</p>
+<p class="wallet">Wallet: 0x1830DAdb0A16eb569B5f8526AADDF47ce85aC8e0</p>
 </section>
 
 <section>
