@@ -55,78 +55,59 @@ X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://x402.org/
 X402_ENABLED = False
 X402_ERROR = "Not initialized"
 try:
-    from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption, CreateHeadersAuthProvider
+    from x402.http import FacilitatorConfig, HTTPFacilitatorClient
     from x402.http.middleware.fastapi import PaymentMiddlewareASGI
-    from x402.http.types import RouteConfig
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
     from x402.server import x402ResourceServer
-    from x402.extensions.bazaar import bazaar_resource_server_extension
-    from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
 
-    auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
-
+    # Use default x402.org facilitator (no auth needed)
     facilitator = HTTPFacilitatorClient(
-        FacilitatorConfig(
-            url=CDP_FACILITATOR_URL,
-            auth_provider=auth_provider,
-        )
+        FacilitatorConfig(url=X402_FACILITATOR_URL)
     )
     payment_server = x402ResourceServer(facilitator)
     payment_server.register(X402_NETWORK, ExactEvmServerScheme())
     payment_server.register_extension(bazaar_resource_server_extension)
 
     payment_routes = {
-        "POST /v1/disputes": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.05",
-                    network=X402_NETWORK,
-                ),
-            ],
-            mime_type="application/json",
-            description="Submit a dispute for policy-driven ruling (AgentCourt engine)",
-        ),
-        "GET /v1/indicators/*": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.02",
-                    network=X402_NETWORK,
-                ),
-            ],
-            mime_type="application/json",
-            description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
-        ),
-        "GET /v1/yields": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.02",
-                    network=X402_NETWORK,
-                ),
-            ],
-            mime_type="application/json",
-            description="Top DeFi yield pools by TVL",
-        ),
-        "GET /v1/metadata": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.01",
-                    network=X402_NETWORK,
-                ),
-            ],
-            mime_type="application/json",
-            description="URL metadata extraction and unfurling",
-        ),
+        "POST /v1/disputes": {
+            "accepts": {
+                "scheme": "exact",
+                "payTo": X402_WALLET,
+                "price": "$0.05",
+                "network": X402_NETWORK,
+            },
+            "description": "Submit a dispute for policy-driven ruling (AgentCourt engine)",
+        },
+        "GET /v1/indicators/*": {
+            "accepts": {
+                "scheme": "exact",
+                "payTo": X402_WALLET,
+                "price": "$0.02",
+                "network": X402_NETWORK,
+            },
+            "description": "Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
+        },
+        "GET /v1/yields": {
+            "accepts": {
+                "scheme": "exact",
+                "payTo": X402_WALLET,
+                "price": "$0.02",
+                "network": X402_NETWORK,
+            },
+            "description": "Top DeFi yield pools by TVL",
+        },
+        "GET /v1/metadata": {
+            "accepts": {
+                "scheme": "exact",
+                "payTo": X402_WALLET,
+                "price": "$0.01",
+                "network": X402_NETWORK,
+            },
+            "description": "URL metadata extraction and unfurling",
+        },
     }
 
-    app.add_middleware(
+        app.add_middleware(
         PaymentMiddlewareASGI,
         routes=payment_routes,
         server=payment_server,
