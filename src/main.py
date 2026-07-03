@@ -13,7 +13,7 @@ if env_file.exists():
             key, val = line.split("=", 1)
             os.environ.setdefault(key.strip(), val.strip())
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -285,8 +285,31 @@ def _get_landing():
 
 
 @app.get("/")
-async def root():
-    """Landing page — beautiful website for humans."""
+async def root(request: Request):
+    """Route based on domain: aiservices.to = website, api.aiservices.to = API JSON."""
+    host = request.headers.get("host", "").split(":")[0].lower()
+    if host.startswith("api."):
+        return {
+            "name": "AIServices",
+            "tagline": "Paid APIs for AI agents — market data + dispute resolution",
+            "version": "2.1.0",
+            "payment": "x402 / USDC on Base",
+            "wallet": WALLET,
+            "services": {
+                "market_data": {
+                    "price": {"endpoint": "GET /v1/price/{symbol}", "price": "free", "desc": "Current crypto price"},
+                    "batch_prices": {"endpoint": "GET /v1/prices?symbols=BTC,ETH", "price": "free", "desc": "Batch crypto prices"},
+                    "indicators": {"endpoint": "GET /v1/indicators/{symbol}", "price": "$0.02", "desc": "RSI, Bollinger Bands, ATR, Support/Resistance"},
+                    "yields": {"endpoint": "GET /v1/yields", "price": "$0.02", "desc": "Top DeFi yield pools by TVL"},
+                    "fear_greed": {"endpoint": "GET /v1/fear-greed", "price": "free", "desc": "Crypto Fear & Greed Index"},
+                },
+                "dispute_resolution": {
+                    "file_dispute": {"endpoint": "POST /v1/disputes", "price": "$0.05", "desc": "Submit dispute for policy-driven ruling (AgentCourt engine)"},
+                    "policies": {"endpoint": "GET /v1/policies", "price": "free", "desc": "List dispute policy templates"},
+                },
+            },
+            "live": True,
+        }
     return HTMLResponse(content=_get_landing())
 
 
