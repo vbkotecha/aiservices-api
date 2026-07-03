@@ -61,27 +61,38 @@ try:
     print("[x402] All imports successful", flush=True)
 
     # HTTPFacilitatorClient auto-detects CDP_API_KEY_ID and CDP_API_KEY_SECRET from env
-    facilitator = HTTPFacilitatorClient()
-    print("[x402] Facilitator client created (CDP auto-detected)", flush=True)
+    # But we don't call it at startup to avoid blocking/crashing
+    cdp_key_id = os.environ.get("CDP_API_KEY_ID", "")
+    cdp_secret = os.environ.get("CDP_API_KEY_SECRET", "")
+    
+    if not cdp_key_id or not cdp_secret:
+        raise ValueError("CDP_API_KEY_ID and CDP_API_KEY_SECRET must be set for x402")
+
+    from x402.http import FacilitatorConfig, HTTPFacilitatorClient
+    from x402.http.types import AuthProvider, AuthHeaders
+
+    # Simple CDP auth: use API key in Authorization header
+    class CDPSimpleAuth(AuthProvider):
+        def get_auth_headers(self) -> AuthHeaders:
+            return AuthHeaders(
+                verify={"Authorization": f"Bearer {cdp_key_id}"},
+                settle={"Authorization": f"Bearer {cdp_key_id}"},
+                supported={"Authorization": f"Bearer {cdp_key_id}"},
+            )
+
+    facilitator = HTTPFacilitatorClient(
+        FacilitatorConfig(
+            url="https://api.cdp.coinbase.com/platform/v2/x402",
+            auth_provider=CDPSimpleAuth(),
+        )
+    )
+    print("[x402] Facilitator client created with CDP auth", flush=True)
 
     payment_server = x402ResourceServer(facilitator)
     payment_server.register(X402_NETWORK, ExactEvmServerScheme())
     print("[x402] Server registered", flush=True)
 
-    # Try bazaar extension but don't fail if it breaks
-    try:
-        from x402.extensions.bazaar import bazaar_resource_server_extension
-        payment_server.register_extension(bazaar_resource_server_extension)
-        print("[x402] Bazaar extension registered", flush=True)
-    except Exception as bazaar_err:
-        print(f"[x402] Bazaar extension skipped: {bazaar_err}", flush=True)
-
-    # Initialize server to fetch supported from facilitator
-    try:
-        payment_server.initialize()
-        print("[x402] Server initialized successfully", flush=True)
-    except Exception as init_err:
-        print(f"[x402] Server initialize() warning (non-fatal): {init_err}", flush=True)
+    # Skip initialize() - it makes a network call that can block/crash startup
 
     # Route config using dict format (matches x402 v2 API)
     payment_routes = {
