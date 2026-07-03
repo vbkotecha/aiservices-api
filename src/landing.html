@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A1A2E'/%3E%3Ctext x='50' y='68' font-family='Georgia,serif' font-size='52' font-weight='600' fill='%23C9A961' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
 <style>
 :root {
   --bg: #FAF8F5;
@@ -296,81 +297,64 @@ nav.scrolled {
   border-color: var(--gold);
 }
 
-/* ===== LIVE STATS BAR ===== */
-.stats-bar {
-  max-width: 1000px;
-  margin: 60px auto 0;
+/* ===== LIVE TICKER ===== */
+.ticker-bar {
+  max-width: 800px;
+  margin: 56px auto 0;
   padding: 0 32px;
   animation: fadeInUp 0.8s ease 0.5s both;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+.ticker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 48px;
+  flex-wrap: wrap;
 }
 
-.stat-card {
-  background: var(--card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 28px 24px;
-  text-align: center;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s;
+.ticker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow);
-  border-color: var(--border-strong);
-}
-
-.stat-icon {
-  width: 44px; height: 44px;
-  margin: 0 auto 12px;
+.ticker-top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  font-size: 1.3rem;
+  gap: 8px;
 }
 
-.stat-icon.gold { background: linear-gradient(135deg, rgba(201,169,97,0.12), rgba(201,169,97,0.04)); }
-.stat-icon.purple { background: linear-gradient(135deg, rgba(107,70,193,0.1), rgba(107,70,193,0.03)); }
-.stat-icon.blue { background: linear-gradient(135deg, rgba(37,99,235,0.1), rgba(37,99,235,0.03)); }
-.stat-icon.green { background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.03)); }
+.ticker-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
 
-.stat-value {
+.ticker-dot.gold { background: var(--gold); box-shadow: 0 0 8px rgba(201,169,97,0.4); }
+.ticker-dot.purple { background: var(--royal-light); box-shadow: 0 0 8px rgba(139,92,246,0.4); }
+.ticker-dot.blue { background: var(--blue-light); box-shadow: 0 0 8px rgba(96,165,250,0.4); }
+
+.ticker-label {
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+
+.ticker-value {
   font-family: var(--serif);
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--ink);
   line-height: 1.2;
 }
 
-.stat-value .unit {
-  font-size: 0.9rem;
-  color: var(--text-light);
-  font-family: var(--sans);
-  font-weight: 400;
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  color: var(--text-faint);
-  margin-top: 6px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
+.ticker-sub {
+  font-size: 0.78rem;
   font-weight: 500;
-}
-
-.stat-sub {
-  font-size: 0.85rem;
   color: var(--text-light);
-  margin-top: 4px;
 }
 
 /* ===== SECTION COMMONS ===== */
@@ -1039,32 +1023,32 @@ footer {
     </div>
   </div>
 
-  <!-- Live Stats -->
-  <div class="stats-bar">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon gold">₿</div>
-        <div class="stat-value" id="btc-price">—</div>
-        <div class="stat-label">BTC / USD</div>
-        <div class="stat-sub" id="btc-change">—</div>
+  <!-- Live Ticker -->
+  <div class="ticker-bar">
+    <div class="ticker">
+      <div class="ticker-item">
+        <div class="ticker-top">
+          <span class="ticker-dot gold"></span>
+          <span class="ticker-label">BTC</span>
+        </div>
+        <div class="ticker-value" id="btc-price">—</div>
+        <div class="ticker-sub" id="btc-change">—</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon purple">Σ</div>
-        <div class="stat-value" id="fear-greed">—</div>
-        <div class="stat-label">Fear & Greed</div>
-        <div class="stat-sub" id="fear-greed-label">—</div>
+      <div class="ticker-item">
+        <div class="ticker-top">
+          <span class="ticker-dot purple"></span>
+          <span class="ticker-label">Fear & Greed</span>
+        </div>
+        <div class="ticker-value" id="fear-greed">—</div>
+        <div class="ticker-sub" id="fear-greed-label">—</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon blue">⚡</div>
-        <div class="stat-value">8</div>
-        <div class="stat-label">API Endpoints</div>
-        <div class="stat-sub">4 free · 4 paid</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon green">✦</div>
-        <div class="stat-value">$0.01</div>
-        <div class="stat-label">Starting Price</div>
-        <div class="stat-sub">Per API call</div>
+      <div class="ticker-item">
+        <div class="ticker-top">
+          <span class="ticker-dot blue"></span>
+          <span class="ticker-label">Starting at</span>
+        </div>
+        <div class="ticker-value">$0.01</div>
+        <div class="ticker-sub">Per API call</div>
       </div>
     </div>
   </div>
