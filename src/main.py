@@ -354,18 +354,6 @@ async def global_market():
     return get_global_market()
 
 
-@app.get("/debug/marketing")
-async def debug_marketing():
-    """Debug marketing module env vars."""
-    import marketing_data
-    return {
-        "module_openai_key_set": bool(marketing_data.OPENAI_API_KEY),
-        "module_openai_key_len": len(marketing_data.OPENAI_API_KEY),
-        "env_openai_key_set": bool(os.environ.get("OPENAI_API_KEY", "")),
-        "env_openai_key_len": len(os.environ.get("OPENAI_API_KEY", "")),
-    }
-
-
 # --- Marketing Intelligence (AI-Powered) ---
 
 @app.post("/v1/marketing/sentiment", tags=["Marketing Intelligence"],
@@ -403,19 +391,6 @@ async def marketing_ad_copy(req: AdCopyRequest):
     """AI ad copy generation (FREE during beta)"""
     return generate_ad_copy(req.product, req.platform, req.tone, req.count)
 
-
-
-@app.get("/debug/env")
-async def debug_env():
-    """Temporary debug endpoint to check env vars."""
-    import os as _os
-    return {
-        "OPENAI_API_KEY": "SET" if _os.environ.get("OPENAI_API_KEY") else "NOT SET",
-        "OPENAI_API_KEY_LEN": len(_os.environ.get("OPENAI_API_KEY", "")),
-        "TEST_VAR": _os.environ.get("TEST_VAR", "NOT SET"),
-        "WALLET_ADDRESS": _os.environ.get("WALLET_ADDRESS", "NOT SET"),
-        "all_keys": sorted([k for k in _os.environ.keys() if not k.startswith("_") and k.isupper()]),
-    }
 
 
 # --- Health & Discovery ---
