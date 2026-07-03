@@ -49,8 +49,8 @@ app.add_middleware(
 
 # --- x402 Payment Protocol (Base Mainnet) ---
 X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
-X402_NETWORK = "eip155:8453"
-X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
+X402_NETWORK = "eip155:84532"  # Base Sepolia testnet (default facilitator supports this)
+X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://x402.org/facilitator")
 
 X402_ENABLED = False
 X402_ERROR = "Not initialized"
