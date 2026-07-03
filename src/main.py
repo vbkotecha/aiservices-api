@@ -140,6 +140,48 @@ except Exception as e:
     X402_ERROR = f"{type(e).__name__}: {e}"
 X402_ERROR = "Not initialized"
 
+
+@app.get("/x402-debug")
+async def x402_debug():
+    """Debug endpoint for x402 configuration."""
+    if not X402_ENABLED:
+        return {"enabled": False, "error": X402_ERROR}
+    
+    import sys
+    # Check x402 version
+    try:
+        import x402
+        version = getattr(x402, '__version__', 'unknown')
+    except:
+        version = 'import failed'
+    
+    # Check facilitator connectivity
+    import requests as req
+    try:
+        r = req.get(f"{X402_FACILITATOR_URL}/supported", timeout=5)
+        facilitator_status = r.status_code
+        facilitator_data = r.json() if r.status_code == 200 else None
+    except Exception as e:
+        facilitator_status = f"error: {e}"
+        facilitator_data = None
+    
+    # Check supported networks
+    networks = []
+    if facilitator_data and 'kinds' in facilitator_data:
+        networks = [k.get('network','') for k in facilitator_data['kinds']]
+    
+    return {
+        "enabled": True,
+        "x402_version": version,
+        "network": X402_NETWORK,
+        "wallet": X402_WALLET,
+        "facilitator_url": X402_FACILITATOR_URL,
+        "facilitator_status": facilitator_status,
+        "facilitator_supports_our_network": X402_NETWORK in networks,
+        "facilitator_networks": networks,
+        "python_path": sys.path[:3],
+    }
+
 # --- MCP Remote Transport ---
 app.include_router(mcp_router)
 print(f"[mcp] Remote MCP endpoint mounted at /mcp — 8 tools available", flush=True)
