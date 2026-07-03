@@ -47,60 +47,83 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- x402 Payment Protocol (Base Sepolia Testnet) ---
+# --- x402 Payment Protocol (Base Mainnet) ---
 X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
-X402_NETWORK = "eip155:84532"  # Base Sepolia (supported by x402.org default facilitator)
+X402_NETWORK = "eip155:8453"
+X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
 
 X402_ENABLED = False
 X402_ERROR = "Not initialized"
 try:
-    from x402.http import HTTPFacilitatorClient
+    from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption, CreateHeadersAuthProvider
     from x402.http.middleware.fastapi import PaymentMiddlewareASGI
+    from x402.http.types import RouteConfig
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
     from x402.server import x402ResourceServer
+    from x402.extensions.bazaar import bazaar_resource_server_extension
+    from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
 
-    # Use x402.org default facilitator (no auth needed)
-    facilitator = HTTPFacilitatorClient()
+    auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
+
+    facilitator = HTTPFacilitatorClient(
+        FacilitatorConfig(
+            url=CDP_FACILITATOR_URL,
+            auth_provider=auth_provider,
+        )
+    )
     payment_server = x402ResourceServer(facilitator)
-    payment_server.register("eip155:*", ExactEvmServerScheme())
+    payment_server.register(X402_NETWORK, ExactEvmServerScheme())
+    payment_server.register_extension(bazaar_resource_server_extension)
 
     payment_routes = {
-        "POST /v1/disputes": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.05",
-                "network": X402_NETWORK,
-            },
-            "description": "Submit a dispute for policy-driven ruling",
-        },
-        "GET /v1/indicators/*": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.02",
-                "network": X402_NETWORK,
-            },
-            "description": "Technical indicators: RSI, Bollinger Bands, ATR",
-        },
-        "GET /v1/yields": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.02",
-                "network": X402_NETWORK,
-            },
-            "description": "Top DeFi yield pools by TVL",
-        },
-        "GET /v1/metadata": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.01",
-                "network": X402_NETWORK,
-            },
-            "description": "URL metadata extraction",
-        },
+        "POST /v1/disputes": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.05",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Submit a dispute for policy-driven ruling (AgentCourt engine)",
+        ),
+        "GET /v1/indicators/*": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.02",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
+        ),
+        "GET /v1/yields": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.02",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Top DeFi yield pools by TVL",
+        ),
+        "GET /v1/metadata": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.01",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="URL metadata extraction and unfurling",
+        ),
     }
 
     app.add_middleware(
@@ -108,7 +131,7 @@ try:
         routes=payment_routes,
         server=payment_server,
     )
-    print(f"[x402] Payment middleware enabled (Base Sepolia testnet)", flush=True)
+    print(f"[x402] Payment middleware enabled — disputes ($0.05), indicators/yields ($0.02), metadata ($0.01)", flush=True)
     X402_ENABLED = True
     X402_ERROR = None
 except ImportError as e:
@@ -282,8 +305,8 @@ async def x402_manifest():
         "version": "1.0",
         "name": "AIServices",
         "description": "Paid data APIs for AI agents — crypto prices, indicators, DeFi yields, geolocation, URL metadata",
-        "network": "base-sepolia-testnet",
-        "chain_id": "eip155:84532",
+        "network": "base-mainnet",
+        "chain_id": "eip155:8453",
         "currency": "USDC",
         "endpoints": [
             {"path": "/v1/price/{symbol}", "method": "GET", "price": "$0.00", "description": "Current crypto price (FREE)"},
