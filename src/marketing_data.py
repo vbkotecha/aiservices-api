@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 # --- OpenAI Helper ---
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+print(f"[marketing] OPENAI_API_KEY present: {bool(OPENAI_API_KEY)}, len={len(OPENAI_API_KEY)}", flush=True)
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 
 
