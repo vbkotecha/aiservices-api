@@ -26,6 +26,7 @@ from crypto_data import get_price, get_multi_price, get_indicators, get_fear_gre
 from geo_data import get_ip_geo
 from web_data import get_url_metadata
 from engine.policy_engine import evaluate_dispute, list_policies
+from mcp_endpoint import router as mcp_router
 
 WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
 
@@ -140,6 +141,9 @@ except Exception as e:
     traceback.print_exc()
     X402_ENABLED = False
 
+# --- MCP Remote Transport ---
+app.include_router(mcp_router)
+print(f"[mcp] Remote MCP endpoint mounted at /mcp — 8 tools available", flush=True)
 
 
 # --- Market Data ---
