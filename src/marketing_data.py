@@ -20,7 +20,7 @@ OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 def _ai_analyze(prompt: str, system: str = "You are a marketing intelligence analyst. Return ONLY raw JSON. No markdown, no code blocks, no explanations.") -> str:
     """Call OpenAI for analysis."""
     if not OPENAI_API_KEY:
-        return _heuristic_response(prompt, str(e))
+        return _heuristic_response(prompt, "OPENAI_API_KEY not set")
 
     try:
         body = json.dumps({
@@ -54,8 +54,8 @@ def _ai_analyze(prompt: str, system: str = "You are a marketing intelligence ana
                     lines = lines[:-1]
                 content = "\n".join(lines).strip()
             return content
-    except Exception:
-        return _heuristic_response(prompt, str(e))
+    except Exception as exc:
+        return _heuristic_response(prompt, str(exc))
 
 
 def _heuristic_response(prompt: str, error: str = "") -> str:
