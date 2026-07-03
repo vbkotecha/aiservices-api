@@ -32,7 +32,7 @@ from news_data import get_crypto_news, get_social_trending, get_global_market
 from engine.policy_engine import evaluate_dispute, list_policies
 from mcp_endpoint import router as mcp_router
 
-WALLET = os.environ.get("WALLET_ADDRESS", "0x1830DAdb0A16eb569B5f8526AADDF47ce85aC8e0")
+WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
 
 app = FastAPI(
     title="AIServices",
@@ -492,12 +492,18 @@ async def x402_manifest():
             {"path": "/v1/predictions", "method": "GET", "price": "$0.00", "description": "Active prediction markets (FREE)"},
             {"path": "/v1/news", "method": "GET", "price": "$0.00", "description": "Latest crypto news (FREE)"},
             {"path": "/v1/social", "method": "GET", "price": "$0.00", "description": "Trending coins, categories, NFTs (FREE)"},
+            {"path": "/v1/disputes", "method": "POST", "price": "$0.05", "description": "Policy-driven dispute resolution (7 policies: freelance, milestone, SLA, API quality, bug bounty, scope, commerce)"},
+            {"path": "/v1/policies", "method": "GET", "price": "$0.00", "description": "List dispute resolution policy templates (FREE)"},
+            {"path": "/mcp", "method": "POST", "price": "$0.00", "description": "MCP server with 8 tools for AI agent integration (FREE)"},
         ],
-        "categories": ["Data", "Market Data", "Geolocation", "DEX", "Prediction Markets", "Search", "News"],
+        "categories": ["Data", "Market Data", "Geolocation", "DEX", "Prediction Markets", "Search", "News", "Governance", "Dispute Resolution", "MCP"],
         "payTo": WALLET,
         "contact": "https://github.com/vbkotecha",
         "website": "https://api.aiservices.to",
+        "repository": "https://github.com/vbkotecha/aiservices-api",
+        "homepage": "https://api.aiservices.to",
         "license": "MIT",
+        "spec": "x402-service-manifest/1",
     }
 
 
