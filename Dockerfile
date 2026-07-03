@@ -2,15 +2,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install build dependencies for crypto/eth libraries
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ libffi-dev libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN python -c "import x402; print(f'x402 version: {x402.__version__}')" || echo "x402 import check failed"
-RUN python -c "from x402.http import HTTPFacilitatorClient; from x402.http.middleware.fastapi import PaymentMiddlewareASGI; print('x402 middleware OK')" || echo "x402 middleware check failed"
 
 COPY src/ ./src/
 
