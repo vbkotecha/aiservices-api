@@ -1022,36 +1022,6 @@ footer {
       </a>
     </div>
   </div>
-
-  <!-- Live Ticker -->
-  <div class="ticker-bar">
-    <div class="ticker">
-      <div class="ticker-item">
-        <div class="ticker-top">
-          <span class="ticker-dot gold"></span>
-          <span class="ticker-label">BTC</span>
-        </div>
-        <div class="ticker-value" id="btc-price">—</div>
-        <div class="ticker-sub" id="btc-change">—</div>
-      </div>
-      <div class="ticker-item">
-        <div class="ticker-top">
-          <span class="ticker-dot purple"></span>
-          <span class="ticker-label">Fear & Greed</span>
-        </div>
-        <div class="ticker-value" id="fear-greed">—</div>
-        <div class="ticker-sub" id="fear-greed-label">—</div>
-      </div>
-      <div class="ticker-item">
-        <div class="ticker-top">
-          <span class="ticker-dot blue"></span>
-          <span class="ticker-label">Starting at</span>
-        </div>
-        <div class="ticker-value">$0.01</div>
-        <div class="ticker-sub">Per API call</div>
-      </div>
-    </div>
-  </div>
 </section>
 
 <!-- ===== FEATURES ===== -->
@@ -1426,51 +1396,6 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
 
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-// ===== LIVE DATA FETCHING =====
-async function fetchLiveData() {
-  try {
-    // Fetch BTC price
-    const btcRes = await fetch('/v1/price/BTC');
-    const btcData = await btcRes.json();
-    const btcEl = document.getElementById('btc-price');
-    const changeEl = document.getElementById('btc-change');
-    if (btcData.price_usd) {
-      btcEl.innerHTML = '$' + btcData.price_usd.toLocaleString('en-US', {maximumFractionDigits: 0});
-      const change = btcData.change_24h_pct;
-      const sign = change >= 0 ? '+' : '';
-      changeEl.textContent = sign + change.toFixed(2) + '% (24h)';
-      changeEl.style.color = change >= 0 ? '#15803d' : '#dc2626';
-    }
-  } catch(e) {
-    document.getElementById('btc-price').textContent = 'Live';
-  }
-
-  try {
-    // Fetch Fear & Greed
-    const fgRes = await fetch('/v1/fear-greed');
-    const fgData = await fgRes.json();
-    const fgEl = document.getElementById('fear-greed');
-    const fgLabel = document.getElementById('fear-greed-label');
-    if (fgData.index !== undefined) {
-      fgEl.textContent = fgData.index;
-      fgLabel.textContent = fgData.label;
-      const colors = {
-        'Extreme Fear': '#dc2626',
-        'Fear': '#f97316',
-        'Neutral': '#6b7280',
-        'Greed': '#16a34a',
-        'Extreme Greed': '#15803d'
-      };
-      fgLabel.style.color = colors[fgData.label] || '#6b7280';
-    }
-  } catch(e) {
-    document.getElementById('fear-greed').textContent = '—';
-  }
-}
-
-fetchLiveData();
-setInterval(fetchLiveData, 30000); // Refresh every 30s
 
 // ===== CODE TABS =====
 const tabs = document.querySelectorAll('.code-tab');
