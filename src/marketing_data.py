@@ -43,8 +43,7 @@ def _ai_analyze(prompt: str, system: str = "You are a marketing intelligence ana
         )
 
         with urllib.request.urlopen(req, timeout=30) as resp:
-            resp.raise_for_status()
-            content = resp.json()["choices"][0]["message"]["content"]
+            content = json.loads(resp.read())["choices"][0]["message"]["content"]
             # Strip markdown code blocks
             content = content.strip()
             if content.startswith("```"):
