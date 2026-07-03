@@ -49,11 +49,10 @@ app.add_middleware(
 
 # --- x402 Payment Protocol (Base Mainnet) ---
 X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
-X402_NETWORK = "eip155:84532"
-X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://x402.org/facilitator")
+X402_NETWORK = "eip155:8453"
+X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
 
 X402_ENABLED = False
-X402_ERROR = "Not initialized"
 try:
     from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption, CreateHeadersAuthProvider
     from x402.http.middleware.fastapi import PaymentMiddlewareASGI
@@ -61,15 +60,19 @@ try:
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
     from x402.server import x402ResourceServer
     from x402.extensions.bazaar import bazaar_resource_server_extension
-    # x402.org default facilitator (no auth needed)
+    from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
+
+    auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
+
     facilitator = HTTPFacilitatorClient(
         FacilitatorConfig(
-            url=X402_FACILITATOR_URL,
+            url=CDP_FACILITATOR_URL,
+            auth_provider=auth_provider,
         )
     )
     payment_server = x402ResourceServer(facilitator)
     payment_server.register(X402_NETWORK, ExactEvmServerScheme())
-    # Bazaar extension skipped (requires separate import)
+    payment_server.register_extension(bazaar_resource_server_extension)
 
     payment_routes = {
         "POST /v1/disputes": RouteConfig(
@@ -132,15 +135,11 @@ try:
 except ImportError as e:
     print(f"[x402] NOT installed — running in free mode. Error: {e}", flush=True)
     X402_ENABLED = False
-    X402_ERROR = f"ImportError: {e}"
-X402_ERROR = "Not initialized"
 except Exception as e:
     import traceback
     print(f"[x402] Failed to initialize — running in free mode. Error: {e}", flush=True)
     traceback.print_exc()
     X402_ENABLED = False
-    X402_ERROR = f"{type(e).__name__}: {e}"
-X402_ERROR = "Not initialized"
 
 # --- MCP Remote Transport ---
 app.include_router(mcp_router)
@@ -290,7 +289,6 @@ async def health():
         "status": "ok",
         "version": "2.0.0",
         "x402_enabled": X402_ENABLED,
-        "x402_error": X402_ERROR,
         "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "disputes", "policies"],
     }
 
