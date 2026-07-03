@@ -50,32 +50,22 @@ app.add_middleware(
 # --- x402 Payment Protocol (Base Mainnet) ---
 X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
 X402_NETWORK = "eip155:8453"
-X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
 
 X402_ENABLED = False
 try:
-    from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption, CreateHeadersAuthProvider
+    from x402 import x402ResourceServer
+    from x402.http import HTTPFacilitatorClient
     from x402.http.middleware.fastapi import PaymentMiddlewareASGI
-    from x402.http.types import RouteConfig
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
-    from x402.server import x402ResourceServer
-    from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
     print("[x402] All imports successful", flush=True)
 
-    auth_provider = CreateHeadersAuthProvider(create_cdp_auth_headers)
-    print("[x402] Auth provider created", flush=True)
-
-    facilitator = HTTPFacilitatorClient(
-        FacilitatorConfig(
-            url=CDP_FACILITATOR_URL,
-            auth_provider=auth_provider,
-        )
-    )
-    print("[x402] Facilitator client created", flush=True)
+    # HTTPFacilitatorClient auto-detects CDP_API_KEY_ID and CDP_API_KEY_SECRET from env
+    facilitator = HTTPFacilitatorClient()
+    print("[x402] Facilitator client created (CDP auto-detected)", flush=True)
 
     payment_server = x402ResourceServer(facilitator)
     payment_server.register(X402_NETWORK, ExactEvmServerScheme())
-    print("[x402] Server registered with network", flush=True)
+    print("[x402] Server registered", flush=True)
 
     # Try bazaar extension but don't fail if it breaks
     try:
@@ -85,62 +75,51 @@ try:
     except Exception as bazaar_err:
         print(f"[x402] Bazaar extension skipped: {bazaar_err}", flush=True)
 
-    # Initialize the server to fetch supported schemes from facilitator
+    # Initialize server to fetch supported from facilitator
     try:
         payment_server.initialize()
-        print("[x402] Server initialized", flush=True)
+        print("[x402] Server initialized successfully", flush=True)
     except Exception as init_err:
-        print(f"[x402] Server initialize() warning: {init_err}", flush=True)
+        print(f"[x402] Server initialize() warning (non-fatal): {init_err}", flush=True)
 
+    # Route config using dict format (matches x402 v2 API)
     payment_routes = {
-        "POST /v1/disputes": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.05",
-                    network=X402_NETWORK,
-                ),
-            ],
-            mime_type="application/json",
-            description="Submit a dispute for policy-driven ruling (AgentCourt engine)",
-        ),
-        "GET /v1/indicators/*": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.02",
-                    network=X402_NETWORK,
-                ),
-            ],
-            mime_type="application/json",
-            description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
-        ),
-        "GET /v1/yields": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.02",
-                    network=X402_NETWORK,
-                ),
-            ],
-            mime_type="application/json",
-            description="Top DeFi yield pools by TVL",
-        ),
-        "GET /v1/metadata": RouteConfig(
-            accepts=[
-                PaymentOption(
-                    scheme="exact",
-                    pay_to=X402_WALLET,
-                    price="$0.01",
-                    network=X402_NETWORK,
-                ),
-            ],
-            mime_type="application/json",
-            description="URL metadata extraction and unfurling",
-        ),
+        "POST /v1/disputes": {
+            "accepts": {
+                "scheme": "exact",
+                "payTo": X402_WALLET,
+                "price": "$0.05",
+                "network": X402_NETWORK,
+            },
+            "description": "Submit a dispute for policy-driven ruling (AgentCourt engine)",
+        },
+        "GET /v1/indicators/*": {
+            "accepts": {
+                "scheme": "exact",
+                "payTo": X402_WALLET,
+                "price": "$0.02",
+                "network": X402_NETWORK,
+            },
+            "description": "Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
+        },
+        "GET /v1/yields": {
+            "accepts": {
+                "scheme": "exact",
+                "payTo": X402_WALLET,
+                "price": "$0.02",
+                "network": X402_NETWORK,
+            },
+            "description": "Top DeFi yield pools by TVL",
+        },
+        "GET /v1/metadata": {
+            "accepts": {
+                "scheme": "exact",
+                "payTo": X402_WALLET,
+                "price": "$0.01",
+                "network": X402_NETWORK,
+            },
+            "description": "URL metadata extraction and unfurling",
+        },
     }
 
     app.add_middleware(
@@ -148,7 +127,7 @@ try:
         routes=payment_routes,
         server=payment_server,
     )
-    print(f"[x402] Payment middleware enabled — disputes ($0.05), indicators/yields ($0.02), metadata ($0.01)", flush=True)
+    print(f"[x402] Payment middleware ENABLED — disputes ($0.05), indicators/yields ($0.02), metadata ($0.01)", flush=True)
     X402_ENABLED = True
 except ImportError as e:
     print(f"[x402] NOT installed — running in free mode. Error: {e}", flush=True)
