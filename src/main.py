@@ -49,69 +49,80 @@ app.add_middleware(
 
 # --- x402 Payment Protocol (Base Mainnet) ---
 X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
-X402_NETWORK = "eip155:84532"  # Base Sepolia testnet (default facilitator supports this)
+X402_NETWORK = "eip155:84532"
 X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://x402.org/facilitator")
 
 X402_ENABLED = False
 X402_ERROR = "Not initialized"
 try:
-    from x402.http import HTTPFacilitatorClient
+    from x402.http import FacilitatorConfig, HTTPFacilitatorClient, PaymentOption, CreateHeadersAuthProvider
     from x402.http.middleware.fastapi import PaymentMiddlewareASGI
+    from x402.http.types import RouteConfig
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
     from x402.server import x402ResourceServer
-
-    # Use default facilitator (x402.org) - matches official example
-    facilitator = HTTPFacilitatorClient()
+    from x402.extensions.bazaar import bazaar_resource_server_extension
+    # x402.org default facilitator (no auth needed)
+    facilitator = HTTPFacilitatorClient(
+        FacilitatorConfig(
+            url=X402_FACILITATOR_URL,
+        )
+    )
     payment_server = x402ResourceServer(facilitator)
-    payment_server.register("eip155:*", ExactEvmServerScheme())
-
-    # Initialize server (fetches supported schemes from facilitator)
-    try:
-        payment_server.initialize()
-        print("[x402] Server initialized", flush=True)
-    except Exception as init_err:
-        print(f"[x402] Initialize warning: {init_err}", flush=True)
+    payment_server.register(X402_NETWORK, ExactEvmServerScheme())
+    # Bazaar extension skipped (requires separate import)
 
     payment_routes = {
-        "POST /v1/disputes": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.05",
-                "network": X402_NETWORK,
-            },
-            "description": "Submit a dispute for policy-driven ruling (AgentCourt engine)",
-        },
-        "GET /v1/indicators/*": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.02",
-                "network": X402_NETWORK,
-            },
-            "description": "Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
-        },
-        "GET /v1/yields": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.02",
-                "network": X402_NETWORK,
-            },
-            "description": "Top DeFi yield pools by TVL",
-        },
-        "GET /v1/metadata": {
-            "accepts": {
-                "scheme": "exact",
-                "payTo": X402_WALLET,
-                "price": "$0.01",
-                "network": X402_NETWORK,
-            },
-            "description": "URL metadata extraction and unfurling",
-        },
+        "POST /v1/disputes": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.05",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Submit a dispute for policy-driven ruling (AgentCourt engine)",
+        ),
+        "GET /v1/indicators/*": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.02",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance",
+        ),
+        "GET /v1/yields": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.02",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="Top DeFi yield pools by TVL",
+        ),
+        "GET /v1/metadata": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_WALLET,
+                    price="$0.01",
+                    network=X402_NETWORK,
+                ),
+            ],
+            mime_type="application/json",
+            description="URL metadata extraction and unfurling",
+        ),
     }
 
-        app.add_middleware(
+    app.add_middleware(
         PaymentMiddlewareASGI,
         routes=payment_routes,
         server=payment_server,
@@ -130,48 +141,6 @@ except Exception as e:
     X402_ENABLED = False
     X402_ERROR = f"{type(e).__name__}: {e}"
 X402_ERROR = "Not initialized"
-
-
-@app.get("/x402-debug")
-async def x402_debug():
-    """Debug endpoint for x402 configuration."""
-    if not X402_ENABLED:
-        return {"enabled": False, "error": X402_ERROR}
-    
-    import sys
-    # Check x402 version
-    try:
-        import x402
-        version = getattr(x402, '__version__', 'unknown')
-    except:
-        version = 'import failed'
-    
-    # Check facilitator connectivity
-    import requests as req
-    try:
-        r = req.get(f"{X402_FACILITATOR_URL}/supported", timeout=5)
-        facilitator_status = r.status_code
-        facilitator_data = r.json() if r.status_code == 200 else None
-    except Exception as e:
-        facilitator_status = f"error: {e}"
-        facilitator_data = None
-    
-    # Check supported networks
-    networks = []
-    if facilitator_data and 'kinds' in facilitator_data:
-        networks = [k.get('network','') for k in facilitator_data['kinds']]
-    
-    return {
-        "enabled": True,
-        "x402_version": version,
-        "network": X402_NETWORK,
-        "wallet": X402_WALLET,
-        "facilitator_url": X402_FACILITATOR_URL,
-        "facilitator_status": facilitator_status,
-        "facilitator_supports_our_network": X402_NETWORK in networks,
-        "facilitator_networks": networks,
-        "python_path": sys.path[:3],
-    }
 
 # --- MCP Remote Transport ---
 app.include_router(mcp_router)
