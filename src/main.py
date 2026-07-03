@@ -262,8 +262,27 @@ async def get_policies():
 
 # --- Health & Discovery ---
 
+_landing_html = None
+def _get_landing():
+    global _landing_html
+    if _landing_html is None:
+        landing_path = Path(__file__).parent / "landing.html"
+        if landing_path.exists():
+            _landing_html = landing_path.read_text()
+        else:
+            _landing_html = "<h1>AIServices</h1>"
+    return _landing_html
+
+
 @app.get("/")
 async def root():
+    """Landing page — beautiful website for humans."""
+    return HTMLResponse(content=_get_landing())
+
+
+@app.get("/api")
+async def api_discovery():
+    """API discovery JSON for agents and crawlers."""
     return {
         "name": "AIServices",
         "tagline": "Paid APIs for AI agents — market data + dispute resolution",
