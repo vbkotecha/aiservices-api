@@ -263,7 +263,7 @@ async def root():
     return {
         "name": "AIServices",
         "tagline": "Paid APIs for AI agents — market data + dispute resolution",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "payment": "x402 / USDC on Base",
         "wallet": WALLET,
         "services": {
@@ -287,7 +287,7 @@ async def root():
 async def health():
     return {
         "status": "ok",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "x402_enabled": X402_ENABLED,
         "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "disputes", "policies"],
     }
