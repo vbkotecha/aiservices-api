@@ -424,7 +424,7 @@ _landing_html = None
 def _get_landing():
     global _landing_html
     if _landing_html is None:
-        landing_path = Path(__file__).parent / "landing.html"  # TODO: Update to AgentServices branding
+        landing_path = Path(__file__).parent / "landing.html"
         if landing_path.exists():
             _landing_html = landing_path.read_text()
         else:
@@ -440,7 +440,7 @@ async def root(request: Request):
         return {
             "name": "AgentServices",
             "tagline": "Paid APIs for AI agents — market data, marketing intelligence + dispute resolution",
-            "version": "3.0.0",
+            "version": "4.0.0",
             "payment": "x402 / USDC on Base",
             "wallet": WALLET,
             "services": {

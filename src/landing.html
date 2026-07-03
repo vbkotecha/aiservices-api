@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIServices — Premium APIs for the Machine Economy</title>
-<meta name="description" content="Paid data APIs for AI agents. Crypto market data, DeFi yields, IP geolocation, dispute resolution. Powered by x402 micropayments on Base.">
+<title>AgentServices — Premium APIs for AI Agents</title>
+<meta name="description" content="Paid data APIs for AI agents. Crypto market data, DeFi yields, IP geolocation, dispute resolution, marketing intelligence. Powered by x402 micropayments on Base.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A1A2E'/%3E%3Ctext x='50' y='68' font-family='Georgia,serif' font-size='52' font-weight='600' fill='%23C9A961' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231A1A2E'/%3E%3Ctext x='50' y='68' font-family='Georgia,serif' font-size='52' font-weight='600' fill='%23C9A961' text-anchor='middle' font-size='34'%3EAS%3C/text%3E%3C/svg%3E">
 <style>
 :root {
   --bg: #FAF8F5;
@@ -984,14 +984,14 @@ footer {
   <div class="nav-inner">
     <a href="#" class="nav-logo">
       <span class="nav-logo-mark">A</span>
-      AIServices
+      AgentServices
     </a>
     <div class="nav-links">
       <a href="#features">Features</a>
       <a href="#endpoints">Endpoints</a>
       <a href="#payments">Payments</a>
       <a href="#mcp">MCP</a>
-      <a href="https://api.aiservices.to/docs" target="_blank">Docs</a>
+      <a href="https://api.agentservices.to/docs" target="_blank">Docs</a>
       <a href="https://github.com/vbkotecha/aiservices-api" target="_blank" class="nav-cta">GitHub</a>
     </div>
   </div>
@@ -1009,7 +1009,7 @@ footer {
       for the <span class="gradient-word">Machine Economy</span>
     </h1>
     <p class="hero-tagline">
-      Real-time crypto market data, DeFi intelligence, geolocation, and agent-to-agent dispute resolution.
+      Real-time crypto market data, DeFi intelligence, geolocation, and agent-to-agent dispute resolution, marketing intelligence.
       No API keys. No subscriptions. Pay per request with USDC on Base.
     </p>
     <div class="hero-actions">
@@ -1029,7 +1029,7 @@ footer {
   <div class="section-header reveal">
     <div class="section-eyebrow">Capabilities</div>
     <h2 class="section-title">Everything Your Agent Needs<br>to Navigate the <em>Onchain World</em></h2>
-    <p class="section-subtitle">From real-time prices to DeFi yields to agent-to-agent dispute resolution — all accessible via clean REST APIs with instant micropayments.</p>
+    <p class="section-subtitle">From real-time prices to DeFi yields to agent-to-agent dispute resolution, marketing intelligence — all accessible via clean REST APIs with instant micropayments.</p>
   </div>
 
   <div class="features-grid">
@@ -1198,44 +1198,44 @@ footer {
         </div>
         <div class="code-body">
           <pre id="code-curl"><span class="com"># Free: Get live BTC price</span>
-<span class="fn">curl</span> https://api.aiservices.to/v1/price/BTC
+<span class="fn">curl</span> https://api.agentservices.to/v1/price/BTC
 
 <span class="com"># Free: Batch prices</span>
-<span class="fn">curl</span> <span class="str">"https://api.aiservices.to/v1/prices?symbols=BTC,ETH,SOL"</span>
+<span class="fn">curl</span> <span class="str">"https://api.agentservices.to/v1/prices?symbols=BTC,ETH,SOL"</span>
 
 <span class="com"># Free: Fear & Greed Index</span>
-<span class="fn">curl</span> https://api.aiservices.to/v1/fear-greed
+<span class="fn">curl</span> https://api.agentservices.to/v1/fear-greed
 
 <span class="com"># Paid: Technical indicators (x402 payment)</span>
-<span class="fn">curl</span> https://api.aiservices.to/v1/indicators/BTC</pre>
+<span class="fn">curl</span> https://api.agentservices.to/v1/indicators/BTC</pre>
 
           <pre id="code-python" style="display:none"><span class="com"># Free: Get live BTC price</span>
 <span class="kw">import</span> requests
 
-response = requests.get(<span class="str">"https://api.aiservices.to/v1/price/BTC"</span>)
+response = requests.get(<span class="str">"https://api.agentservices.to/v1/price/BTC"</span>)
 data = response.json()
 <span class="fn">print</span>(<span class="str">f"BTC: $</span>{data[<span class="str">'price_usd'</span>]:,.0f}<span class="str">"</span>)
 
 <span class="com"># Batch prices</span>
 response = requests.get(
-    <span class="str">"https://api.aiservices.to/v1/prices"</span>,
+    <span class="str">"https://api.agentservices.to/v1/prices"</span>,
     params={<span class="str">"symbols"</span>: <span class="str">"BTC,ETH,SOL,XRP"</span>}
 )
 <span class="kw">for</span> coin <span class="kw">in</span> response.json()[<span class="str">"data"</span>]:
     <span class="fn">print</span>(<span class="str">f"</span>{coin[<span class="str">'symbol'</span>]}<span class="str">: $</span>{coin[<span class="str">'price_usd'</span>]:,.2f}<span class="str">"</span>)</pre>
 
           <pre id="code-js" style="display:none"><span class="com">// Free: Get live BTC price</span>
-<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://api.aiservices.to/v1/price/BTC"</span>);
+<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://api.agentservices.to/v1/price/BTC"</span>);
 <span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
 console.<span class="fn">log</span>(<span class="str">`BTC: $$</span>{data.price_usd.<span class="fn">toLocaleString</span>()}<span class="str">`</span>);
 
 <span class="com">// Batch prices</span>
 <span class="kw">const</span> batch = <span class="kw">await</span> <span class="fn">fetch</span>(
-  <span class="str">"https://api.aiservices.to/v1/prices?symbols=BTC,ETH,SOL"</span>
+  <span class="str">"https://api.agentservices.to/v1/prices?symbols=BTC,ETH,SOL"</span>
 ).<span class="fn">then</span>(r => r.<span class="fn">json</span>());
 
 <span class="com">// Fear & Greed</span>
-<span class="kw">const</span> sentiment = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://api.aiservices.to/v1/fear-greed"</span>)
+<span class="kw">const</span> sentiment = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://api.agentservices.to/v1/fear-greed"</span>)
   .<span class="fn">then</span>(r => r.<span class="fn">json</span>());
 console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>${sentiment.label}<span class="str">`</span>);</pre>
         </div>
@@ -1309,10 +1309,10 @@ console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>
         <div class="section-eyebrow">MCP Protocol</div>
         <h2 class="section-title" style="text-align:left">Connect to<br>Claude & Cursor<br><em>Instantly</em></h2>
         <p style="color:var(--text-light); font-size:1.05rem; margin-top:16px;">
-          AIServices ships with a built-in MCP (Model Context Protocol) server. Connect any MCP-compatible AI tool and get instant access to all eight tools — no SDK installation required.
+          AgentServices ships with a built-in MCP (Model Context Protocol) server. Connect any MCP-compatible AI tool and get instant access to all eight tools — no SDK installation required.
         </p>
         <div style="margin-top:24px;">
-          <a href="https://api.aiservices.to/mcp" target="_blank" class="btn btn-primary">
+          <a href="https://api.agentservices.to/mcp" target="_blank" class="btn btn-primary">
             Try MCP Endpoint
             <span>→</span>
           </a>
@@ -1320,7 +1320,7 @@ console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>
       </div>
       <div class="mcp-card">
         <div class="label">MCP Server URL</div>
-        <div class="url">https://api.aiservices.to/mcp</div>
+        <div class="url">https://api.agentservices.to/mcp</div>
         <div class="label" style="margin-top:20px;">Available Tools (8)</div>
         <div class="tools">
           <span class="tool-chip">get_price</span>
@@ -1343,7 +1343,7 @@ console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>
     <h2>Build Something<br><em>Extraordinary</em></h2>
     <p>Your agents deserve premium data. Start making calls in under 60 seconds.</p>
     <div class="hero-actions">
-      <a href="https://api.aiservices.to/docs" target="_blank" class="btn btn-primary">
+      <a href="https://api.agentservices.to/docs" target="_blank" class="btn btn-primary">
         View API Docs
         <span>→</span>
       </a>
@@ -1357,20 +1357,20 @@ console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>
 <!-- ===== FOOTER ===== -->
 <footer>
   <div class="footer-inner">
-    <div class="footer-logo">AIServices</div>
+    <div class="footer-logo">AgentServices</div>
     <p class="footer-tagline">Premium APIs for the machine economy — powered by x402 micropayments</p>
     <div class="footer-links">
-      <a href="https://api.aiservices.to/docs">API Docs</a>
-      <a href="https://api.aiservices.to/llms.txt">llms.txt</a>
-      <a href="https://api.aiservices.to/.well-known/x402">x402 Manifest</a>
-      <a href="https://api.aiservices.to/health">Health</a>
+      <a href="https://api.agentservices.to/docs">API Docs</a>
+      <a href="https://api.agentservices.to/llms.txt">llms.txt</a>
+      <a href="https://api.agentservices.to/.well-known/x402">x402 Manifest</a>
+      <a href="https://api.agentservices.to/health">Health</a>
       <a href="https://github.com/vbkotecha/aiservices-api">GitHub</a>
     </div>
     <div class="footer-wallet">
       Payment Wallet: 0x1830DAdb0A16eb569B5f8526AADDF47ce85aC8e0
     </div>
     <div class="footer-bottom">
-      AIServices v2.1.0 · MIT License · Built with x402 + USDC on Base
+      AgentServices v2.1.0 · MIT License · Built with x402 + USDC on Base
     </div>
   </div>
 </footer>
