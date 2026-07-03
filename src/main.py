@@ -55,24 +55,15 @@ X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://x402.org/
 X402_ENABLED = False
 X402_ERROR = "Not initialized"
 try:
-    from x402.http import FacilitatorConfig, HTTPFacilitatorClient
+    from x402.http import HTTPFacilitatorClient
     from x402.http.middleware.fastapi import PaymentMiddlewareASGI
     from x402.mechanisms.evm.exact import ExactEvmServerScheme
     from x402.server import x402ResourceServer
 
-    # Use default x402.org facilitator (no auth needed)
-    facilitator = HTTPFacilitatorClient(
-        FacilitatorConfig(url=X402_FACILITATOR_URL)
-    )
+    # Use default facilitator (x402.org) - matches official example
+    facilitator = HTTPFacilitatorClient()
     payment_server = x402ResourceServer(facilitator)
-    payment_server.register(X402_NETWORK, ExactEvmServerScheme())
-
-    # Try bazaar extension (non-blocking)
-    try:
-        from x402.extensions.bazaar import bazaar_resource_server_extension
-        payment_server.register_extension(bazaar_resource_server_extension)
-    except Exception:
-        pass
+    payment_server.register("eip155:*", ExactEvmServerScheme())
 
     # Initialize server (fetches supported schemes from facilitator)
     try:
