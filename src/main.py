@@ -497,7 +497,7 @@ async def x402_manifest():
             {"path": "/mcp", "method": "POST", "price": "$0.00", "description": "MCP server with 8 tools for AI agent integration (FREE)"},
         ],
         "categories": ["Data", "Market Data", "Geolocation", "DEX", "Prediction Markets", "Search", "News", "Governance", "Dispute Resolution", "MCP"],
-        "payTo": WALLET,
+        "payTo": "0x9863aB6242663FCc84c33632741711dB78f8Fd15",
         "contact": "https://github.com/vbkotecha",
         "website": "https://api.aiservices.to",
         "repository": "https://github.com/vbkotecha/aiservices-api",
