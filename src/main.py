@@ -425,6 +425,148 @@ async def web_manifest():
     }
 
 
-@app.get("/api-docs", response_class=HTMLResponse)
+@app.get("/docs-page", response_class=HTMLResponse)
 async def api_docs_page():
-    return HTMLResponse(content="<h1>AIServices</h1><p>Visit <a href='/docs'>/docs</a> for Swagger.</p>")
+    return HTMLResponse(content="""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIServices — Paid APIs for AI Agents</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a0a;color:#e0e0e0;line-height:1.6}
+.container{max-width:900px;margin:0 auto;padding:40px 20px}
+header{text-align:center;margin-bottom:50px}
+h1{font-size:2.5em;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.tagline{font-size:1.1em;color:#888}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.85em;font-weight:600;margin:5px}
+.badge-free{background:#1a3a1a;color:#4ade80;border:1px solid #4ade80}
+.badge-paid{background:#3a2a1a;color:#fbbf24;border:1px solid #fbbf24}
+.badge-x402{background:#2a1a3a;color:#a78bfa;border:1px solid #a78bfa}
+section{background:#111;border-radius:12px;padding:25px;margin-bottom:20px;border:1px solid #222}
+h2{font-size:1.4em;color:#60a5fa;margin-bottom:15px}
+.endpoint{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 0;border-bottom:1px solid #1a1a1a}
+.endpoint:last-child{border-bottom:none}
+.method{font-weight:700;font-family:monospace;font-size:0.9em;min-width:200px}
+.GET{color:#4ade80}.POST{color:#fbbf24}
+.price{font-weight:600;font-size:0.85em}
+.desc{color:#999;font-size:0.9em;margin-top:4px}
+code{background:#1a1a1a;padding:2px 6px;border-radius:4px;font-size:0.9em;color:#a78bfa}
+pre{background:#1a1a1a;padding:15px;border-radius:8px;overflow-x:auto;margin:10px 0}
+pre code{background:none;padding:0;color:#e0e0e0}
+a{color:#60a5fa;text-decoration:none}
+a:hover{text-decoration:underline}
+.footer{text-align:center;padding:30px;color:#555;font-size:0.85em}
+.wallet{font-family:monospace;font-size:0.85em;color:#666}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>AIServices</h1>
+<p class="tagline">Paid APIs for AI Agents — Market Data + Dispute Resolution</p>
+<div style="margin-top:10px">
+<span class="badge badge-x402">x402 / USDC on Base</span>
+<span class="badge badge-free">4 Free Endpoints</span>
+<span class="badge badge-paid">4 Paid Endpoints</span>
+</div>
+</header>
+
+<section>
+<h2>Quick Start</h2>
+<p>No signup. No API keys. Free endpoints work immediately. Paid endpoints use x402 micropayments.</p>
+<pre><code># Free: Get BTC price
+curl https://api.aiservices.to/v1/price/BTC
+
+# Free: Batch prices
+curl "https://api.aiservices.to/v1/prices?symbols=BTC,ETH,SOL"
+
+# Free: Fear & Greed Index
+curl https://api.aiservices.to/v1/fear-greed
+
+# MCP: Connect your AI tool
+# URL: https://api.aiservices.to/mcp (Streamable HTTP)</code></pre>
+</section>
+
+<section>
+<h2>Market Data</h2>
+<div class="endpoint">
+<div><div class="method GET">GET /v1/price/{symbol}</div><div class="desc">Current crypto price (BTC, ETH, SOL, XRP...)</div></div>
+<span class="badge badge-free">FREE</span>
+</div>
+<div class="endpoint">
+<div><div class="method GET">GET /v1/prices?symbols=BTC,ETH</div><div class="desc">Batch crypto prices</div></div>
+<span class="badge badge-free">FREE</span>
+</div>
+<div class="endpoint">
+<div><div class="method GET">GET /v1/indicators/{symbol}</div><div class="desc">RSI, Bollinger Bands, ATR, Support/Resistance</div></div>
+<span class="price">$0.02</span>
+</div>
+<div class="endpoint">
+<div><div class="method GET">GET /v1/yields</div><div class="desc">Top DeFi yield pools by TVL</div></div>
+<span class="price">$0.02</span>
+</div>
+<div class="endpoint">
+<div><div class="method GET">GET /v1/fear-greed</div><div class="desc">Crypto Fear & Greed Index (0-100)</div></div>
+<span class="badge badge-free">FREE</span>
+</div>
+</section>
+
+<section>
+<h2>Location & Web</h2>
+<div class="endpoint">
+<div><div class="method GET">GET /v1/geo/{ip}</div><div class="desc">IP geolocation lookup (country, city, ISP)</div></div>
+<span class="badge badge-free">FREE</span>
+</div>
+<div class="endpoint">
+<div><div class="method GET">GET /v1/metadata?url=...</div><div class="desc">URL metadata extraction and unfurling</div></div>
+<span class="price">$0.01</span>
+</div>
+</section>
+
+<section>
+<h2>Dispute Resolution (AgentCourt Engine)</h2>
+<div class="endpoint">
+<div><div class="method POST">POST /v1/disputes</div><div class="desc">Submit dispute for policy-driven ruling. 7 policies: freelance, milestone, SLA, API quality, bug bounty, scope, physical commerce.</div></div>
+<span class="price">$0.05</span>
+</div>
+<div class="endpoint">
+<div><div class="method GET">GET /v1/policies</div><div class="desc">List dispute policy templates</div></div>
+<span class="badge badge-free">FREE</span>
+</div>
+</section>
+
+<section>
+<h2>MCP Integration</h2>
+<p>Connect AIServices directly to Claude, Cursor, or any MCP client:</p>
+<pre><code>MCP Server URL: https://api.aiservices.to/mcp
+Transport: Streamable HTTP</code></pre>
+<p>8 tools available immediately. No installation required.</p>
+</section>
+
+<section>
+<h2>Payments (x402)</h2>
+<p>Paid endpoints use the <a href="https://x402.org" target="_blank">x402 protocol</a>. No API keys, no subscriptions.</p>
+<ol style="padding-left:20px;color:#999">
+<li>Agent requests a paid endpoint</li>
+<li>Server returns HTTP 402 with payment details</li>
+<li>Agent pays in USDC on Base Mainnet</li>
+<li>Server verifies and returns data</li>
+</ol>
+<p class="wallet">Wallet: 0x9863aB6242663FCc84c33632741711dB78f8Fd15</p>
+</section>
+
+<section>
+<h2>Links</h2>
+<p><a href="/docs">Swagger/OpenAPI Docs</a> · <a href="/llms.txt">llms.txt</a> · <a href="/health">Health Check</a> · <a href="https://github.com/vbkotecha/aiservices-api">GitHub</a></p>
+</section>
+
+<div class="footer">
+<p>AIServices v2.0.0 — MIT License</p>
+</div>
+</div>
+</body>
+</html>
+""")
