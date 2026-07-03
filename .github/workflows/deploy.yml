@@ -8,51 +8,47 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Railway Deploy
+      - name: Trigger Railway Deploy (latest commit)
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           RAILWAY_SERVICE_ID: e7d88b8a-d2aa-4113-aafa-061615ed4c43
           RAILWAY_ENV_ID: ac26fe55-88a1-4f24-9777-a142af59373b
         run: |
-          # Trigger a new deployment via Railway GraphQL API
+          # Deploy with latestCommit=true to pull fresh code from GitHub
           RESPONSE=$(curl -s -X POST \
             "https://backboard.railway.app/graphql/v2" \
             -H "Authorization: Bearer ${RAILWAY_TOKEN}" \
             -H "Content-Type: application/json" \
             -d "{
-              \"query\": \"mutation { serviceInstanceDeployV2(serviceId: \\\"${RAILWAY_SERVICE_ID}\\\", environmentId: \\\"${RAILWAY_ENV_ID}\\\") }\"
+              \"query\": \"mutation { serviceInstanceDeploy(latestCommit: true, serviceId: \\\"${RAILWAY_SERVICE_ID}\\\", environmentId: \\\"${RAILWAY_ENV_ID}\\\") }\"
             }")
 
           echo "Deploy response: $RESPONSE"
 
-          # Check if deploy was triggered
-          DEPLOY_ID=$(echo "$RESPONSE" | jq -r '.data.serviceInstanceDeployV2 // empty')
-          if [ -z "$DEPLOY_ID" ]; then
+          if echo "$RESPONSE" | jq -e '.data.serviceInstanceDeploy' > /dev/null; then
+            echo "Deploy triggered successfully"
+          else
             echo "::error::Failed to trigger Railway deploy"
             echo "$RESPONSE"
             exit 1
           fi
 
-          echo "Deploy triggered: $DEPLOY_ID"
-          echo "deploy_id=$DEPLOY_ID" >> $GITHUB_ENV
-
-      - name: Wait for deploy to complete
+      - name: Wait for build and deploy
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           RAILWAY_SERVICE_ID: e7d88b8a-d2aa-4113-aafa-061615ed4c43
         run: |
-          DEPLOY_ID="${{ env.deploy_id }}"
-          echo "Waiting for deployment $DEPLOY_ID..."
+          echo "Waiting for Railway build and deploy..."
 
-          for i in $(seq 1 40); do
+          for i in $(seq 1 60); do
             sleep 15
             STATUS=$(curl -s -X POST \
               "https://backboard.railway.app/graphql/v2" \
               -H "Authorization: Bearer ${RAILWAY_TOKEN}" \
               -H "Content-Type: application/json" \
               -d "{
-                \"query\": \"query { deployment(id: \\\"${DEPLOY_ID}\\\") { status } }\"
-              }" | jq -r '.data.deployment.status')
+                \"query\": \"query { service(id: \\\"${RAILWAY_SERVICE_ID}\\\") { deployments(first: 1) { edges { node { status meta } } } } }\"
+              }" | jq -r '.data.service.deployments.edges[0].node.status')
 
             echo "  [$i] Status: $STATUS"
 
@@ -62,7 +58,7 @@ jobs:
           done
 
           if [ "$STATUS" != "SUCCESS" ]; then
-            echo "::error::Deploy $STATUS"
+            echo "::error::Deploy ended with status: $STATUS"
             exit 1
           fi
 
@@ -71,4 +67,10 @@ jobs:
       - name: Health check
         run: |
           sleep 10
-          curl -sf https://api.aiservices.to/health | jq . || echo "Health check failed"
+          echo "=== Health Check ==="
+          curl -sf https://api.aiservices.to/health | jq . || echo "::warning::Health check failed"
+
+      - name: Test free endpoints
+        run: |
+          echo "=== Testing BTC price ==="
+          curl -sf https://api.aiservices.to/v1/price/BTC | jq -r '.symbol,.price_usd' || echo "::warning::Price endpoint failed"
