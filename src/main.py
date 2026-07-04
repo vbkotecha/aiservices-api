@@ -40,7 +40,8 @@ from onchain_data import (
     get_defi_tvl, get_stablecoin_flows, get_github_velocity, get_agent_context, get_macro,
 )
 
-WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
+AISERVICES_PAY_TO = "0x9863aB6242663FCc84c33632741711dB78f8Fd15"
+WALLET = os.environ.get("WALLET_ADDRESS", AISERVICES_PAY_TO)
 
 app = FastAPI(
     title="AIServices",
@@ -70,7 +71,9 @@ async def add_security_headers(request, call_next):
     return response
 
 # --- x402 Payment Protocol (Base Mainnet) ---
-X402_WALLET = os.environ.get("WALLET_ADDRESS", WALLET)
+# Payment receiver is intentionally separated from WALLET_ADDRESS so an agent
+# consumer wallet cannot accidentally become the API revenue wallet in prod.
+X402_WALLET = os.environ.get("X402_PAY_TO", os.environ.get("X402_WALLET_ADDRESS", AISERVICES_PAY_TO))
 X402_BASE_NETWORK = "eip155:8453"
 X402_BSC_NETWORK = "eip155:56"
 X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
@@ -658,44 +661,55 @@ async def health():
 @app.get("/.well-known/x402")
 async def x402_manifest():
     """x402 payment manifest for agent discovery."""
+    endpoints = [
+        {"path": "/v1/price/{symbol}", "method": "GET", "price": "$0.00", "description": "Current crypto price (FREE)"},
+        {"path": "/v1/prices", "method": "GET", "price": "$0.00", "description": "Batch crypto prices (FREE)"},
+        {"path": "/v1/fear-greed", "method": "GET", "price": "$0.00", "description": "Crypto Fear and Greed Index (FREE)"},
+        {"path": "/v1/global", "method": "GET", "price": "$0.00", "description": "Global market cap, volume, dominance (FREE)"},
+        {"path": "/v1/trending", "method": "GET", "price": "$0.00", "description": "Trending tokens (FREE)"},
+        {"path": "/v1/gas", "method": "GET", "price": "$0.00", "description": "Current ETH gas prices (FREE)"},
+        {"path": "/v1/geo/{ip}", "method": "GET", "price": "$0.00", "description": "IP geolocation lookup (FREE)"},
+        {"path": "/v1/swap/quote", "method": "GET", "price": "$0.00", "description": "DEX swap quote across 6 chains (FREE)"},
+        {"path": "/v1/predictions", "method": "GET", "price": "$0.00", "description": "Active prediction markets (FREE)"},
+        {"path": "/v1/news", "method": "GET", "price": "$0.00", "description": "Latest crypto news (FREE)"},
+        {"path": "/v1/social", "method": "GET", "price": "$0.00", "description": "Trending coins, categories, NFTs (FREE)"},
+        {"path": "/v1/policies", "method": "GET", "price": "$0.00", "description": "List dispute resolution policy templates (FREE)"},
+        {"path": "/mcp", "method": "POST", "price": "$0.00", "description": "Remote MCP server for AI agent integration (FREE)"},
+        {"path": "/v1/indicators/{symbol}", "method": "GET", "price": "$0.02", "description": "Technical indicators: RSI, BB, ATR, S/R"},
+        {"path": "/v1/yields", "method": "GET", "price": "$0.02", "description": "Top DeFi yield pools by TVL"},
+        {"path": "/v1/metadata", "method": "GET", "price": "$0.01", "description": "URL metadata extraction and unfurling"},
+        {"path": "/v1/search", "method": "GET", "price": "$0.01", "description": "AI-powered web search with structured results"},
+        {"path": "/v1/disputes", "method": "POST", "price": "$0.05", "description": "Policy-driven dispute resolution (7 policy templates)"},
+        {"path": "/v1/marketing/sentiment", "method": "POST", "price": "$0.03", "description": "AI brand sentiment analysis across platforms"},
+        {"path": "/v1/marketing/trends", "method": "POST", "price": "$0.03", "description": "Industry trend detection with velocity scores"},
+        {"path": "/v1/marketing/competitors", "method": "POST", "price": "$0.05", "description": "Competitive intelligence: keywords, channels, strategy"},
+        {"path": "/v1/marketing/content-gaps", "method": "POST", "price": "$0.04", "description": "SEO content gap analysis"},
+        {"path": "/v1/marketing/ad-copy", "method": "POST", "price": "$0.05", "description": "AI ad copy generator for paid channels"},
+        {"path": "/v1/whales", "method": "GET", "price": "$0.02", "description": "Large whale transactions on BTC and ETH chains"},
+        {"path": "/v1/exchange-flows", "method": "GET", "price": "$0.02", "description": "CEX reserve flows and 24h changes"},
+        {"path": "/v1/correlation", "method": "GET", "price": "$0.03", "description": "30-day cross-asset correlation matrix"},
+        {"path": "/v1/defi-tvl", "method": "GET", "price": "$0.02", "description": "DeFi protocol TVL rankings from DeFi Llama"},
+        {"path": "/v1/stablecoin-flows", "method": "GET", "price": "$0.02", "description": "Stablecoin market caps and supply data"},
+        {"path": "/v1/github-velocity", "method": "GET", "price": "$0.02", "description": "GitHub crypto repo velocity scores"},
+        {"path": "/v1/macro", "method": "GET", "price": "$0.02", "description": "Macro economic and crypto indicators"},
+    ]
+    paid_endpoints = [endpoint for endpoint in endpoints if endpoint["price"] != "$0.00"]
     return {
         "version": "1.0",
         "name": "AIServices",
-        "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata",
+        "description": "Paid data APIs for AI agents — crypto, DeFi, on-chain analytics, search, marketing intelligence, and dispute resolution",
         "networks": X402_NETWORKS,
         "chain_id": X402_NETWORKS[0] if X402_NETWORKS else "eip155:8453",
         "currency": "USDC",
-        "endpoints": [
-            {"path": "/v1/price/{symbol}", "method": "GET", "price": "$0.00", "description": "Current crypto price (FREE)"},
-            {"path": "/v1/prices", "method": "GET", "price": "$0.00", "description": "Batch crypto prices (FREE)"},
-            {"path": "/v1/indicators/{symbol}", "method": "GET", "price": "$0.02", "description": "Technical indicators: RSI, BB, ATR, S/R"},
-            {"path": "/v1/yields", "method": "GET", "price": "$0.02", "description": "Top DeFi yield pools by TVL"},
-            {"path": "/v1/fear-greed", "method": "GET", "price": "$0.00", "description": "Crypto Fear and Greed Index (FREE)"},
-            {"path": "/v1/global", "method": "GET", "price": "$0.00", "description": "Global market cap, volume, dominance (FREE)"},
-            {"path": "/v1/trending", "method": "GET", "price": "$0.00", "description": "Trending tokens (FREE)"},
-            {"path": "/v1/gas", "method": "GET", "price": "$0.00", "description": "Current ETH gas prices (FREE)"},
-            {"path": "/v1/geo/{ip}", "method": "GET", "price": "$0.00", "description": "IP geolocation lookup (FREE)"},
-            {"path": "/v1/metadata", "method": "GET", "price": "$0.01", "description": "URL metadata extraction and unfurling"},
-            {"path": "/v1/search", "method": "GET", "price": "$0.01", "description": "AI-powered web search"},
-            {"path": "/v1/swap/quote", "method": "GET", "price": "$0.00", "description": "DEX swap quote across 6 chains (FREE)"},
-            {"path": "/v1/predictions", "method": "GET", "price": "$0.00", "description": "Active prediction markets (FREE)"},
-            {"path": "/v1/news", "method": "GET", "price": "$0.00", "description": "Latest crypto news (FREE)"},
-            {"path": "/v1/social", "method": "GET", "price": "$0.00", "description": "Trending coins, categories, NFTs (FREE)"},
-            {"path": "/v1/disputes", "method": "POST", "price": "$0.05", "description": "Policy-driven dispute resolution (7 policies: freelance, milestone, SLA, API quality, bug bounty, scope, commerce)"},
-            {"path": "/v1/policies", "method": "GET", "price": "$0.00", "description": "List dispute resolution policy templates (FREE)"},
-            {"path": "/v1/marketing/sentiment", "method": "POST", "price": "$0.00", "description": "AI brand sentiment analysis (FREE beta)"},
-            {"path": "/v1/marketing/trends", "method": "POST", "price": "$0.00", "description": "Industry trend detection (FREE beta)"},
-            {"path": "/v1/marketing/competitors", "method": "POST", "price": "$0.00", "description": "Competitive intelligence (FREE beta)"},
-            {"path": "/v1/marketing/content-gaps", "method": "POST", "price": "$0.00", "description": "SEO content gap analysis (FREE beta)"},
-            {"path": "/v1/marketing/ad-copy", "method": "POST", "price": "$0.00", "description": "AI ad copy generator (FREE beta)"},
-            {"path": "/mcp", "method": "POST", "price": "$0.00", "description": "MCP server with 13 tools for AI agent integration (FREE)"},
-        ],
-        "categories": ["Data", "Market Data", "Geolocation", "DEX", "Prediction Markets", "Search", "News", "Governance", "Dispute Resolution", "MCP", "Marketing Intelligence"],
-        "payTo": "0x9863aB6242663FCc84c33632741711dB78f8Fd15",
+        "endpoints": endpoints,
+        "paid_endpoints": paid_endpoints,
+        "paid_endpoint_count": len(paid_endpoints),
+        "categories": ["Data", "Market Data", "On-chain Analytics", "Geolocation", "DEX", "Prediction Markets", "Search", "News", "Governance", "Dispute Resolution", "MCP", "Marketing Intelligence"],
+        "payTo": X402_WALLET,
         "contact": "https://github.com/vbkotecha",
-        "website": "https://api.agentservices.to",
+        "website": "https://api.aiservices.to",
         "repository": "https://github.com/vbkotecha/aiservices-api",
-        "homepage": "https://api.agentservices.to",
+        "homepage": "https://api.aiservices.to",
         "license": "MIT",
         "spec": "x402-service-manifest/1",
     }
@@ -708,7 +722,7 @@ async def agent_json():
         "name": "AIServices",
         "version": "4.1.0",
         "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata, on-chain analytics, whale tracking, DeFi TVL, correlation matrix, stablecoin flows, GitHub velocity, macro indicators",
-        "url": "https://api.agentservices.to",
+        "url": "https://api.aiservices.to",
         "capabilities": [
             "crypto-market-data",
             "technical-indicators",
@@ -754,17 +768,18 @@ async def agent_json():
                 "GET /v1/predictions",
                 "GET /v1/news",
                 "GET /v1/social",
-                "POST /v1/marketing/sentiment",
-                "POST /v1/marketing/trends",
-                "POST /v1/marketing/competitors",
-                "POST /v1/marketing/content-gaps",
-                "POST /v1/marketing/ad-copy",
             ],
             "paid": [
                 {"path": "GET /v1/indicators/{symbol}", "price": "$0.02"},
                 {"path": "GET /v1/yields", "price": "$0.02"},
                 {"path": "GET /v1/metadata", "price": "$0.01"},
                 {"path": "GET /v1/search", "price": "$0.01"},
+                {"path": "POST /v1/disputes", "price": "$0.05"},
+                {"path": "POST /v1/marketing/sentiment", "price": "$0.03"},
+                {"path": "POST /v1/marketing/trends", "price": "$0.03"},
+                {"path": "POST /v1/marketing/competitors", "price": "$0.05"},
+                {"path": "POST /v1/marketing/content-gaps", "price": "$0.04"},
+                {"path": "POST /v1/marketing/ad-copy", "price": "$0.05"},
                 {"path": "GET /v1/whales", "price": "$0.02"},
                 {"path": "GET /v1/exchange-flows", "price": "$0.02"},
                 {"path": "GET /v1/correlation", "price": "$0.03"},
@@ -774,9 +789,9 @@ async def agent_json():
                 {"path": "GET /v1/macro", "price": "$0.02"},
             ],
         },
-        "docs": "https://api.agentservices.to/docs",
+        "docs": "https://api.aiservices.to/docs",
         "github": "https://github.com/vbkotecha/aiservices-api",
-        "wallet": WALLET,
+        "wallet": X402_WALLET,
     }
 
 
