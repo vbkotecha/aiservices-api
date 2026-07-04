@@ -144,6 +144,58 @@ MCP_TOOLS = [
             },
             "required": ["product"]
         }
+    },
+    {
+        "name": "whale_tracking",
+        "description": "Large whale transactions on BTC (>=10 BTC) and ETH chains ($0.02 x402)",
+        "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+        "name": "exchange_flows",
+        "description": "CEX reserve flows and 24h changes from DeFi Llama ($0.02 x402)",
+        "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+        "name": "correlation_matrix",
+        "description": "30-day Pearson correlation matrix across top crypto assets ($0.03 x402)",
+        "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+        "name": "defi_tvl",
+        "description": "Top DeFi protocols ranked by TVL from DeFi Llama ($0.02 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "limit": {"type": "integer", "description": "Max results", "default": 20},
+                "chain": {"type": "string", "description": "Filter by chain", "default": "all"}
+            }
+        }
+    },
+    {
+        "name": "stablecoin_flows",
+        "description": "Stablecoin market caps and supply data ($0.02 x402)",
+        "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+        "name": "github_velocity",
+        "description": "Trending crypto/web3 GitHub repos with velocity scores ($0.02 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "language": {"type": "string", "description": "Filter by language", "default": ""},
+                "limit": {"type": "integer", "description": "Max results", "default": 15}
+            }
+        }
+    },
+    {
+        "name": "agent_context",
+        "description": "Paste-ready multi-source market context for LLM system prompts (FREE)",
+        "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+        "name": "macro_indicators",
+        "description": "Macro economic indicators: global market cap, dominance, derivatives ($0.02 x402)",
+        "inputSchema": {"type": "object", "properties": {}}
     }
 ]
 
@@ -302,6 +354,38 @@ async def _execute_tool(tool_name: str, args: dict):
             from engine.policy_engine import list_policies
             return list_policies()
 
+        elif tool_name == "whale_tracking":
+            from onchain_data import get_whales
+            return get_whales()
+
+        elif tool_name == "exchange_flows":
+            from onchain_data import get_exchange_flows
+            return get_exchange_flows()
+
+        elif tool_name == "correlation_matrix":
+            from onchain_data import get_correlation_matrix
+            return get_correlation_matrix()
+
+        elif tool_name == "defi_tvl":
+            from onchain_data import get_defi_tvl
+            return get_defi_tvl(args.get("limit", 20), args.get("chain", "all"))
+
+        elif tool_name == "stablecoin_flows":
+            from onchain_data import get_stablecoin_flows
+            return get_stablecoin_flows()
+
+        elif tool_name == "github_velocity":
+            from onchain_data import get_github_velocity
+            return get_github_velocity(args.get("language", ""), args.get("limit", 15))
+
+        elif tool_name == "agent_context":
+            from onchain_data import get_agent_context
+            return get_agent_context()
+
+        elif tool_name == "macro_indicators":
+            from onchain_data import get_macro
+            return get_macro()
+
         else:
             return {"error": f"Unknown tool: {tool_name}"}
 
@@ -321,8 +405,8 @@ async def mcp_tools_summary():
             {"name": t["name"], "description": t["description"]}
             for t in MCP_TOOLS
         ],
-        "free_tools": ["crypto_prices", "fear_greed", "ip_geolocation", "list_policies"],
-        "paid_tools": ["technical_indicators", "defi_yields", "url_metadata", "resolve_dispute"],
+        "free_tools": ["crypto_prices", "fear_greed", "ip_geolocation", "list_policies", "agent_context"],
+        "paid_tools": ["technical_indicators", "defi_yields", "url_metadata", "resolve_dispute", "whale_tracking", "exchange_flows", "correlation_matrix", "defi_tvl", "stablecoin_flows", "github_velocity", "macro_indicators"],
         "setup": {
             "claude_desktop": {
                 "mcpServers": {

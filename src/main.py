@@ -35,13 +35,17 @@ from marketing_data import (
     SentimentRequest, TrendRequest, CompetitorRequest, ContentGapRequest, AdCopyRequest,
     analyze_sentiment, detect_trends, analyze_competitors, find_content_gaps, generate_ad_copy,
 )
+from onchain_data import (
+    get_whales, get_exchange_flows, get_correlation_matrix,
+    get_defi_tvl, get_stablecoin_flows, get_github_velocity, get_agent_context, get_macro,
+)
 
 WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
 
 app = FastAPI(
     title="AIServices",
-    version="4.0.0",
-    description="""Paid APIs for AI agents — crypto market data, DeFi yields, DEX quotes, prediction markets, news, search, IP geolocation, URL metadata, and dispute resolution.
+    version="4.1.0",
+    description="""Paid APIs for AI agents — crypto market data, DeFi yields, DEX quotes, prediction markets, news, search, IP geolocation, URL metadata, on-chain analytics, whale tracking, correlation matrix, DeFi TVL, stablecoin flows, GitHub velocity, macro indicators, and dispute resolution.
 
 All paid endpoints use x402 protocol with USDC on Base. Powered by AgentCourt policy engine.
 """,
@@ -158,6 +162,41 @@ try:
             mime_type="application/json",
             description="AI ad copy generator for Google/Meta/TikTok/Taboola",
         ),
+        "GET /v1/whales": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="Large whale transactions on BTC and ETH chains",
+        ),
+        "GET /v1/exchange-flows": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="CEX reserve flows and 24h changes",
+        ),
+        "GET /v1/correlation": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="30-day cross-asset correlation matrix",
+        ),
+        "GET /v1/defi-tvl": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="DeFi protocol TVL rankings from DeFi Llama",
+        ),
+        "GET /v1/stablecoin-flows": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="Stablecoin market caps and supply data",
+        ),
+        "GET /v1/github-velocity": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="GitHub crypto repo velocity scores",
+        ),
+        "GET /v1/macro": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="Macro economic and crypto indicators",
+        ),
     }
 
     app.add_middleware(
@@ -165,7 +204,7 @@ try:
         routes=payment_routes,
         server=payment_server,
     )
-    print(f"[x402] Payment middleware enabled on {X402_NETWORK_LABEL} — disputes ($0.05), indicators/yields ($0.02), metadata/search ($0.01), marketing ($0.03–$0.05)", flush=True)
+    print(f"[x402] Payment middleware enabled on {X402_NETWORK_LABEL} — disputes ($0.05), indicators/yields/correlation ($0.02–$0.03), metadata/search ($0.01), marketing ($0.03–$0.05), on-chain data ($0.02–$0.03)", flush=True)
     X402_ENABLED = True
     X402_ERROR = None
 except ImportError as e:
@@ -181,7 +220,7 @@ except Exception as e:
 
 # --- MCP Remote Transport ---
 app.include_router(mcp_router)
-print(f"[mcp] Remote MCP endpoint mounted at /mcp — 13 tools available", flush=True)
+print(f"[mcp] Remote MCP endpoint mounted at /mcp — 21 tools available", flush=True)
 
 
 # --- Market Data ---
@@ -418,6 +457,65 @@ async def marketing_ad_copy(req: AdCopyRequest):
 
 
 
+# --- On-Chain & Advanced Data (Gap Fillers) ---
+
+@app.get("/v1/whales", tags=["On-Chain Data"],
+         summary="Large Transaction Tracking",
+         description="Whale transactions: large BTC (>=10 BTC) and ETH movements from public blockchain APIs. ($0.02)")
+async def whale_tracking():
+    """Large on-chain whale transactions ($0.02)"""
+    return get_whales()
+
+@app.get("/v1/exchange-flows", tags=["On-Chain Data"],
+         summary="CEX Reserve Flows",
+         description="Centralized exchange reserves and 24h changes from DeFi Llama transparency data. ($0.02)")
+async def exchange_flows():
+    """CEX inflow/outflow tracking ($0.02)"""
+    return get_exchange_flows()
+
+@app.get("/v1/correlation", tags=["Market Data"],
+         summary="Cross-Asset Correlation Matrix",
+         description="30-day Pearson correlations across top crypto assets (BTC, ETH, SOL, XRP, BNB, etc.). ($0.03)")
+async def correlation_matrix():
+    """Cross-asset correlation matrix ($0.03)"""
+    return get_correlation_matrix()
+
+@app.get("/v1/defi-tvl", tags=["DeFi"],
+         summary="DeFi Protocol TVL Rankings",
+         description="Top DeFi protocols ranked by Total Value Locked from DeFi Llama. ($0.02)")
+async def defi_tvl(limit: int = 20, chain: str = "all"):
+    """DeFi protocol TVL rankings ($0.02)"""
+    return get_defi_tvl(limit, chain)
+
+@app.get("/v1/stablecoin-flows", tags=["On-Chain Data"],
+         summary="Stablecoin Market Caps & Flows",
+         description="Top stablecoins by market cap with supply data from DeFi Llama. ($0.02)")
+async def stablecoin_flows():
+    """Stablecoin supply and flows ($0.02)"""
+    return get_stablecoin_flows()
+
+@app.get("/v1/github-velocity", tags=["Developer Activity"],
+         summary="GitHub Repo Velocity Scores",
+         description="Trending crypto/web3 GitHub repos with computed velocity scores. ($0.02)")
+async def github_velocity(language: str = "", limit: int = 15):
+    """GitHub repo activity with velocity scoring ($0.02)"""
+    return get_github_velocity(language, limit)
+
+@app.get("/v1/agent-context", tags=["AI Agent Tools"],
+         summary="Paste-Ready Agent Context",
+         description="Composed multi-source market context in a single paste-ready payload for LLM system prompts. (FREE)")
+async def agent_context():
+    """Composed context for AI agents (FREE)"""
+    return get_agent_context()
+
+@app.get("/v1/macro", tags=["Market Data"],
+         summary="Macro Economic Indicators",
+         description="Crypto-macro indicators: global market cap, dominance, derivatives data. ($0.02)")
+async def macro_indicators():
+    """Macro economic indicators ($0.02)"""
+    return get_macro()
+
+
 # --- Health & Discovery ---
 
 _landing_html = None
@@ -523,6 +621,22 @@ async def api_discovery():
                 "content_gaps": {"endpoint": "POST /v1/marketing/content-gaps", "price": "$0.04", "desc": "SEO content gap analysis"},
                 "ad_copy": {"endpoint": "POST /v1/marketing/ad-copy", "price": "$0.05", "desc": "AI ad copy generation"},
             },
+            "onchain_data": {
+                "whales": {"endpoint": "GET /v1/whales", "price": "$0.02", "desc": "Large whale transactions on BTC/ETH"},
+                "exchange_flows": {"endpoint": "GET /v1/exchange-flows", "price": "$0.02", "desc": "CEX reserve flows"},
+                "stablecoin_flows": {"endpoint": "GET /v1/stablecoin-flows", "price": "$0.02", "desc": "Stablecoin market caps and supply"},
+            },
+            "advanced_market_data": {
+                "correlation": {"endpoint": "GET /v1/correlation", "price": "$0.03", "desc": "30-day cross-asset correlation matrix"},
+                "defi_tvl": {"endpoint": "GET /v1/defi-tvl", "price": "$0.02", "desc": "DeFi protocol TVL rankings"},
+                "macro": {"endpoint": "GET /v1/macro", "price": "$0.02", "desc": "Macro economic indicators"},
+            },
+            "developer_activity": {
+                "github_velocity": {"endpoint": "GET /v1/github-velocity", "price": "$0.02", "desc": "GitHub crypto repo velocity scores"},
+            },
+            "agent_tools": {
+                "agent_context": {"endpoint": "GET /v1/agent-context", "price": "free", "desc": "Paste-ready market context for LLMs"},
+            },
         },
         "live": True,
     }
@@ -537,7 +651,7 @@ async def health():
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,
         "x402_facilitator": X402_FACILITATOR_URL,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro"],
     }
 
 
@@ -592,8 +706,8 @@ async def agent_json():
     """Agent discovery manifest for AI agent platforms and crawlers."""
     return {
         "name": "AIServices",
-        "version": "3.0.0",
-        "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata",
+        "version": "4.1.0",
+        "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata, on-chain analytics, whale tracking, DeFi TVL, correlation matrix, stablecoin flows, GitHub velocity, macro indicators",
         "url": "https://api.agentservices.to",
         "capabilities": [
             "crypto-market-data",
@@ -612,6 +726,14 @@ async def agent_json():
             "marketing-competitors",
             "marketing-content-gaps",
             "marketing-ad-copy",
+            "whale-tracking",
+            "exchange-flows",
+            "correlation-matrix",
+            "defi-tvl",
+            "stablecoin-flows",
+            "github-velocity",
+            "agent-context",
+            "macro-indicators",
         ],
         "payment": {
             "protocol": "x402",
@@ -643,6 +765,13 @@ async def agent_json():
                 {"path": "GET /v1/yields", "price": "$0.02"},
                 {"path": "GET /v1/metadata", "price": "$0.01"},
                 {"path": "GET /v1/search", "price": "$0.01"},
+                {"path": "GET /v1/whales", "price": "$0.02"},
+                {"path": "GET /v1/exchange-flows", "price": "$0.02"},
+                {"path": "GET /v1/correlation", "price": "$0.03"},
+                {"path": "GET /v1/defi-tvl", "price": "$0.02"},
+                {"path": "GET /v1/stablecoin-flows", "price": "$0.02"},
+                {"path": "GET /v1/github-velocity", "price": "$0.02"},
+                {"path": "GET /v1/macro", "price": "$0.02"},
             ],
         },
         "docs": "https://api.agentservices.to/docs",
@@ -657,7 +786,7 @@ async def llms_txt():
     lines = [
         "# AIServices",
         "",
-        "> Paid data APIs for AI agents. Crypto prices, technical indicators, DeFi yields, IP geolocation, URL metadata, marketing intelligence, and dispute resolution.",
+        "> Paid data APIs for AI agents. Crypto prices, technical indicators, DeFi yields, IP geolocation, URL metadata, on-chain analytics, whale tracking, correlation matrix, DeFi TVL, stablecoin flows, GitHub velocity, macro indicators, marketing intelligence, and dispute resolution.",
         "",
         "## Base URL",
         "https://api.agentservices.to",
@@ -689,6 +818,16 @@ async def llms_txt():
         "- POST /v1/marketing/competitors — Competitive intelligence ($0.05)",
         "- POST /v1/marketing/content-gaps — SEO content gap analysis ($0.04)",
         "- POST /v1/marketing/ad-copy — AI ad copy generator ($0.05)",
+        "- GET /v1/whales — Large whale transactions BTC/ETH ($0.02)",
+        "- GET /v1/exchange-flows — CEX reserve flows ($0.02)",
+        "- GET /v1/correlation — 30-day cross-asset correlation matrix ($0.03)",
+        "- GET /v1/defi-tvl — DeFi protocol TVL rankings ($0.02)",
+        "- GET /v1/stablecoin-flows — Stablecoin market caps and supply ($0.02)",
+        "- GET /v1/github-velocity — GitHub crypto repo velocity scores ($0.02)",
+        "- GET /v1/macro — Macro economic indicators ($0.02)",
+        "",
+        "## Free Agent Tools",
+        "- GET /v1/agent-context — Paste-ready market context for LLM prompts",
         "",
         "## Example Usage",
         "```",
