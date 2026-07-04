@@ -1,5 +1,5 @@
 """
-AgentServices — Paid APIs for AI agents
+AIServices — Paid APIs for AI agents
 Crypto market data, IP geolocation, URL metadata, marketing intelligence
 """
 import os
@@ -39,7 +39,7 @@ from marketing_data import (
 WALLET = os.environ.get("WALLET_ADDRESS", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")
 
 app = FastAPI(
-    title="AgentServices",
+    title="AIServices",
     version="4.0.0",
     description="""Paid APIs for AI agents — crypto market data, DeFi yields, DEX quotes, prediction markets, news, search, IP geolocation, URL metadata, and dispute resolution.
 
@@ -428,7 +428,7 @@ def _get_landing():
         if landing_path.exists():
             _landing_html = landing_path.read_text()
         else:
-            _landing_html = "<h1>AgentServices</h1>"
+            _landing_html = "<h1>AIServices</h1>"
     return _landing_html
 
 
@@ -438,7 +438,7 @@ async def root(request: Request):
     host = request.headers.get("host", "").split(":")[0].lower()
     if host.startswith("api."):
         return {
-            "name": "AgentServices",
+            "name": "AIServices",
             "tagline": "Paid APIs for AI agents — market data, marketing intelligence + dispute resolution",
             "version": "4.0.0",
             "payment": "x402 / USDC on Base",
@@ -482,7 +482,7 @@ async def root(request: Request):
 async def api_discovery():
     """API discovery JSON for agents and crawlers."""
     return {
-        "name": "AgentServices",
+        "name": "AIServices",
         "tagline": "Paid APIs for AI agents — market data, marketing intelligence + dispute resolution",
         "version": "3.0.0",
         "payment": "x402 / USDC on Base",
@@ -546,7 +546,7 @@ async def x402_manifest():
     """x402 payment manifest for agent discovery."""
     return {
         "version": "1.0",
-        "name": "AgentServices",
+        "name": "AIServices",
         "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata",
         "networks": X402_NETWORKS,
         "chain_id": X402_NETWORKS[0] if X402_NETWORKS else "eip155:8453",
@@ -591,7 +591,7 @@ async def x402_manifest():
 async def agent_json():
     """Agent discovery manifest for AI agent platforms and crawlers."""
     return {
-        "name": "AgentServices",
+        "name": "AIServices",
         "version": "3.0.0",
         "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata",
         "url": "https://api.agentservices.to",
@@ -655,7 +655,7 @@ async def agent_json():
 async def llms_txt():
     """LLM-friendly API description for agent crawlers and AI discovery."""
     lines = [
-        "# AgentServices",
+        "# AIServices",
         "",
         "> Paid data APIs for AI agents. Crypto prices, technical indicators, DeFi yields, IP geolocation, URL metadata, marketing intelligence, and dispute resolution.",
         "",
@@ -719,8 +719,8 @@ async def openapi_schema():
 async def web_manifest():
     """Web app manifest for browser/agent discovery."""
     return {
-        "name": "AgentServices",
-        "short_name": "AgentServices",
+        "name": "AIServices",
+        "short_name": "AIServices",
         "description": "Paid data APIs for AI agents — crypto, DeFi, geo, web metadata, marketing intelligence, dispute resolution",
         "start_url": "https://api.agentservices.to",
         "scope": "/",
@@ -738,7 +738,7 @@ async def api_docs_page():
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AgentServices — Premium APIs for AI Agents</title>
+<title>AIServices — Premium APIs for AI Agents</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a0a;color:#e0e0e0;line-height:1.6}
@@ -770,7 +770,7 @@ a:hover{text-decoration:underline}
 <body>
 <div class="container">
 <header>
-<h1>AgentServices</h1>
+<h1>AIServices</h1>
 <p class="tagline">Paid APIs for AI Agents — Market Data + Dispute Resolution</p>
 <div style="margin-top:10px">
 <span class="badge badge-x402">x402 / USDC on Base</span>
@@ -845,7 +845,7 @@ curl https://api.agentservices.to/v1/fear-greed
 
 <section>
 <h2>MCP Integration</h2>
-<p>Connect AgentServices directly to Claude, Cursor, or any MCP client:</p>
+<p>Connect AIServices directly to Claude, Cursor, or any MCP client:</p>
 <pre><code>MCP Server URL: https://api.agentservices.to/mcp
 Transport: Streamable HTTP</code></pre>
 <p>8 tools available immediately. No installation required.</p>
@@ -869,7 +869,7 @@ Transport: Streamable HTTP</code></pre>
 </section>
 
 <div class="footer">
-<p>AgentServices — MIT License</p>
+<p>AIServices — MIT License</p>
 </div>
 </div>
 </body>

@@ -16,7 +16,7 @@ KALSHI_API = "https://api.elections.kalshi.com"
 
 def _fetch(url, timeout=10):
     req = urllib.request.Request(url, headers={
-        "User-Agent": "AgentServices/2.0",
+        "User-Agent": "AIServices/2.0",
         "Accept": "application/json",
     })
     try:

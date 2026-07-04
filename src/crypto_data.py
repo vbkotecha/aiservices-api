@@ -14,7 +14,7 @@ _SYMBOL_MAP = {
 }
 
 def _fetch(url, timeout=10):
-    req = urllib.request.Request(url, headers={"User-Agent": "AgentServices/1.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "AIServices/1.0"})
     try:
         resp = urllib.request.urlopen(req, timeout=timeout)
         return json.loads(resp.read())
