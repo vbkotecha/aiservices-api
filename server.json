@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.vbkotecha/agentservices",
+  "name": "to.aiservices/aiservices",
   "version": "4.0.0",
   "description": "Paid APIs for AI agents \u2014 crypto, DeFi, marketing intelligence, dispute resolution. x402 on Base.",
   "title": "AgentServices",
