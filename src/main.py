@@ -538,7 +538,7 @@ async def root(request: Request):
         return {
             "name": "AIServices",
             "tagline": "Paid APIs for AI agents — market data, marketing intelligence + dispute resolution",
-            "version": "4.0.0",
+            "version": "4.1.0",
             "payment": "x402 / USDC on Base",
             "wallet": WALLET,
             "services": {
