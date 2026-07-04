@@ -1,0 +1,78 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.vbkotecha/agentservices",
+  "version": "4.0.0",
+  "description": "Paid APIs for AI agents \u2014 crypto, DeFi, marketing intelligence, dispute resolution. x402 on Base.",
+  "title": "AgentServices",
+  "websiteUrl": "https://agentservices.to",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.aiservices.to/mcp"
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/vbkotecha/aiservices-api",
+    "source": "github"
+  },
+  "license": "MIT",
+  "categories": [
+    "finance",
+    "data",
+    "developer-tools"
+  ],
+  "tools": [
+    {
+      "name": "get_price",
+      "description": "Get current crypto price for any token (BTC, ETH, SOL, XRP...)"
+    },
+    {
+      "name": "get_batch_prices",
+      "description": "Get multiple crypto prices in one call"
+    },
+    {
+      "name": "get_indicators",
+      "description": "Technical indicators \u2014 RSI, Bollinger Bands, ATR, Support/Resistance ($0.02)"
+    },
+    {
+      "name": "get_fear_greed",
+      "description": "Crypto Fear & Greed Index (0-100)"
+    },
+    {
+      "name": "get_defi_yields",
+      "description": "Top DeFi yield pools by TVL ($0.02)"
+    },
+    {
+      "name": "get_swap_quote",
+      "description": "DEX swap quote across 6 chains via 0x API"
+    },
+    {
+      "name": "get_predictions",
+      "description": "Active Polymarket prediction markets"
+    },
+    {
+      "name": "get_crypto_news",
+      "description": "Latest crypto and blockchain news"
+    },
+    {
+      "name": "get_geolocation",
+      "description": "IP geolocation \u2014 country, city, ISP, coordinates"
+    },
+    {
+      "name": "extract_metadata",
+      "description": "URL metadata extraction and unfurling ($0.01)"
+    },
+    {
+      "name": "web_search",
+      "description": "AI-powered web search with structured results ($0.01)"
+    },
+    {
+      "name": "marketing_sentiment",
+      "description": "AI brand sentiment analysis across platforms ($0.03)"
+    },
+    {
+      "name": "marketing_ad_copy",
+      "description": "AI ad copy generator for Google/Meta/TikTok/Taboola ($0.05)"
+    }
+  ]
+}

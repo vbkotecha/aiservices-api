@@ -1,0 +1,24 @@
+name: Publish to MCP Registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server.json'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install -g @anthropic-ai/mcp-publisher
+      - run: mcp-publisher validate server.json
+      - run: mcp-publisher login github-oidc
+      - run: mcp-publisher publish server.json
