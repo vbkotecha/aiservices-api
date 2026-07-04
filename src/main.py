@@ -133,6 +133,31 @@ try:
             mime_type="application/json",
             description="AI-powered web search with structured results",
         ),
+        "POST /v1/marketing/sentiment": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="AI brand sentiment analysis across platforms",
+        ),
+        "POST /v1/marketing/trends": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="Industry trend detection with velocity scores",
+        ),
+        "POST /v1/marketing/competitors": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.05"),
+            mime_type="application/json",
+            description="Competitive intelligence — keywords, channels, strategy",
+        ),
+        "POST /v1/marketing/content-gaps": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.04"),
+            mime_type="application/json",
+            description="SEO content gap analysis",
+        ),
+        "POST /v1/marketing/ad-copy": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.05"),
+            mime_type="application/json",
+            description="AI ad copy generator for Google/Meta/TikTok/Taboola",
+        ),
     }
 
     app.add_middleware(
@@ -140,7 +165,7 @@ try:
         routes=payment_routes,
         server=payment_server,
     )
-    print(f"[x402] Payment middleware enabled on {X402_NETWORK_LABEL} — disputes ($0.05), indicators/yields ($0.02), metadata/search ($0.01)", flush=True)
+    print(f"[x402] Payment middleware enabled on {X402_NETWORK_LABEL} — disputes ($0.05), indicators/yields ($0.02), metadata/search ($0.01), marketing ($0.03–$0.05)", flush=True)
     X402_ENABLED = True
     X402_ERROR = None
 except ImportError as e:
