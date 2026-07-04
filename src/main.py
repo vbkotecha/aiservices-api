@@ -738,7 +738,7 @@ async def api_docs_page():
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIServices — Paid APIs for AI Agents</title>
+<title>AgentServices — Premium APIs for AI Agents</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a0a;color:#e0e0e0;line-height:1.6}
@@ -845,7 +845,7 @@ curl https://api.agentservices.to/v1/fear-greed
 
 <section>
 <h2>MCP Integration</h2>
-<p>Connect AIServices directly to Claude, Cursor, or any MCP client:</p>
+<p>Connect AgentServices directly to Claude, Cursor, or any MCP client:</p>
 <pre><code>MCP Server URL: https://api.agentservices.to/mcp
 Transport: Streamable HTTP</code></pre>
 <p>8 tools available immediately. No installation required.</p>
@@ -869,7 +869,7 @@ Transport: Streamable HTTP</code></pre>
 </section>
 
 <div class="footer">
-<p>AIServices v2.0.0 — MIT License</p>
+<p>AgentServices — MIT License</p>
 </div>
 </div>
 </body>

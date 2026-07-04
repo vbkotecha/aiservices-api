@@ -24,7 +24,7 @@ AFFILIATE_ADDRESS = os.environ.get("AFFILIATE_ADDRESS", "")
 
 
 def _fetch(url, timeout=10):
-    req = urllib.request.Request(url, headers={"User-Agent": "AIServices/2.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "AgentServices/2.0"})
     try:
         resp = urllib.request.urlopen(req, timeout=timeout)
         return json.loads(resp.read())

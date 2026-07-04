@@ -1,5 +1,5 @@
 """
-Remote MCP transport endpoint for AIServices.
+Remote MCP transport endpoint for AgentServices.
 Allows AI tools (Claude, Cursor, etc.) to connect directly without installing anything.
 Uses Streamable HTTP transport per MCP spec.
 """
@@ -149,13 +149,13 @@ MCP_TOOLS = [
 
 MCP_RESOURCES = [
     {
-        "uri": "aiservices://prices",
+        "uri": "agentservices://prices",
         "name": "Live Crypto Prices",
         "description": "Current crypto prices (BTC, ETH, SOL, XRP)",
         "mimeType": "application/json"
     },
     {
-        "uri": "aiservices://policies",
+        "uri": "agentservices://policies",
         "name": "Dispute Policy Templates",
         "description": "Available dispute resolution policies",
         "mimeType": "application/json"
@@ -193,7 +193,7 @@ async def mcp_handler(request: Request):
                     "resources": {"listChanged": False},
                 },
                 "serverInfo": {
-                    "name": "AIServices",
+                    "name": "AgentServices",
                     "version": "2.0.0",
                 }
             }
@@ -313,7 +313,7 @@ async def _execute_tool(tool_name: str, args: dict):
 async def mcp_tools_summary():
     """Human-readable summary of MCP tools for discovery."""
     return {
-        "server": "AIServices MCP Server",
+        "server": "AgentServices MCP Server",
         "endpoint": "https://api.aiservices.to/mcp",
         "transport": "streamable-http",
         "protocol_version": "2024-11-05",

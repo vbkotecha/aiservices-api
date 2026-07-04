@@ -10,7 +10,7 @@ from fastapi import HTTPException
 
 def _fetch(url, timeout=10):
     req = urllib.request.Request(url, headers={
-        "User-Agent": "AIServices/2.0",
+        "User-Agent": "AgentServices/2.0",
         "Accept": "application/json",
     })
     try:
@@ -25,7 +25,7 @@ def _fetch(url, timeout=10):
 def _fetch_rss(url, source_name, limit=10, timeout=10):
     """Fetch and parse an RSS feed into structured news items."""
     req = urllib.request.Request(url, headers={
-        "User-Agent": "AIServices/2.0",
+        "User-Agent": "AgentServices/2.0",
         "Accept": "application/rss+xml, application/xml, text/xml",
     })
     try:

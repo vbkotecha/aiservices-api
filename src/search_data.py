@@ -16,7 +16,7 @@ if _env_key:
     EXA_API_KEY = _env_key
 
 def _fetch_json(url, headers=None, timeout=10, data=None):
-    req = urllib.request.Request(url, headers=headers or {"User-Agent": "AIServices/2.0"})
+    req = urllib.request.Request(url, headers=headers or {"User-Agent": "AgentServices/2.0"})
     if data:
         req.data = json.dumps(data).encode()
         req.add_header("Content-Type", "application/json")
