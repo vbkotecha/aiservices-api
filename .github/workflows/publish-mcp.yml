@@ -10,9 +10,6 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -26,7 +23,9 @@ jobs:
           sudo cp bin/mcp-publisher /usr/local/bin/
       - name: Validate server.json
         run: mcp-publisher validate server.json
-      - name: Login via GitHub OIDC
-        run: mcp-publisher login github-oidc
+      - name: Login via DNS
+        env:
+          MCP_DNS_KEY: ${{ secrets.MCP_DNS_PRIVATE_KEY }}
+        run: mcp-publisher login dns --domain aiservices.to --private-key "$MCP_DNS_KEY"
       - name: Publish to MCP Registry
         run: mcp-publisher publish server.json
