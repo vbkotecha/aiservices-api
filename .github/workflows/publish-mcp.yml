@@ -15,10 +15,18 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-go@v5
         with:
-          node-version: '20'
-      - run: npm install -g @modelcontextprotocol/publisher
-      - run: mcp-publisher validate server.json
-      - run: mcp-publisher login github-oidc
-      - run: mcp-publisher publish server.json
+          go-version: '1.23'
+      - name: Build publisher
+        run: |
+          git clone https://github.com/modelcontextprotocol/registry.git /tmp/registry
+          cd /tmp/registry
+          make publisher
+          sudo cp bin/mcp-publisher /usr/local/bin/
+      - name: Validate server.json
+        run: mcp-publisher validate server.json
+      - name: Login via GitHub OIDC
+        run: mcp-publisher login github-oidc
+      - name: Publish to MCP Registry
+        run: mcp-publisher publish server.json
