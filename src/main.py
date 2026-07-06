@@ -798,6 +798,62 @@ async def agent_json():
     }
 
 
+@app.get("/.well-known/x402.json")
+async def x402_json_manifest():
+    """x402 v2 discovery manifest — what AgentGrade, Open 402 Directory, and x402.direct crawlers look for."""
+    paid_services = [
+        {"method": "GET", "path": "/v1/indicators/{symbol}", "price": "$0.02"},
+        {"method": "GET", "path": "/v1/yields", "price": "$0.02"},
+        {"method": "GET", "path": "/v1/metadata", "price": "$0.01"},
+        {"method": "GET", "path": "/v1/search", "price": "$0.01"},
+        {"method": "POST", "path": "/v1/disputes", "price": "$0.05"},
+        {"method": "POST", "path": "/v1/marketing/sentiment", "price": "$0.03"},
+        {"method": "POST", "path": "/v1/marketing/trends", "price": "$0.03"},
+        {"method": "POST", "path": "/v1/marketing/competitors", "price": "$0.05"},
+        {"method": "POST", "path": "/v1/marketing/content-gaps", "price": "$0.04"},
+        {"method": "POST", "path": "/v1/marketing/ad-copy", "price": "$0.05"},
+        {"method": "GET", "path": "/v1/whales", "price": "$0.02"},
+        {"method": "GET", "path": "/v1/exchange-flows", "price": "$0.02"},
+        {"method": "GET", "path": "/v1/correlation", "price": "$0.03"},
+        {"method": "GET", "path": "/v1/defi-tvl", "price": "$0.02"},
+        {"method": "GET", "path": "/v1/stablecoin-flows", "price": "$0.02"},
+        {"method": "GET", "path": "/v1/github-velocity", "price": "$0.02"},
+        {"method": "GET", "path": "/v1/macro", "price": "$0.02"},
+    ]
+    free_services = [
+        {"method": "GET", "path": "/v1/price/{symbol}", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/prices", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/fear-greed", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/global", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/trending", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/gas", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/geo/{ip}", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/swap/quote", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/predictions", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/news", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/social", "price": "$0.00"},
+        {"method": "GET", "path": "/v1/policies", "price": "$0.00"},
+        {"method": "POST", "path": "/mcp", "price": "$0.00"},
+    ]
+    return {
+        "x402Version": 2,
+        "name": "AgentServices",
+        "description": "Paid APIs for AI agents — crypto market data, DeFi yields, on-chain analytics, dispute resolution, and MCP integration",
+        "network": "eip155:8453",
+        "facilitator": "coinbase",
+        "payTo": X402_WALLET,
+        "currency": "USDC",
+        "website": "https://aiservices.to",
+        "apiBaseUrl": "https://api.aiservices.to",
+        "repository": "https://github.com/vbkotecha/aiservices-api",
+        "documentation": "https://api.aiservices.to/docs",
+        "services": paid_services + free_services,
+        "extensions": {
+            "bazaar": {"discoverable": True}
+        },
+    }
+
+
 @app.get("/llms.txt")
 async def llms_txt():
     """LLM-friendly API description for agent crawlers and AI discovery."""
