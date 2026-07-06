@@ -39,16 +39,25 @@ from onchain_data import (
     get_whales, get_exchange_flows, get_correlation_matrix,
     get_defi_tvl, get_stablecoin_flows, get_github_velocity, get_agent_context, get_macro,
 )
+from synthesis_data import (
+    get_token_risk, get_crypto_signal, get_hn_sentiment, get_npm_stats,
+    get_github_trending, get_yield_comparison,
+)
+from inference_gateway import list_models as list_inference_models, inference, quick_complete
 
 AISERVICES_PAY_TO = "0x9863aB6242663FCc84c33632741711dB78f8Fd15"
 WALLET = os.environ.get("WALLET_ADDRESS", AISERVICES_PAY_TO)
 
 app = FastAPI(
-    title="AIServices",
-    version="4.1.0",
-    description="""Paid APIs for AI agents — crypto market data, DeFi yields, DEX quotes, prediction markets, news, search, IP geolocation, URL metadata, on-chain analytics, whale tracking, correlation matrix, DeFi TVL, stablecoin flows, GitHub velocity, macro indicators, and dispute resolution.
+    title="AgentServices",
+    version="5.0.0",
+    description="""Paid APIs for AI agents — data, intelligence, inference, and more.
+Crypto market data, DeFi yields, DEX quotes, prediction markets, news, search, IP geolocation,
+URL metadata, on-chain analytics, whale tracking, correlation matrix, DeFi TVL, stablecoin flows,
+GitHub trending, npm stats, Hacker News sentiment, token risk scoring, crypto signals,
+LLM inference gateway, marketing intelligence, and more.
 
-All paid endpoints use x402 protocol with USDC on Base. Powered by AgentCourt policy engine.
+All paid endpoints use x402 protocol with USDC on Base.
 """,
 )
 
@@ -202,6 +211,48 @@ try:
             accepts=_payment_options(X402_WALLET, "$0.02"),
             mime_type="application/json",
             description="Macro economic and crypto indicators",
+        ),
+        # --- NEW: Inference Gateway (BlockRun competitor) ---
+        "POST /v1/inference": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="LLM inference gateway — chat completions via gpt-5.4/5.4-mini/5.5",
+        ),
+        "POST /v1/complete": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="Quick text completion — send a prompt, get a response",
+        ),
+        # --- NEW: Synthesis Endpoints ---
+        "GET /v1/token-risk/*": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="Token risk scoring — volatility, liquidity, market cap analysis",
+        ),
+        "GET /v1/signals/*": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.04"),
+            mime_type="application/json",
+            description="Crypto buy/sell signals synthesized from technical indicators",
+        ),
+        "GET /v1/hn-sentiment": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="Hacker News tech sentiment analysis",
+        ),
+        "GET /v1/npm-stats/*": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="NPM package download statistics and trend analysis",
+        ),
+        "GET /v1/github-trending": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="GitHub trending repositories",
+        ),
+        "GET /v1/yield-comparison": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="DeFi yield comparison with risk-adjusted analysis",
         ),
     }
 
@@ -657,7 +708,7 @@ async def health():
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,
         "x402_facilitator": X402_FACILITATOR_URL,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison"],
     }
 
 
@@ -1088,3 +1139,86 @@ Transport: Streamable HTTP</code></pre>
 </body>
 </html>
 """)
+
+
+# ============================================================
+# NEW v5.0.0 ENDPOINTS — Synthesis + Inference Gateway
+# ============================================================
+
+# --- Inference Gateway (BlockRun competitor) ---
+
+class InferenceRequest(BaseModel):
+    model: str = Field(default="gpt-5.4-mini", description="gpt-5.4, gpt-5.4-mini, or gpt-5.5")
+    messages: List[dict] = Field(description="Chat messages in OpenAI format [{role, content}]")
+    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    max_tokens: int = Field(default=1000, ge=1, le=16000)
+
+@app.get("/v1/models", tags=["Inference"])
+async def list_models():
+    """List available inference models (FREE)"""
+    return list_inference_models()
+
+@app.post("/v1/inference", tags=["Inference"],
+          summary="LLM Inference — Chat Completion",
+          description="Send a chat completion request. Models: gpt-5.4, gpt-5.4-mini, gpt-5.5. Costs $0.03 USDC via x402.")
+async def llm_inference(req: InferenceRequest):
+    """LLM inference gateway ($0.03 per call via x402)"""
+    return inference(
+        model=req.model,
+        messages=req.messages,
+        temperature=req.temperature,
+        max_tokens=req.max_tokens,
+    )
+
+@app.post("/v1/complete", tags=["Inference"],
+          summary="Quick Text Completion",
+          description="Send a prompt, get a completion. Simpler than /v1/inference. Costs $0.03 USDC via x402.")
+async def quick_completion(prompt: str, model: str = "gpt-5.4-mini", max_tokens: int = 500):
+    """Quick text completion ($0.03 per call via x402)"""
+    return quick_complete(prompt=prompt, model=model, max_tokens=max_tokens)
+
+
+# --- Synthesis Endpoints ---
+
+@app.get("/v1/token-risk/{token}", tags=["Synthesis"],
+         summary="Token Risk Scoring",
+         description="Risk score (0-100) for any crypto token. Analyzes volatility, liquidity, and market cap. Costs $0.03 USDC via x402.")
+async def token_risk(token: str):
+    """Token risk scoring ($0.03 per call via x402)"""
+    return get_token_risk(token)
+
+@app.get("/v1/signals/{symbol}", tags=["Synthesis"],
+         summary="Crypto Buy/Sell Signals",
+         description="Synthesized trading signal from RSI, moving averages, and Bollinger Bands. Costs $0.04 USDC via x402.")
+async def crypto_signals(symbol: str):
+    """Crypto signal feed ($0.04 per call via x402)"""
+    return get_crypto_signal(symbol)
+
+@app.get("/v1/hn-sentiment", tags=["Synthesis"],
+         summary="Hacker News Sentiment",
+         description="Tech sentiment from top HN stories. Optionally filter by query. Costs $0.02 USDC via x402.")
+async def hn_sentiment(query: str = ""):
+    """Hacker News sentiment ($0.02 per call via x402)"""
+    return get_hn_sentiment(query)
+
+@app.get("/v1/npm-stats/{package}", tags=["Synthesis"],
+         summary="NPM Download Stats",
+         description="Package download statistics and trend analysis. Costs $0.02 USDC via x402.")
+async def npm_stats(package: str):
+    """NPM package stats ($0.02 per call via x402)"""
+    return get_npm_stats(package)
+
+@app.get("/v1/github-trending", tags=["Synthesis"],
+         summary="GitHub Trending Repos",
+         description="Hot repositories created in the last 7 days. Filter by language. Costs $0.02 USDC via x402.")
+async def github_trending(language: str = "", since: str = "daily"):
+    """GitHub trending ($0.02 per call via x402)"""
+    return get_github_trending(language, since)
+
+@app.get("/v1/yield-comparison", tags=["Synthesis"],
+         summary="DeFi Yield Comparison with Risk",
+         description="Compare DeFi yields with risk-adjusted analysis. Not just raw APY. Costs $0.03 USDC via x402.")
+async def yield_comparison(chain: str = ""):
+    """Risk-adjusted yield comparison ($0.03 per call via x402)"""
+    return get_yield_comparison(chain)
+

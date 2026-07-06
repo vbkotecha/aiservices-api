@@ -1,2 +1,3 @@
 .letta/
 src/.env
+__pycache__/
