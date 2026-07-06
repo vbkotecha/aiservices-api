@@ -804,7 +804,7 @@ async def llms_txt():
         "> Paid data APIs for AI agents. Crypto prices, technical indicators, DeFi yields, IP geolocation, URL metadata, on-chain analytics, whale tracking, correlation matrix, DeFi TVL, stablecoin flows, GitHub velocity, macro indicators, marketing intelligence, and dispute resolution.",
         "",
         "## Base URL",
-        "https://api.agentservices.to",
+        "https://api.aiservices.to",
         "",
         "## Authentication",
         "Paid endpoints use x402 protocol (USDC on Base Mainnet). Free endpoints require no auth.",
@@ -847,16 +847,16 @@ async def llms_txt():
         "## Example Usage",
         "```",
         "# Free: Get BTC price",
-        "curl https://api.agentservices.to/v1/price/BTC",
+        "curl https://api.aiservices.to/v1/price/BTC",
         "",
         "# Paid: Get BTC indicators (requires x402 payment)",
-        "curl https://api.agentservices.to/v1/indicators/BTC",
+        "curl https://api.aiservices.to/v1/indicators/BTC",
         "```",
         "",
         f"## Payment Wallet\n{WALLET}",
         "",
         "## Links",
-        "- API Docs: https://api.agentservices.to/docs",
+        "- API Docs: https://api.aiservices.to/docs",
         "- GitHub: https://github.com/vbkotecha/aiservices-api",
     ]
     from starlette.responses import PlainTextResponse
@@ -876,7 +876,7 @@ async def web_manifest():
         "name": "AIServices",
         "short_name": "AIServices",
         "description": "Paid data APIs for AI agents — crypto, DeFi, geo, web metadata, marketing intelligence, dispute resolution",
-        "start_url": "https://api.agentservices.to",
+        "start_url": "https://api.aiservices.to",
         "scope": "/",
         "display": "standalone",
         "categories": ["developer", "finance", "data"],
@@ -937,16 +937,16 @@ a:hover{text-decoration:underline}
 <h2>Quick Start</h2>
 <p>No signup. No API keys. Free endpoints work immediately. Paid endpoints use x402 micropayments.</p>
 <pre><code># Free: Get BTC price
-curl https://api.agentservices.to/v1/price/BTC
+curl https://api.aiservices.to/v1/price/BTC
 
 # Free: Batch prices
-curl "https://api.agentservices.to/v1/prices?symbols=BTC,ETH,SOL"
+curl "https://api.aiservices.to/v1/prices?symbols=BTC,ETH,SOL"
 
 # Free: Fear & Greed Index
-curl https://api.agentservices.to/v1/fear-greed
+curl https://api.aiservices.to/v1/fear-greed
 
 # MCP: Connect your AI tool
-# URL: https://api.agentservices.to/mcp (Streamable HTTP)</code></pre>
+# URL: https://api.aiservices.to/mcp (Streamable HTTP)</code></pre>
 </section>
 
 <section>
@@ -1000,7 +1000,7 @@ curl https://api.agentservices.to/v1/fear-greed
 <section>
 <h2>MCP Integration</h2>
 <p>Connect AIServices directly to Claude, Cursor, or any MCP client:</p>
-<pre><code>MCP Server URL: https://api.agentservices.to/mcp
+<pre><code>MCP Server URL: https://api.aiservices.to/mcp
 Transport: Streamable HTTP</code></pre>
 <p>8 tools available immediately. No installation required.</p>
 </section>
@@ -1014,7 +1014,7 @@ Transport: Streamable HTTP</code></pre>
 <li>Agent pays in USDC on Base Mainnet</li>
 <li>Server verifies and returns data</li>
 </ol>
-<p class="wallet">Wallet: 0x1830DAdb0A16eb569B5f8526AADDF47ce85aC8e0</p>
+<p class="wallet">Wallet: 0x9863aB6242663FCc84c33632741711dB78f8Fd15</p>
 </section>
 
 <section>

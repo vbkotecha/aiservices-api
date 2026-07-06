@@ -9,7 +9,10 @@ import json
 import time
 from fastapi import HTTPException
 
-# 0x API base URLs per chain
+# 0x API requires an API key now (free tier: 100K calls/month)
+ZEROX_API_KEY = os.environ.get("ZEROX_API_KEY", "")
+
+# 0x API base URLs per chain (new unified API format)
 ZEROX_BASE = {
     "ethereum": "https://api.0x.org/swap",
     "base": "https://base-api.0x.org/swap",
@@ -24,11 +27,16 @@ AFFILIATE_ADDRESS = os.environ.get("AFFILIATE_ADDRESS", "")
 
 
 def _fetch(url, timeout=10):
-    req = urllib.request.Request(url, headers={"User-Agent": "AIServices/2.0"})
+    headers = {"User-Agent": "AIServices/2.0"}
+    if ZEROX_API_KEY:
+        headers["0x-api-key"] = ZEROX_API_KEY
+    req = urllib.request.Request(url, headers=headers)
     try:
         resp = urllib.request.urlopen(req, timeout=timeout)
         return json.loads(resp.read())
     except urllib.error.HTTPError as e:
+        if e.code == 401:
+            raise HTTPException(status_code=503, detail="DEX API requires ZEROX_API_KEY — not configured. Set ZEROX_API_KEY env var.")
         raise HTTPException(status_code=502, detail=f"DEX API error: {e.code}")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"DEX error: {str(e)}")
@@ -39,6 +47,9 @@ def get_swap_quote(chain: str, sell_token: str, buy_token: str, sell_amount: str
     Get a DEX swap quote from 0x API.
     Pass either sell_amount (in token units) or buy_amount.
     """
+    if not ZEROX_API_KEY:
+        raise HTTPException(status_code=503, detail="DEX swap quotes require ZEROX_API_KEY configuration. Free endpoints: /v1/trending, /v1/gas, /v1/price/{symbol}")
+
     base = ZEROX_BASE.get(chain.lower(), ZEROX_BASE["ethereum"])
     chain_lower = chain.lower()
     
