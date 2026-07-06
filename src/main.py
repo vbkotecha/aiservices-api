@@ -701,21 +701,21 @@ async def marketing_ad_copy(req: AdCopyRequest):
 @app.get("/v1/whales", tags=["On-Chain Data"],
          summary="Large Transaction Tracking",
          description="Whale transactions: large BTC (>=10 BTC) and ETH movements from public blockchain APIs. ($0.02)")
-async def whale_tracking():
+async def whale_tracking(limit: int = 50, min_btc: float = 10.0):
     """Large on-chain whale transactions ($0.02)"""
     return get_whales()
 
 @app.get("/v1/exchange-flows", tags=["On-Chain Data"],
          summary="CEX Reserve Flows",
          description="Centralized exchange reserves and 24h changes from DeFi Llama transparency data. ($0.02)")
-async def exchange_flows():
+async def exchange_flows(limit: int = 20):
     """CEX inflow/outflow tracking ($0.02)"""
     return get_exchange_flows()
 
 @app.get("/v1/correlation", tags=["Market Data"],
          summary="Cross-Asset Correlation Matrix",
          description="30-day Pearson correlations across top crypto assets (BTC, ETH, SOL, XRP, BNB, etc.). ($0.03)")
-async def correlation_matrix():
+async def correlation_matrix(days: int = 30):
     """Cross-asset correlation matrix ($0.03)"""
     return get_correlation_matrix()
 
@@ -729,7 +729,7 @@ async def defi_tvl(limit: int = 20, chain: str = "all"):
 @app.get("/v1/stablecoin-flows", tags=["On-Chain Data"],
          summary="Stablecoin Market Caps & Flows",
          description="Top stablecoins by market cap with supply data from DeFi Llama. ($0.02)")
-async def stablecoin_flows():
+async def stablecoin_flows(limit: int = 20):
     """Stablecoin supply and flows ($0.02)"""
     return get_stablecoin_flows()
 
@@ -750,7 +750,7 @@ async def agent_context():
 @app.get("/v1/macro", tags=["Market Data"],
          summary="Macro Economic Indicators",
          description="Crypto-macro indicators: global market cap, dominance, derivatives data. ($0.02)")
-async def macro_indicators():
+async def macro_indicators(currency: str = "usd"):
     """Macro economic indicators ($0.02)"""
     return get_macro()
 
@@ -1469,14 +1469,14 @@ async def sec_filings(ticker: str, filing_type: str = "10-K"):
 @app.get("/v1/commodities", tags=["Traditional Finance"],
          summary="Commodity Prices",
          description="Oil, gold, silver, copper, wheat, corn, coffee, and more. Undercuts LoneStar ($0.05). $0.03 USDC via x402.")
-async def commodities():
+async def commodities(category: str = "all"):
     """Commodity prices ($0.03 per call via x402)"""
     return get_commodities()
 
 @app.get("/v1/economic", tags=["Traditional Finance"],
          summary="Economic Indicators",
          description="CPI, GDP, unemployment, Fed funds rate, Treasury yields. From FRED. $0.03 USDC via x402.")
-async def economic_indicators():
+async def economic_indicators(indicator: str = "all"):
     """US economic indicators ($0.03 per call via x402)"""
     return get_economic_indicators()
 
