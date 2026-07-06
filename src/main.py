@@ -69,10 +69,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Security Headers ---
+# --- Security Headers + Bazaar Discovery Enrichment ---
+# x402 indexers (CDP Bazaar / agentic.market) validate resources by GETting
+# the live 402 response and checking for extensions.bazaar and
+# resource.serviceName/tags. Without these, resources stay stuck in
+# "processing" and never get indexed. This middleware enriches all 402
+# responses with the required bazaar discovery metadata.
+_BAZAAR_TAGS = ["data", "crypto", "defi", "search", "inference", "marketing-intelligence", "onchain", "analytics"]
+
 @app.middleware("http")
-async def add_security_headers(request, call_next):
+async def enrich_402_bazaar(request, call_next):
     response = await call_next(request)
+    # Security headers on all responses
     response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -80,6 +88,61 @@ async def add_security_headers(request, call_next):
     response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:;"
     response.headers["X-RateLimit-Limit"] = "100"
     response.headers["X-RateLimit-Window"] = "60s"
+
+    # Enrich 402 Payment Required responses with Bazaar discovery data
+    if response.status_code == 402:
+        # Get the payment-required header
+        pr_header = response.headers.get("payment-required", "")
+        if pr_header:
+            try:
+                import base64 as _b64
+                import json as _json
+                # Decode the base64 payment-required payload
+                try:
+                    decoded = _b64.b64decode(pr_header).decode()
+                except Exception:
+                    decoded = pr_header  # might already be raw JSON
+
+                payload = _json.loads(decoded)
+
+                # Fix resource URL: http -> https
+                resource = payload.get("resource", {})
+                if "url" in resource and resource["url"].startswith("http://"):
+                    resource["url"] = resource["url"].replace("http://", "https://", 1)
+
+                # Add serviceName and tags to resource (required by Bazaar indexers)
+                resource["serviceName"] = "AgentServices"
+                resource["tags"] = _BAZAAR_TAGS
+                payload["resource"] = resource
+
+                # Add extensions.bazaar to each accept entry
+                route_path = resource.get("url", "").split("aiservices.to", 1)[-1] if "aiservices.to" in resource.get("url", "") else resource.get("url", "")
+                route_desc = resource.get("description", "AgentServices API")
+
+                for accept in payload.get("accepts", []):
+                    # Fix payTo: ensure 0x prefix
+                    pay_to = accept.get("payTo", "")
+                    if pay_to and not pay_to.startswith("0x"):
+                        accept["payTo"] = "0x" + pay_to
+
+                    # Add bazaar extension if not present
+                    if "extensions" not in accept:
+                        accept["extensions"] = {}
+                    if "bazaar" not in accept["extensions"]:
+                        accept["extensions"]["bazaar"] = {
+                            "name": "AgentServices",
+                            "description": route_desc,
+                        }
+
+                # Re-encode and update header
+                updated_json = _json.dumps(payload, separators=(',', ':'))
+                updated_b64 = _b64.b64encode(updated_json.encode()).decode()
+                response.headers["payment-required"] = updated_b64
+
+            except Exception as e:
+                # Don't break the response if enrichment fails
+                print(f"[bazaar-enrich] Warning: failed to enrich 402: {e}", flush=True)
+
     return response
 
 # --- x402 Payment Protocol (Base Mainnet) ---
