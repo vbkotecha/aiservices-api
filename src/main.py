@@ -727,10 +727,10 @@ async def root(request: Request):
     if host.startswith("api."):
         return {
             "name": "AgentServices",
-            "tagline": "Paid APIs for AI agents — market data, marketing intelligence + dispute resolution",
+            "tagline": "Paid APIs for AI agents — data, inference, and market intelligence",
             "version": "4.1.0",
             "payment": "x402 / USDC on Base",
-            "wallet": WALLET,
+            "wallet": X402_WALLET,
             "services": {
                 "market_data": {
                     "price": {"endpoint": "GET /v1/price/{symbol}", "price": "free", "desc": "Current crypto price"},
@@ -771,10 +771,10 @@ async def api_discovery():
     """API discovery JSON for agents and crawlers."""
     return {
         "name": "AgentServices",
-        "tagline": "Paid APIs for AI agents — market data, marketing intelligence + dispute resolution",
+        "tagline": "Paid APIs for AI agents — data, inference, and market intelligence",
         "version": "3.0.0",
         "payment": "x402 / USDC on Base",
-        "wallet": WALLET,
+        "wallet": X402_WALLET,
         "services": {
             "market_data": {
                 "price": {"endpoint": "GET /v1/price/{symbol}", "price": "free", "desc": "Current crypto price"},
