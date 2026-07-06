@@ -196,6 +196,117 @@ MCP_TOOLS = [
         "name": "macro_indicators",
         "description": "Macro economic indicators: global market cap, dominance, derivatives ($0.02 x402)",
         "inputSchema": {"type": "object", "properties": {}}
+    },
+    # v5.0.0 — Inference Gateway
+    {
+        "name": "llm_inference",
+        "description": "LLM inference gateway — chat completions via gpt-5.4/5.4-mini/5.5 ($0.03 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "model": {"type": "string", "description": "gpt-5.4, gpt-5.4-mini, or gpt-5.5", "default": "gpt-5.4-mini"},
+                "messages": {"type": "array", "description": "Chat messages [{role, content}]"},
+                "max_tokens": {"type": "integer", "default": 1000}
+            },
+            "required": ["messages"]
+        }
+    },
+    # v5.0.0 — Synthesis
+    {
+        "name": "token_risk",
+        "description": "Token risk scoring — volatility, liquidity, market cap analysis ($0.03 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"token": {"type": "string", "description": "CoinGecko token ID (e.g. bitcoin)"}},
+            "required": ["token"]
+        }
+    },
+    {
+        "name": "crypto_signals",
+        "description": "Crypto buy/sell signals from RSI, moving averages, Bollinger Bands ($0.04 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"symbol": {"type": "string", "description": "Symbol (BTC, ETH, etc.)"}},
+            "required": ["symbol"]
+        }
+    },
+    # v5.1.0 — Traditional Finance
+    {
+        "name": "stock_quote",
+        "description": "Real-time stock market quote from Yahoo Finance ($0.02 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"ticker": {"type": "string", "description": "Stock ticker (e.g. AAPL, TSLA)"}},
+            "required": ["ticker"]
+        }
+    },
+    {
+        "name": "stock_history",
+        "description": "Historical OHLCV stock data ($0.03 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "ticker": {"type": "string"},
+                "range": {"type": "string", "default": "3mo", "description": "1d, 5d, 1mo, 3mo, 6mo, 1y, 5y"}
+            },
+            "required": ["ticker"]
+        }
+    },
+    {
+        "name": "sec_filings",
+        "description": "SEC filings parser — 10-K, 10-Q, 8-K from EDGAR ($0.03 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "ticker": {"type": "string"},
+                "filing_type": {"type": "string", "default": "10-K"}
+            },
+            "required": ["ticker"]
+        }
+    },
+    {
+        "name": "commodities",
+        "description": "Commodity prices — oil, gold, silver, copper, wheat ($0.03 x402)",
+        "inputSchema": {"type": "object", "properties": {}}
+    },
+    {
+        "name": "fx_rates",
+        "description": "Real-time FX/forex rates for 30+ currencies ($0.003 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"base": {"type": "string", "default": "USD"}}
+        }
+    },
+    # v5.1.0 — Utility
+    {
+        "name": "web_extract",
+        "description": "Extract clean text from any URL — strips ads, nav, scripts ($0.002 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"url": {"type": "string", "description": "URL to extract content from"}},
+            "required": ["url"]
+        }
+    },
+    {
+        "name": "package_security",
+        "description": "Check PyPI/npm package for known vulnerabilities ($0.02 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "package": {"type": "string", "description": "Package name"},
+                "ecosystem": {"type": "string", "default": "PyPI", "description": "PyPI or npm"}
+            },
+            "required": ["package"]
+        }
+    },
+    {
+        "name": "seo_keywords",
+        "description": "SEO keyword research with volume estimates and competition ($0.01 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"keyword": {"type": "string"}},
+            "required": ["keyword"]
+        }
     }
 ]
 
@@ -218,8 +329,8 @@ MCP_RESOURCES = [
 SERVER_CARD = {
     "serverInfo": {
         "name": "AgentServices",
-        "version": "4.1.0",
-        "description": "Paid APIs for AI agents — crypto market data, DeFi yields, on-chain analytics, dispute resolution. x402 payments on Base."
+        "version": "5.1.0",
+        "description": "Paid APIs for AI agents — 46 services, 34 paid. Crypto, stocks, SEC, commodities, FX, inference, signals, extraction, security. x402 on Base."
     },
     "transport": {
         "type": "streamable-http",
@@ -420,6 +531,41 @@ async def _execute_tool(tool_name: str, args: dict):
         elif tool_name == "macro_indicators":
             from onchain_data import get_macro
             return get_macro()
+
+        # v5.0+ tools
+        elif tool_name == "llm_inference":
+            from inference_gateway import inference
+            return inference(model=args.get("model", "gpt-5.4-mini"), messages=args.get("messages", []), max_tokens=args.get("max_tokens", 1000))
+        elif tool_name == "token_risk":
+            from synthesis_data import get_token_risk
+            return get_token_risk(args.get("token", "bitcoin"))
+        elif tool_name == "crypto_signals":
+            from synthesis_data import get_crypto_signal
+            return get_crypto_signal(args.get("symbol", "BTC"))
+        elif tool_name == "stock_quote":
+            from tradfi_data import get_stock_quote
+            return get_stock_quote(args.get("ticker", "AAPL"))
+        elif tool_name == "stock_history":
+            from tradfi_data import get_stock_history
+            return get_stock_history(args.get("ticker", "AAPL"), args.get("range", "3mo"))
+        elif tool_name == "sec_filings":
+            from tradfi_data import get_sec_filings
+            return get_sec_filings(args.get("ticker", "AAPL"), args.get("filing_type", "10-K"))
+        elif tool_name == "commodities":
+            from tradfi_data import get_commodities
+            return get_commodities()
+        elif tool_name == "fx_rates":
+            from tradfi_data import get_fx_rates
+            return get_fx_rates(args.get("base", "USD"))
+        elif tool_name == "web_extract":
+            from utility_data import extract_web_content
+            return extract_web_content(args.get("url", ""))
+        elif tool_name == "package_security":
+            from utility_data import scan_package_security
+            return scan_package_security(args.get("package", "requests"), args.get("ecosystem", "PyPI"))
+        elif tool_name == "seo_keywords":
+            from utility_data import seo_keywords
+            return seo_keywords(args.get("keyword", ""))
 
         else:
             return {"error": f"Unknown tool: {tool_name}"}
