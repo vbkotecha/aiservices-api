@@ -41,7 +41,7 @@ from onchain_data import (
 )
 from synthesis_data import (
     get_token_risk, get_crypto_signal, get_hn_sentiment, get_npm_stats,
-    get_github_trending, get_yield_comparison,
+    get_github_trending, get_yield_comparison, deep_research,
 )
 from inference_gateway import list_models as list_inference_models, inference, quick_complete
 from tradfi_data import get_stock_quote, get_stock_history, get_sec_filings, get_commodities, get_economic_indicators, get_fx_rates
@@ -365,6 +365,12 @@ try:
             accepts=_payment_options(X402_WALLET, "$0.01"),
             mime_type="application/json",
             description="SEO keyword research — volume estimates and competition",
+        ),
+        # --- NEW: Deep Research (flagship bundled endpoint) ---
+        "GET /v1/research": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.05"),
+            mime_type="application/json",
+            description="Deep research — search + extract + synthesize in one call",
         ),
     }
 
@@ -837,6 +843,7 @@ async def api_discovery():
             },
             "search": {
                 "web_search": {"endpoint": "GET /v1/search?q=...", "price": "$0.01", "desc": "AI-powered web search"},
+                "deep_research": {"endpoint": "GET /v1/research?q=...", "price": "$0.05", "desc": "Search + extract + synthesize in one call"},
             },
             "dex": {
                 "swap_quote": {"endpoint": "GET /v1/swap/quote", "price": "free", "desc": "DEX swap quote (0x API, 6 chains)"},
@@ -890,7 +897,7 @@ async def health():
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,
         "x402_facilitator": X402_FACILITATOR_URL,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research"],
     }
 
 
@@ -928,6 +935,7 @@ async def x402_manifest():
         {"path": "/v1/stablecoin-flows", "method": "GET", "price": "$0.02", "description": "Stablecoin market caps and supply data"},
         {"path": "/v1/github-velocity", "method": "GET", "price": "$0.02", "description": "GitHub crypto repo velocity scores"},
         {"path": "/v1/macro", "method": "GET", "price": "$0.02", "description": "Macro economic and crypto indicators"},
+        {"path": "/v1/research", "method": "GET", "price": "$0.05", "description": "Deep research — search + extract + synthesize in one call"},
     ]
     paid_endpoints = [endpoint for endpoint in endpoints if endpoint["price"] != "$0.00"]
     return {
@@ -1168,6 +1176,7 @@ async def llms_txt():
         "- GET /v1/extract?url=... — Web content extraction ($0.002)",
         "- GET /v1/security/{package} — Package vulnerability scan ($0.02)",
         "- GET /v1/seo/keywords?keyword=... — SEO keyword research ($0.01)",
+        "- GET /v1/research?q=... — Deep research: search + extract + synthesize ($0.05)",
         "",
         "## Free Agent Tools",
         "- GET /v1/agent-context — Paste-ready market context for LLM prompts",
@@ -1512,4 +1521,19 @@ async def package_security(package: str, ecosystem: str = "PyPI"):
 async def keyword_research(keyword: str):
     """SEO keyword research ($0.01 per call via x402)"""
     return seo_keywords(keyword)
+
+
+# --- Deep Research (Flagship Bundled Endpoint) ---
+
+@app.get("/v1/research", tags=["Research"],
+         summary="Deep Research — Search + Extract + Synthesize",
+         description="One-call deep research: searches the web, extracts content from top sources, and synthesizes an intelligence brief with key findings, themes, and sentiment. Replaces 3+ separate API calls. $0.05 USDC via x402.")
+async def research_endpoint(q: str, sources: int = 3):
+    """
+    Deep Research ($0.05 per call via x402)
+
+    Bundles: web search + content extraction + synthesis analysis.
+    Returns a structured intelligence brief with key findings, themes, and sentiment.
+    """
+    return deep_research(q, max_sources=min(sources, 5))
 
