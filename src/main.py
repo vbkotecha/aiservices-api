@@ -870,6 +870,14 @@ async def x402_json_manifest():
         {"method": "GET", "path": "/v1/stablecoin-flows", "price": "$0.02"},
         {"method": "GET", "path": "/v1/github-velocity", "price": "$0.02"},
         {"method": "GET", "path": "/v1/macro", "price": "$0.02"},
+        {"method": "POST", "path": "/v1/inference", "price": "$0.03"},
+        {"method": "POST", "path": "/v1/complete", "price": "$0.03"},
+        {"method": "GET", "path": "/v1/token-risk/{token}", "price": "$0.03"},
+        {"method": "GET", "path": "/v1/signals/{symbol}", "price": "$0.04"},
+        {"method": "GET", "path": "/v1/hn-sentiment", "price": "$0.02"},
+        {"method": "GET", "path": "/v1/npm-stats/{package}", "price": "$0.02"},
+        {"method": "GET", "path": "/v1/github-trending", "price": "$0.02"},
+        {"method": "GET", "path": "/v1/yield-comparison", "price": "$0.03"},
     ]
     free_services = [
         {"method": "GET", "path": "/v1/price/{symbol}", "price": "$0.00"},
@@ -889,7 +897,7 @@ async def x402_json_manifest():
     return {
         "x402Version": 2,
         "name": "AgentServices",
-        "description": "Paid APIs for AI agents — crypto market data, DeFi yields, on-chain analytics, dispute resolution, and MCP integration",
+        "description": "Paid APIs for AI agents — crypto data, DeFi yields, on-chain analytics, inference gateway, market signals, token risk scoring, and MCP integration",
         "network": "eip155:8453",
         "facilitator": "coinbase",
         "payTo": X402_WALLET,
