@@ -437,3 +437,33 @@ async def mcp_tools_summary():
 async def mcp_server_card():
     """Static MCP server card for registry discovery (Smithery, mcp-marketplace.io)."""
     return SERVER_CARD
+
+@router.get("/.well-known/mcp")
+async def mcp_well_known():
+    """SEP-1960 MCP discovery manifest — terse, machine-first.
+    Enumerates transport endpoints and capabilities for auto-discovery.
+    Probed by Claude Desktop and other MCP clients.
+    """
+    return JSONResponse(
+        {
+            "version": "2024-11-05",
+            "name": "AgentServices",
+            "description": "Paid APIs for AI agents — crypto market data, DeFi yields, on-chain analytics, dispute resolution. x402 payments on Base.",
+            "transports": {
+                "streamable-http": {
+                    "endpoint": "https://api.aiservices.to/mcp",
+                    "capabilities": {"tools": True, "resources": False, "prompts": False}
+                }
+            },
+            "authentication": {"type": "none", "note": "Free tools require no auth. Paid tools use x402 (HTTP 402) payment."},
+            "pricing": {"protocol": "x402", "currency": "USDC", "chain": "base"},
+            "repository": "https://github.com/vbkotecha/aiservices-api",
+            "tools_count": len(MCP_TOOLS),
+            "links": {
+                "server-card": "https://api.aiservices.to/.well-known/mcp/server-card.json",
+                "documentation": "https://api.aiservices.to/docs",
+                "health": "https://api.aiservices.to/health"
+            }
+        },
+        headers={"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"}
+    )
