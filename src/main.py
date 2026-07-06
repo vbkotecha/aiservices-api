@@ -44,6 +44,8 @@ from synthesis_data import (
     get_github_trending, get_yield_comparison,
 )
 from inference_gateway import list_models as list_inference_models, inference, quick_complete
+from tradfi_data import get_stock_quote, get_stock_history, get_sec_filings, get_commodities, get_economic_indicators, get_fx_rates
+from utility_data import extract_web_content, scan_package_security, seo_keywords
 
 AISERVICES_PAY_TO = "0x9863aB6242663FCc84c33632741711dB78f8Fd15"
 WALLET = os.environ.get("WALLET_ADDRESS", AISERVICES_PAY_TO)
@@ -316,6 +318,53 @@ try:
             accepts=_payment_options(X402_WALLET, "$0.03"),
             mime_type="application/json",
             description="DeFi yield comparison with risk-adjusted analysis",
+        ),
+        # --- NEW: Traditional Finance (gap fillers) ---
+        "GET /v1/stocks/*": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="Real-time stock quotes from Yahoo Finance",
+        ),
+        "GET /v1/stocks/*/history": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="Historical OHLCV stock data",
+        ),
+        "GET /v1/sec/*": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="SEC filings parser — 10-K, 10-Q, 8-K, Form 4 from EDGAR",
+        ),
+        "GET /v1/commodities": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="Commodity prices — oil, gold, silver, copper, wheat, more",
+        ),
+        "GET /v1/economic": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="US economic indicators — CPI, GDP, unemployment, Fed rate",
+        ),
+        "GET /v1/fx": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.003"),
+            mime_type="application/json",
+            description="Real-time FX/forex rates for 30+ currencies",
+        ),
+        # --- NEW: Utility (gap fillers) ---
+        "GET /v1/extract": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.002"),
+            mime_type="application/json",
+            description="Web content extraction — clean text from any URL",
+        ),
+        "GET /v1/security/*": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="Package security scan — check PyPI/npm for vulnerabilities",
+        ),
+        "GET /v1/seo/keywords": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.01"),
+            mime_type="application/json",
+            description="SEO keyword research — volume estimates and competition",
         ),
     }
 
@@ -841,7 +890,7 @@ async def health():
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,
         "x402_facilitator": X402_FACILITATOR_URL,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords"],
     }
 
 
@@ -1362,4 +1411,77 @@ async def github_trending(language: str = "", since: str = "daily"):
 async def yield_comparison(chain: str = ""):
     """Risk-adjusted yield comparison ($0.03 per call via x402)"""
     return get_yield_comparison(chain)
+
+
+# ============================================================
+# TRADITIONAL FINANCE ENDPOINTS (v5.1.0 — Gap Fillers)
+# ============================================================
+
+@app.get("/v1/stocks/{ticker}", tags=["Traditional Finance"],
+         summary="Stock Market Quote",
+         description="Real-time stock quote from Yahoo Finance. Only 2 providers on Bazaar. $0.02 USDC via x402.")
+async def stock_quote(ticker: str):
+    """Stock quote ($0.02 per call via x402)"""
+    return get_stock_quote(ticker)
+
+@app.get("/v1/stocks/{ticker}/history", tags=["Traditional Finance"],
+         summary="Historical Stock Data",
+         description="Historical OHLCV data. Range: 1d, 5d, 1mo, 3mo, 6mo, 1y, 5y. $0.03 USDC via x402.")
+async def stock_history(ticker: str, range: str = "3mo"):
+    """Historical stock OHLCV ($0.03 per call via x402)"""
+    return get_stock_history(ticker, range)
+
+@app.get("/v1/sec/{ticker}", tags=["Traditional Finance"],
+         summary="SEC Filings Parser",
+         description="Recent SEC filings (10-K, 10-Q, 8-K, Form 4) from EDGAR. Only 2 providers on Bazaar. $0.03 USDC via x402.")
+async def sec_filings(ticker: str, filing_type: str = "10-K"):
+    """SEC filings ($0.03 per call via x402)"""
+    return get_sec_filings(ticker, filing_type)
+
+@app.get("/v1/commodities", tags=["Traditional Finance"],
+         summary="Commodity Prices",
+         description="Oil, gold, silver, copper, wheat, corn, coffee, and more. Undercuts LoneStar ($0.05). $0.03 USDC via x402.")
+async def commodities():
+    """Commodity prices ($0.03 per call via x402)"""
+    return get_commodities()
+
+@app.get("/v1/economic", tags=["Traditional Finance"],
+         summary="Economic Indicators",
+         description="CPI, GDP, unemployment, Fed funds rate, Treasury yields. From FRED. $0.03 USDC via x402.")
+async def economic_indicators():
+    """US economic indicators ($0.03 per call via x402)"""
+    return get_economic_indicators()
+
+@app.get("/v1/fx", tags=["Traditional Finance"],
+         summary="FX / Forex Rates",
+         description="Real-time exchange rates for 30+ currencies. Only 1 provider on Bazaar. $0.003 USDC via x402.")
+async def fx_rates(base: str = "USD"):
+    """FX rates ($0.003 per call via x402)"""
+    return get_fx_rates(base)
+
+
+# ============================================================
+# UTILITY ENDPOINTS (v5.1.0 — Gap Fillers)
+# ============================================================
+
+@app.get("/v1/extract", tags=["Utility"],
+         summary="Web Content Extraction",
+         description="Fetch any URL and get clean, token-efficient text. Strips ads, nav, scripts. $0.002 USDC via x402.")
+async def web_extract(url: str):
+    """Web content extraction ($0.002 per call via x402)"""
+    return extract_web_content(url)
+
+@app.get("/v1/security/{package}", tags=["Utility"],
+         summary="Package Security Scan",
+         description="Check PyPI/npm packages for known vulnerabilities. Only 1 provider on Bazaar. $0.02 USDC via x402.")
+async def package_security(package: str, ecosystem: str = "PyPI"):
+    """Package security scan ($0.02 per call via x402)"""
+    return scan_package_security(package, ecosystem)
+
+@app.get("/v1/seo/keywords", tags=["Utility"],
+         summary="SEO Keyword Research",
+         description="Keyword research with volume estimates and competition data. SpyFu has 46 endpoints — proven demand. $0.01 USDC via x402.")
+async def keyword_research(keyword: str):
+    """SEO keyword research ($0.01 per call via x402)"""
+    return seo_keywords(keyword)
 
