@@ -327,6 +327,76 @@ try:
     print(f"[x402] Payment middleware enabled on {X402_NETWORK_LABEL} — disputes ($0.05), indicators/yields/correlation ($0.02–$0.03), metadata/search ($0.01), marketing ($0.03–$0.05), on-chain data ($0.02–$0.03)", flush=True)
     X402_ENABLED = True
     X402_ERROR = None
+
+    # CRITICAL: Bazaar discovery enrichment middleware — must be added AFTER
+    # PaymentMiddlewareASGI so it's the outermost layer and can intercept 402
+    # responses from the x402 middleware. Without this, CDP Bazaar indexers
+    # never see extensions.bazaar in the live 402 and resources stay stuck
+    # in "processing" — never appearing on agentic.market.
+    from starlette.middleware.base import BaseHTTPMiddleware
+    from starlette.responses import Response as StarletteResponse
+    import base64 as _b64_enrich
+    import json as _json_enrich
+
+    _ENRICH_TAGS = ["data", "crypto", "defi", "search", "inference", "marketing-intelligence", "onchain", "analytics"]
+
+    class BazaarEnrichmentMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request, call_next):
+            response = await call_next(request)
+            if response.status_code == 402:
+                pr_header = response.headers.get("payment-required", "")
+                if pr_header:
+                    try:
+                        # Try base64 decode first, then raw JSON
+                        try:
+                            decoded = _b64_enrich.b64decode(pr_header).decode()
+                        except Exception:
+                            decoded = pr_header
+
+                        payload = _json_enrich.loads(decoded)
+
+                        # Fix resource URL: http -> https
+                        resource = payload.get("resource", {})
+                        if "url" in resource and resource["url"].startswith("http://"):
+                            resource["url"] = resource["url"].replace("http://", "https://", 1)
+
+                        # Add serviceName and tags to resource (Bazaar indexer requirement)
+                        resource["serviceName"] = "AgentServices"
+                        resource["tags"] = _ENRICH_TAGS
+                        payload["resource"] = resource
+
+                        route_desc = resource.get("description", "AgentServices API")
+
+                        # Enrich accepts with bazaar extension + fix payTo
+                        for accept in payload.get("accepts", []):
+                            # Fix payTo: ensure 0x prefix
+                            pay_to = accept.get("payTo", "")
+                            if pay_to and not pay_to.startswith("0x"):
+                                accept["payTo"] = "0x" + pay_to
+
+                            # Add bazaar extension
+                            if "extensions" not in accept:
+                                accept["extensions"] = {}
+                            if "bazaar" not in accept["extensions"]:
+                                accept["extensions"]["bazaar"] = {
+                                    "name": "AgentServices",
+                                    "description": route_desc,
+                                }
+
+                        # Re-encode and update header
+                        updated_json = _json_enrich.dumps(payload, separators=(',', ':'))
+                        updated_b64 = _b64_enrich.b64encode(updated_json.encode()).decode()
+                        response.headers["payment-required"] = updated_b64
+                        print(f"[bazaar-enrich] Enriched 402 for {resource.get('url', 'unknown')}", flush=True)
+
+                    except Exception as e:
+                        print(f"[bazaar-enrich] Warning: failed to enrich 402: {e}", flush=True)
+
+            return response
+
+    app.add_middleware(BazaarEnrichmentMiddleware)
+    print("[bazaar-enrich] Bazaar discovery enrichment middleware enabled", flush=True)
+
 except ImportError as e:
     print(f"[x402] NOT installed — running in free mode. Error: {e}", flush=True)
     X402_ENABLED = False
