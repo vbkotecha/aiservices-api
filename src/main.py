@@ -73,19 +73,56 @@ async def add_security_headers(request, call_next):
     response.headers["X-RateLimit-Window"] = "60s"
     return response
 
-# --- x402 Payment Protocol (Base Mainnet) ---
+# --- x402 Payment Protocol (Multi-chain: Base + Algorand) ---
 # Payment receiver is intentionally separated from WALLET_ADDRESS so an agent
 # consumer wallet cannot accidentally become the API revenue wallet in prod.
 X402_WALLET = os.environ.get("X402_PAY_TO", os.environ.get("X402_WALLET_ADDRESS", AISERVICES_PAY_TO))
 X402_BASE_NETWORK = "eip155:8453"
 X402_BSC_NETWORK = "eip155:56"
+
+# Algorand networks (CAIP-2 identifiers)
+ALGORAND_MAINNET_CAIP2 = "algorand:wGHE2Pwdvd7S12GL5QOHmCMCcP4BpQwLW7c5LT2t4BM="
+ALGORAND_TESTNET_CAIP2 = "algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI="
+
+# Algorand receiver address (separate from EVM wallet — Algorand uses different address format)
+X402_ALGORAND_WALLET = os.environ.get("X402_ALGORAND_WALLET", "")  # 58-char Algorand address
+X402_ALGORAND_ENABLED = os.environ.get("X402_ALGORAND_ENABLED", "").lower() in ("true", "1", "yes")
+
+# USDC ASA IDs on Algorand
+ALGORAND_USDC_MAINNET_ASA = "31566704"  # USDC on Algorand Mainnet
+ALGORAND_USDC_TESTNET_ASA = "10458941"  # USDC on Algorand Testnet
+
 X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
 
-# Multi-chain: Dexter facilitator (x402.dexter.cash) supports Base + BSC + more.
-# CDP facilitator supports Base only. We detect and register accordingly.
-X402_IS_MULTICHAIN = any(d in X402_FACILITATOR_URL.lower() for d in ("dexter", "infra402", "aeon"))
-X402_NETWORKS = [X402_BASE_NETWORK] + ([X402_BSC_NETWORK] if X402_IS_MULTICHAIN else [])
-X402_NETWORK_LABEL = "Base + BSC" if X402_IS_MULTICHAIN else "Base"
+# GoPlausible multichain facilitator — supports EVM (Base) + AVM (Algorand) + SVM (Solana)
+X402_GOPLAUSIBLE_FACILITATOR = "https://facilitator.goplausible.xyz"
+
+# Determine facilitator strategy:
+# - Algorand enabled → use GoPlausible (supports both EVM + AVM)
+# - Multi-chain (Dexter/Infra402/Aeon) → use that facilitator
+# - Default → CDP for Base only
+X402_USE_GOPLAUSIBLE = X402_ALGORAND_ENABLED or "goplausible" in X402_FACILITATOR_URL.lower()
+X402_IS_MULTICHAIN = X402_USE_GOPLAUSIBLE or any(
+    d in X402_FACILITATOR_URL.lower() for d in ("dexter", "infra402", "aeon")
+)
+
+# Build network list
+X402_NETWORKS = [X402_BASE_NETWORK]
+if X402_IS_MULTICHAIN and not X402_USE_GOPLAUSIBLE:
+    X402_NETWORKS.append(X402_BSC_NETWORK)
+
+X402_ALGORAND_NETWORKS = []
+if X402_ALGORAND_ENABLED and X402_ALGORAND_WALLET:
+    # Start with Testnet for development, add Mainnet when wallet is funded
+    use_mainnet = os.environ.get("X402_ALGORAND_USE_MAINNET", "").lower() in ("true", "1", "yes")
+    X402_ALGORAND_NETWORKS = [ALGORAND_MAINNET_CAIP2 if use_mainnet else ALGORAND_TESTNET_CAIP2]
+
+X402_NETWORK_LABEL = "Base"
+if X402_USE_GOPLAUSIBLE and X402_ALGORAND_ENABLED:
+    net_short = "Algorand Mainnet" if os.environ.get("X402_ALGORAND_USE_MAINNET", "").lower() in ("true", "1", "yes") else "Algorand Testnet"
+    X402_NETWORK_LABEL = f"Base + {net_short}"
+elif X402_IS_MULTICHAIN:
+    X402_NETWORK_LABEL = "Base + BSC"
 
 X402_ENABLED = False
 X402_ERROR = "Not initialized"
@@ -97,25 +134,56 @@ try:
     from x402.server import x402ResourceServer
     from x402.extensions.bazaar import bazaar_resource_server_extension
 
-    # Build facilitator — CDP needs JWT auth headers, others (Dexter) are open
-    facilitator_config_kwargs = {"url": X402_FACILITATOR_URL}
-    if not X402_IS_MULTICHAIN:
-        from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
-        facilitator_config_kwargs["url"] = CDP_FACILITATOR_URL
-        facilitator_config_kwargs["auth_provider"] = CreateHeadersAuthProvider(create_cdp_auth_headers)
+    # Import AVM scheme if Algorand is enabled
+    if X402_ALGORAND_ENABLED:
+        from x402.mechanisms.avm.exact import ExactAvmServerScheme
+
+    # Build facilitator strategy:
+    # - GoPlausible: supports EVM + AVM, open access (no JWT needed)
+    # - CDP: Base only, needs JWT auth
+    # - Dexter/others: multi-chain EVM, open access
+    if X402_USE_GOPLAUSIBLE:
+        facilitator_config_kwargs = {"url": X402_GOPLAUSIBLE_FACILITATOR}
+    else:
+        facilitator_config_kwargs = {"url": X402_FACILITATOR_URL}
+        if not X402_IS_MULTICHAIN:
+            from x402_payment import create_cdp_auth_headers, CDP_FACILITATOR_URL
+            facilitator_config_kwargs["url"] = CDP_FACILITATOR_URL
+            facilitator_config_kwargs["auth_provider"] = CreateHeadersAuthProvider(create_cdp_auth_headers)
 
     facilitator = HTTPFacilitatorClient(FacilitatorConfig(**facilitator_config_kwargs))
     payment_server = x402ResourceServer(facilitator)
-    for net in X402_NETWORKS:
+
+    # Register EVM networks (Base, optionally BSC)
+    evm_networks = X402_NETWORKS if not X402_USE_GOPLAUSIBLE else [X402_BASE_NETWORK]
+    for net in evm_networks:
         payment_server.register(net, ExactEvmServerScheme())
+
+    # Register AVM networks (Algorand)
+    for net in X402_ALGORAND_NETWORKS:
+        payment_server.register(net, ExactAvmServerScheme())
+
     payment_server.register_extension(bazaar_resource_server_extension)
 
     def _payment_options(wallet: str, price: str) -> list:
         """Generate PaymentOption for every supported network (multi-chain)."""
-        return [
+        options = [
             PaymentOption(scheme="exact", pay_to=wallet, price=price, network=net)
-            for net in X402_NETWORKS
+            for net in evm_networks
         ]
+        # Add Algorand payment options with USDC ASA
+        for net in X402_ALGORAND_NETWORKS:
+            usdc_asa = ALGORAND_USDC_MAINNET_ASA if "wGHE2Pwdvd7S12GL5QOHmCMCcP4BpQwLW7c5LT2t4BM=" in net else ALGORAND_USDC_TESTNET_ASA
+            options.append(
+                PaymentOption(
+                    scheme="exact",
+                    pay_to=X402_ALGORAND_WALLET,
+                    price=price,
+                    network=net,
+                    extra={"asset": usdc_asa},
+                )
+            )
+        return options
 
     payment_routes = {
         "POST /v1/disputes": RouteConfig(
@@ -655,8 +723,9 @@ async def health():
         "version": "4.0.0",
         "x402_enabled": X402_ENABLED,
         "x402_error": X402_ERROR,
-        "x402_networks": X402_NETWORKS,
-        "x402_facilitator": X402_FACILITATOR_URL,
+        "x402_networks": X402_NETWORKS + X402_ALGORAND_NETWORKS,
+        "x402_facilitator": X402_GOPLAUSIBLE_FACILITATOR if X402_USE_GOPLAUSIBLE else X402_FACILITATOR_URL,
+        "x402_algorand_enabled": X402_ALGORAND_ENABLED,
         "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro"],
     }
 
