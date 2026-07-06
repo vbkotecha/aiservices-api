@@ -1,7 +1,7 @@
 """
 Remote MCP transport endpoint for AgentServices.
 Allows AI tools (Claude, Cursor, etc.) to connect directly without installing anything.
-Uses Streamable HTTP transport per MCP spec.
+Implements MCP 2026-07-28 spec (stateless, header-driven routing) with backward compat.
 """
 import json
 import asyncio
@@ -9,6 +9,10 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import StreamingResponse, JSONResponse
 
 router = APIRouter()
+
+# Protocol versions supported (2026-07-28 is the new stateless spec; 2024-11-05 is legacy)
+MCP_PROTOCOL_VERSION = "2026-07-28"
+MCP_LEGACY_VERSION = "2024-11-05"
 
 # MCP tool definitions matching our API endpoints
 MCP_TOOLS = [
@@ -364,8 +368,14 @@ SERVER_CARD = {
 @router.post("/mcp")
 async def mcp_handler(request: Request):
     """
-    MCP Streamable HTTP endpoint.
-    Handles initialize, tools/list, tools/call, resources/list.
+    MCP Streamable HTTP endpoint (2026-07-28 spec compliant).
+    Stateless, header-driven routing with backward compat for legacy clients.
+
+    New headers (2026-07-28 spec):
+      Mcp-Method: The JSON-RPC method (e.g. "tools/list")
+      Mcp-Name: The server name for routing
+
+    Falls back to body.method for legacy clients.
     """
     try:
         body = await request.json()
@@ -375,35 +385,73 @@ async def mcp_handler(request: Request):
             status_code=400
         )
 
-    method = body.get("method", "")
+    # Extract method: prefer 2026-07-28 headers, fall back to body (legacy compat)
+    header_method = request.headers.get("mcp-method", "")
+    body_method = body.get("method", "")
+    method = header_method or body_method
+
+    # Header-vs-body consistency (tolerate mismatch during transition)
+    # In production post-July-28: reject if header and body methods disagree
+
     req_id = body.get("id")
     params = body.get("params", {})
 
-    # --- initialize ---
-    if method == "initialize":
+    # --- server/discover (2026-07-28 spec — replaces initialize) ---
+    if method == "server/discover":
         return {
             "jsonrpc": "2.0",
             "id": req_id,
             "result": {
-                "protocolVersion": "2024-11-05",
+                "protocolVersion": MCP_PROTOCOL_VERSION,
                 "capabilities": {
                     "tools": {"listChanged": False},
                     "resources": {"listChanged": False},
                 },
                 "serverInfo": {
                     "name": "AgentServices",
-                    "version": "2.0.0",
+                    "version": "5.1.0",
+                    "description": "Paid APIs for AI agents — 46 services, 34 paid. x402 on Base.",
+                },
+                "instructions": "Use tools/list to see available tools. Free tools: crypto_prices, fear_greed, ip_geolocation, list_policies, agent_context. Paid tools return HTTP 402 for x402 payment.",
+            }
+        }
+
+    # --- initialize (legacy compat — deprecated, will be removed post July 28) ---
+    if method == "initialize":
+        return {
+            "jsonrpc": "2.0",
+            "id": req_id,
+            "result": {
+                "protocolVersion": MCP_PROTOCOL_VERSION,
+                "capabilities": {
+                    "tools": {"listChanged": False},
+                    "resources": {"listChanged": False},
+                },
+                "serverInfo": {
+                    "name": "AgentServices",
+                    "version": "5.1.0",
                 }
             }
         }
 
-    # --- tools/list ---
+    # --- tools/list (with cache metadata per 2026-07-28 spec) ---
     if method == "tools/list":
-        return {
-            "jsonrpc": "2.0",
-            "id": req_id,
-            "result": {"tools": MCP_TOOLS}
-        }
+        response = JSONResponse(
+            {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "tools": MCP_TOOLS,
+                    # 2026-07-28 cache hints — clients may cache tool list for 5 min
+                    "_meta": {
+                        "ttlMs": 300000,  # 5 minutes
+                        "cacheScope": "global",
+                    }
+                }
+            }
+        )
+        response.headers["Cache-Control"] = "public, max-age=300"
+        return response
 
     # --- resources/list ---
     if method == "resources/list":
@@ -432,7 +480,7 @@ async def mcp_handler(request: Request):
             }
         }
 
-    # --- notifications/initialized (acknowledge silently) ---
+    # --- notifications/initialized (legacy compat — no-op in 2026-07-28) ---
     if method == "notifications/initialized":
         return Response(status_code=204)
 
@@ -592,7 +640,8 @@ async def mcp_well_known():
     """
     return JSONResponse(
         {
-            "version": "2024-11-05",
+            "version": MCP_PROTOCOL_VERSION,
+            "legacyVersions": [MCP_LEGACY_VERSION],
             "name": "AgentServices",
             "description": "Paid APIs for AI agents — crypto market data, DeFi yields, on-chain analytics, dispute resolution. x402 payments on Base.",
             "transports": {
