@@ -68,6 +68,9 @@ async def add_security_headers(request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:;"
+    response.headers["X-RateLimit-Limit"] = "100"
+    response.headers["X-RateLimit-Window"] = "60s"
     return response
 
 # --- x402 Payment Protocol (Base Mainnet) ---

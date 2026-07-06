@@ -201,18 +201,53 @@ MCP_TOOLS = [
 
 MCP_RESOURCES = [
     {
-        "uri": "agentservices://prices",
+        "uri": "aiservices://prices",
         "name": "Live Crypto Prices",
         "description": "Current crypto prices (BTC, ETH, SOL, XRP)",
         "mimeType": "application/json"
     },
     {
-        "uri": "agentservices://policies",
+        "uri": "aiservices://policies",
         "name": "Dispute Policy Templates",
         "description": "Available dispute resolution policies",
         "mimeType": "application/json"
     }
 ]
+
+# Static server card for MCP discovery (Smithery, mcp-marketplace.io)
+SERVER_CARD = {
+    "serverInfo": {
+        "name": "AIServices",
+        "version": "4.1.0",
+        "description": "Paid APIs for AI agents — crypto market data, DeFi yields, on-chain analytics, dispute resolution. x402 payments on Base."
+    },
+    "transport": {
+        "type": "streamable-http",
+        "endpoint": "https://api.aiservices.to/mcp"
+    },
+    "pricing": {
+        "model": "pay-per-use",
+        "protocol": "x402 (HTTP 402)",
+        "currency": "USDC on Base",
+        "free_tools": ["crypto_prices", "fear_greed", "ip_geolocation", "list_policies", "agent_context"],
+        "paid_tools": {
+            "technical_indicators": "$0.02",
+            "defi_yields": "$0.02",
+            "url_metadata": "$0.01",
+            "resolve_dispute": "$0.05",
+            "whale_tracking": "$0.02",
+            "exchange_flows": "$0.02",
+            "correlation_matrix": "$0.03",
+            "defi_tvl": "$0.02",
+            "stablecoin_flows": "$0.02",
+            "github_velocity": "$0.02",
+            "macro_indicators": "$0.02"
+        }
+    },
+    "repository": "https://github.com/vbkotecha/aiservices-api",
+    "documentation": "https://api.aiservices.to/docs",
+    "tools": [{"name": t["name"], "description": t["description"]} for t in MCP_TOOLS]
+}
 
 
 @router.post("/mcp")
@@ -396,23 +431,9 @@ async def _execute_tool(tool_name: str, args: dict):
 @router.get("/mcp/tools")
 async def mcp_tools_summary():
     """Human-readable summary of MCP tools for discovery."""
-    return {
-        "server": "AIServices MCP Server",
-        "endpoint": "https://api.aiservices.to/mcp",
-        "transport": "streamable-http",
-        "protocol_version": "2024-11-05",
-        "tools": [
-            {"name": t["name"], "description": t["description"]}
-            for t in MCP_TOOLS
-        ],
-        "free_tools": ["crypto_prices", "fear_greed", "ip_geolocation", "list_policies", "agent_context"],
-        "paid_tools": ["technical_indicators", "defi_yields", "url_metadata", "resolve_dispute", "whale_tracking", "exchange_flows", "correlation_matrix", "defi_tvl", "stablecoin_flows", "github_velocity", "macro_indicators"],
-        "setup": {
-            "claude_desktop": {
-                "mcpServers": {
-                    "aiservices": {"url": "https://api.aiservices.to/mcp"}
-                }
-            },
-            "cursor": "Add https://api.aiservices.to/mcp as MCP server in Cursor settings",
-        }
-    }
+    return SERVER_CARD
+
+@router.get("/.well-known/mcp/server-card.json")
+async def mcp_server_card():
+    """Static MCP server card for registry discovery (Smithery, mcp-marketplace.io)."""
+    return SERVER_CARD
