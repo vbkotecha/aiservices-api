@@ -311,6 +311,29 @@ MCP_TOOLS = [
             "properties": {"keyword": {"type": "string"}},
             "required": ["keyword"]
         }
+    },
+    {
+        "name": "deep_research",
+        "description": "Deep research — search web + extract content + synthesize intelligence brief ($0.05 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "q": {"type": "string", "description": "Research query"},
+                "sources": {"type": "integer", "default": 3, "description": "Number of sources to analyze (max 5)"}
+            },
+            "required": ["q"]
+        }
+    },
+    {
+        "name": "portfolio_intelligence",
+        "description": "Portfolio intelligence — price + technical signal + risk score + market sentiment in one call ($0.10 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "symbol": {"type": "string", "description": "Crypto symbol (BTC, ETH, SOL, etc.)"}
+            },
+            "required": ["symbol"]
+        }
     }
 ]
 
@@ -334,7 +357,7 @@ SERVER_CARD = {
     "serverInfo": {
         "name": "AgentServices",
         "version": "5.1.0",
-        "description": "Paid APIs for AI agents — 46 services, 34 paid. Crypto, stocks, SEC, commodities, FX, inference, signals, extraction, security. x402 on Base."
+        "description": "Paid APIs for AI agents — 47 services, 35 paid. Crypto, stocks, SEC, commodities, FX, inference, signals, extraction, security, portfolio intelligence. x402 on Base."
     },
     "transport": {
         "type": "streamable-http",
@@ -410,7 +433,7 @@ async def mcp_handler(request: Request):
                 "serverInfo": {
                     "name": "AgentServices",
                     "version": "5.1.0",
-                    "description": "Paid APIs for AI agents — 46 services, 34 paid. x402 on Base.",
+                    "description": "Paid APIs for AI agents — 47 services, 35 paid. x402 on Base.",
                 },
                 "instructions": "Use tools/list to see available tools. Free tools: crypto_prices, fear_greed, ip_geolocation, list_policies, agent_context. Paid tools return HTTP 402 for x402 payment.",
             }
@@ -614,6 +637,12 @@ async def _execute_tool(tool_name: str, args: dict):
         elif tool_name == "seo_keywords":
             from utility_data import seo_keywords
             return seo_keywords(args.get("keyword", ""))
+        elif tool_name == "deep_research":
+            from synthesis_data import deep_research
+            return deep_research(args.get("q", ""), max_sources=min(args.get("sources", 3), 5))
+        elif tool_name == "portfolio_intelligence":
+            from synthesis_data import portfolio_intelligence
+            return portfolio_intelligence(args.get("symbol", "BTC"))
 
         else:
             return {"error": f"Unknown tool: {tool_name}"}

@@ -41,7 +41,7 @@ from onchain_data import (
 )
 from synthesis_data import (
     get_token_risk, get_crypto_signal, get_hn_sentiment, get_npm_stats,
-    get_github_trending, get_yield_comparison, deep_research,
+    get_github_trending, get_yield_comparison, deep_research, portfolio_intelligence,
 )
 from inference_gateway import list_models as list_inference_models, inference, quick_complete
 from tradfi_data import get_stock_quote, get_stock_history, get_sec_filings, get_commodities, get_economic_indicators, get_fx_rates
@@ -371,6 +371,12 @@ try:
             accepts=_payment_options(X402_WALLET, "$0.05"),
             mime_type="application/json",
             description="Deep research — search + extract + synthesize in one call",
+        ),
+        # --- NEW: Portfolio Intelligence (bundled endpoint) ---
+        "GET /v1/portfolio": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.10"),
+            mime_type="application/json",
+            description="Portfolio intelligence — price + signal + risk + sentiment in one call",
         ),
     }
 
@@ -844,6 +850,7 @@ async def api_discovery():
             "search": {
                 "web_search": {"endpoint": "GET /v1/search?q=...", "price": "$0.01", "desc": "AI-powered web search"},
                 "deep_research": {"endpoint": "GET /v1/research?q=...", "price": "$0.05", "desc": "Search + extract + synthesize in one call"},
+                "portfolio_intelligence": {"endpoint": "GET /v1/portfolio?symbol=...", "price": "$0.10", "desc": "Price + signal + risk + sentiment in one call"},
             },
             "dex": {
                 "swap_quote": {"endpoint": "GET /v1/swap/quote", "price": "free", "desc": "DEX swap quote (0x API, 6 chains)"},
@@ -897,7 +904,7 @@ async def health():
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,
         "x402_facilitator": X402_FACILITATOR_URL,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research", "portfolio_intelligence"],
     }
 
 
@@ -936,6 +943,7 @@ async def x402_manifest():
         {"path": "/v1/github-velocity", "method": "GET", "price": "$0.02", "description": "GitHub crypto repo velocity scores"},
         {"path": "/v1/macro", "method": "GET", "price": "$0.02", "description": "Macro economic and crypto indicators"},
         {"path": "/v1/research", "method": "GET", "price": "$0.05", "description": "Deep research — search + extract + synthesize in one call"},
+        {"path": "/v1/portfolio", "method": "GET", "price": "$0.10", "description": "Portfolio intelligence — price + signal + risk + sentiment in one call"},
     ]
     paid_endpoints = [endpoint for endpoint in endpoints if endpoint["price"] != "$0.00"]
     return {
@@ -1079,6 +1087,9 @@ async def x402_json_manifest():
         {"method": "GET", "path": "/v1/extract", "price": "$0.002"},
         {"method": "GET", "path": "/v1/security/{package}", "price": "$0.02"},
         {"method": "GET", "path": "/v1/seo/keywords", "price": "$0.01"},
+        # Intelligence (bundled high-value)
+        {"method": "GET", "path": "/v1/research", "price": "$0.05"},
+        {"method": "GET", "path": "/v1/portfolio/{symbol}", "price": "$0.10"},
     ]
     free_services = [
         {"method": "GET", "path": "/v1/price/{symbol}", "price": "$0.00"},
@@ -1098,7 +1109,7 @@ async def x402_json_manifest():
     return {
         "x402Version": 2,
         "name": "AgentServices",
-        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, inference gateway, market signals, web extraction, security scanning, and MCP integration. 46 services, 34 paid.",
+        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, inference gateway, market signals, web extraction, security scanning, and MCP integration. 47 services, 35 paid.",
         "network": "eip155:8453",
         "facilitator": "coinbase",
         "payTo": X402_WALLET,
@@ -1120,7 +1131,7 @@ async def llms_txt():
     lines = [
         "# AgentServices",
         "",
-        "> Paid APIs for AI agents. 46 services, 34 paid. Crypto data, stocks, SEC filings, commodities, FX, inference gateway (gpt-5.4/5.5), token risk scoring, crypto signals, web extraction, package security, SEO research, and more. All via x402 (USDC on Base).",
+        "> Paid APIs for AI agents. 47 services, 35 paid. Crypto data, stocks, SEC filings, commodities, FX, inference gateway (gpt-5.4/5.5), token risk scoring, crypto signals, web extraction, package security, SEO research, and more. All via x402 (USDC on Base).",
         "",
         "## Base URL",
         "https://api.aiservices.to",
@@ -1177,6 +1188,7 @@ async def llms_txt():
         "- GET /v1/security/{package} — Package vulnerability scan ($0.02)",
         "- GET /v1/seo/keywords?keyword=... — SEO keyword research ($0.01)",
         "- GET /v1/research?q=... — Deep research: search + extract + synthesize ($0.05)",
+        "- GET /v1/portfolio?symbol=... — Portfolio intelligence: price + signal + risk + sentiment ($0.10)",
         "",
         "## Free Agent Tools",
         "- GET /v1/agent-context — Paste-ready market context for LLM prompts",
@@ -1536,4 +1548,19 @@ async def research_endpoint(q: str, sources: int = 3):
     Returns a structured intelligence brief with key findings, themes, and sentiment.
     """
     return deep_research(q, max_sources=min(sources, 5))
+
+
+# --- Portfolio Intelligence (High-Value Bundled Endpoint) ---
+
+@app.get("/v1/portfolio", tags=["Intelligence"],
+         summary="Portfolio Intelligence — Price + Signal + Risk + Sentiment",
+         description="Comprehensive asset analysis in one call: market data, technical signals (RSI, MA, Bollinger), risk scoring, and market sentiment (Fear & Greed). Replaces 4+ separate API calls. $0.10 USDC via x402.")
+async def portfolio_endpoint(symbol: str):
+    """
+    Portfolio Intelligence ($0.10 per call via x402)
+
+    Bundles: price + technical signal + risk score + market sentiment.
+    Returns a synthesized verdict combining all modules.
+    """
+    return portfolio_intelligence(symbol)
 

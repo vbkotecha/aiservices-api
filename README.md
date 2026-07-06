@@ -1,8 +1,8 @@
 # AgentServices
 
-> 37-endpoint crypto, market intelligence, and AI inference API for AI agents — with x402 micropayments on Base
+> 47-endpoint crypto, market intelligence, and AI inference API for AI agents — with x402 micropayments on Base
 
-[![Version](https://img.shields.io/badge/version-5.0.0-brightgreen)](https://github.com/vbkotecha/aiservices-api)
+[![Version](https://img.shields.io/badge/version-5.1.0-brightgreen)](https://github.com/vbkotecha/aiservices-api)
 [![Network](https://img.shields.io/badge/network-Base%20Mainnet-blue)](https://base.org)
 [![Payment](https://img.shields.io/badge/payment-x402%20%2F%20USDC-purple)](https://x402.org)
 [![MCP](https://img.shields.io/badge/MCP-compatible-orange)](https://modelcontextprotocol.io)
@@ -14,7 +14,7 @@
 
 AgentServices is the monetized API layer for AI agents. No API keys, no subscriptions — agents pay per-request with USDC on Base using the [x402 payment protocol](https://x402.org).
 
-**37 endpoints** across crypto data, market intelligence, DeFi analytics, AI inference, and dispute resolution. 12 are free. 25 are paid via x402 (from $0.01 to $0.05 per call).
+**47 endpoints** across crypto data, market intelligence, DeFi analytics, AI inference, portfolio intelligence, and dispute resolution. 12 are free. 35 are paid via x402 (from $0.002 to $0.10 per call).
 
 ## Endpoints
 
@@ -72,6 +72,11 @@ AgentServices is the monetized API layer for AI agents. No API keys, no subscrip
 
 ### Portfolio Monitor
 ```bash
+# ALL-IN-ONE: Get portfolio intelligence in a single call ($0.10)
+# Returns: price + technical signal + risk score + market sentiment + verdict
+curl "https://api.aiservices.to/v1/portfolio?symbol=BTC"
+
+# Or build it yourself from individual endpoints:
 # Get current prices (FREE)
 curl https://api.aiservices.to/v1/prices?symbols=BTC,ETH,SOL
 
