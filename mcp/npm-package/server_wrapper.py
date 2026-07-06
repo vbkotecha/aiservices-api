@@ -1,5 +1,5 @@
 """
-AIServices MCP Server — lightweight entry point for npm distribution.
+AgentServices MCP Server — lightweight entry point for npm distribution.
 Auto-installs dependencies if missing, then runs the server.
 """
 import sys

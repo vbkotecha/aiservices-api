@@ -27,7 +27,7 @@ AFFILIATE_ADDRESS = os.environ.get("AFFILIATE_ADDRESS", "")
 
 
 def _fetch(url, timeout=10):
-    headers = {"User-Agent": "AIServices/2.0"}
+    headers = {"User-Agent": "AgentServices/2.0"}
     if ZEROX_API_KEY:
         headers["0x-api-key"] = ZEROX_API_KEY
     req = urllib.request.Request(url, headers=headers)

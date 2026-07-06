@@ -1,4 +1,4 @@
-# AIServices
+# AgentServices
 
 > 16-endpoint crypto and market intelligence API for AI agents — with x402 micropayments on Base
 
@@ -11,7 +11,7 @@
 
 ## What is this?
 
-AIServices is the monetized API layer for AI agents. No API keys, no subscriptions — agents pay per-request with USDC on Base using the [x402 payment protocol](https://x402.org).
+AgentServices is the monetized API layer for AI agents. No API keys, no subscriptions — agents pay per-request with USDC on Base using the [x402 payment protocol](https://x402.org).
 
 **16 endpoints** across crypto data, market intelligence, DeFi, and dispute resolution. 11 are free. 4 are paid via x402. One is AI-powered dispute resolution.
 
@@ -82,7 +82,7 @@ result = client.get("https://api.aiservices.to/v1/indicators?symbol=BTC")
 
 ## Dispute Resolution Engine
 
-AIServices includes an AI-powered dispute resolution system with 7 policy templates:
+AgentServices includes an AI-powered dispute resolution system with 7 policy templates:
 
 | Policy | Use Case |
 |--------|----------|

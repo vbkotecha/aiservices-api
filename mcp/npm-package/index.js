@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * AIServices MCP Server — Node.js wrapper
- * Spawns the Python MCP server that exposes AIServices APIs as MCP tools
+ * AgentServices MCP Server — Node.js wrapper
+ * Spawns the Python MCP server that exposes AgentServices APIs as MCP tools
  */
 const { spawn } = require('child_process');
 const path = require('path');
@@ -13,7 +13,7 @@ const py = spawn('python3', [serverPath], {
 });
 
 py.on('error', (err) => {
-  console.error('Failed to start AIServices MCP server:', err.message);
+  console.error('Failed to start AgentServices MCP server:', err.message);
   console.error('Make sure Python 3 and the mcp package are installed:');
   console.error('  pip install mcp httpx');
   process.exit(1);

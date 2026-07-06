@@ -1,6 +1,6 @@
 """
-AIServices MCP Server — Exposes x402 data APIs as MCP tools.
-AI agents can discover and call AIServices endpoints through Model Context Protocol.
+AgentServices MCP Server — Exposes x402 data APIs as MCP tools.
+AI agents can discover and call AgentServices endpoints through Model Context Protocol.
 """
 import json
 import httpx

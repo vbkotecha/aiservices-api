@@ -50,7 +50,7 @@ def get_url_metadata(url: str):
     if not url.startswith("http"):
         url = "https://" + url
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "AIServices/1.0 Bot"})
+        req = urllib.request.Request(url, headers={"User-Agent": "AgentServices/1.0 Bot"})
         resp = urllib.request.urlopen(req, timeout=10)
         html = resp.read().decode("utf-8", errors="ignore")[:50000]
         parser = _MetaParser()

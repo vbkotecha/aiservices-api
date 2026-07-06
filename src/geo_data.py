@@ -6,7 +6,7 @@ def get_ip_geo(ip: str):
     """Get geolocation data for an IP address using free ipapi.co API."""
     try:
         url = "https://ipapi.co/" + ip + "/json/"
-        req = urllib.request.Request(url, headers={"User-Agent": "AIServices/1.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "AgentServices/1.0"})
         resp = urllib.request.urlopen(req, timeout=10)
         data = json.loads(resp.read())
         if data.get("error"):

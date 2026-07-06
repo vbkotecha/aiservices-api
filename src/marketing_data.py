@@ -1,5 +1,5 @@
 """
-AIServices — Marketing Intelligence Module
+AgentServices — Marketing Intelligence Module
 AI-powered marketing tools for media buying teams.
 Powered by OpenAI GPT-4o-mini.
 """

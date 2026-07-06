@@ -1,7 +1,7 @@
 {
   "name": "aiservices-mcp",
   "version": "2.0.0",
-  "description": "MCP server for AIServices — paid APIs for AI agents with crypto data, DeFi yields, indicators, and AI dispute resolution",
+  "description": "MCP server for AgentServices — paid APIs for AI agents with crypto data, DeFi yields, indicators, and AI dispute resolution",
   "main": "index.js",
   "bin": {
     "aiservices-mcp": "./index.js"

@@ -1,7 +1,7 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
   "name": "aiservices",
-  "display_name": "AIServices — Paid APIs for AI Agents",
+  "display_name": "AgentServices — Paid APIs for AI Agents",
   "description": "Paid data APIs for AI agents with built-in trust and x402 dispute resolution. Crypto prices, technical indicators, DeFi yields, Fear & Greed index, IP geolocation, URL metadata search, AI-powered dispute resolution with 7 policy templates, and marketing intelligence tools. Micropayments via x402 USDC on Base.",
   "repository": "https://github.com/vbkotecha/aiservices-api",
   "license": "MIT",
