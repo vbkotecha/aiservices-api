@@ -53,7 +53,7 @@ WALLET = os.environ.get("WALLET_ADDRESS", AISERVICES_PAY_TO)
 
 app = FastAPI(
     title="AgentServices",
-    version="5.2.0",
+    version="5.3.0",
     description="""Paid APIs for AI agents — data, intelligence, inference, and more.
 Crypto market data, DeFi yields, DEX quotes, prediction markets, news, search, IP geolocation,
 URL metadata, on-chain analytics, whale tracking, correlation matrix, DeFi TVL, stablecoin flows,
@@ -1232,10 +1232,11 @@ async def llms_txt():
         "curl https://agentservices.to/v1/indicators/BTC",
         "```",
         "",
-        f"## Payment Wallet\n{WALLET}",
+        f"## Payment Wallet\n{X402_WALLET}",
         "",
         "## Links",
         "- API Docs: https://agentservices.to/docs",
+        "- Examples: https://agentservices.to/examples",
         "- GitHub: https://github.com/vbkotecha/aiservices-api",
     ]
     from starlette.responses import PlainTextResponse
