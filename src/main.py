@@ -42,7 +42,7 @@ from onchain_data import (
 from synthesis_data import (
     get_token_risk, get_crypto_signal, get_hn_sentiment, get_npm_stats,
     get_github_trending, get_yield_comparison, deep_research, portfolio_intelligence,
-    defi_strategy_report, market_pulse,
+    defi_strategy_report, market_pulse, onchain_overview,
 )
 from inference_gateway import list_models as list_inference_models, inference, quick_complete
 from tradfi_data import get_stock_quote, get_stock_history, get_sec_filings, get_commodities, get_economic_indicators, get_fx_rates
@@ -390,6 +390,11 @@ try:
             accepts=_payment_options(X402_WALLET, "$0.05"),
             mime_type="application/json",
             description="Market pulse — sentiment + trending + news + social + whales + global in one call",
+        ),
+        "GET /v1/onchain-overview": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.15"),
+            mime_type="application/json",
+            description="On-chain overview — whales + exchange flows + stablecoin flows + correlation + DeFi TVL",
         ),
     }
 
@@ -866,6 +871,7 @@ async def api_discovery():
                 "portfolio_intelligence": {"endpoint": "GET /v1/portfolio?symbol=...", "price": "$0.10", "desc": "Price + signal + risk + sentiment in one call"},
                 "defi_strategy": {"endpoint": "GET /v1/defi-strategy?chain=...", "price": "$0.25", "desc": "DeFi yields + TVL + comparison + risk analysis"},
                 "market_pulse": {"endpoint": "GET /v1/market-pulse", "price": "$0.05", "desc": "Sentiment + trending + news + whales + global in one call"},
+                "onchain_overview": {"endpoint": "GET /v1/onchain-overview", "price": "$0.15", "desc": "Whales + exchange flows + stablecoin flows + correlation + DeFi TVL"},
             },
             "dex": {
                 "swap_quote": {"endpoint": "GET /v1/swap/quote", "price": "free", "desc": "DEX swap quote (0x API, 6 chains)"},
@@ -919,7 +925,7 @@ async def health():
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,
         "x402_facilitator": X402_FACILITATOR_URL,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research", "portfolio_intelligence", "defi_strategy", "market_pulse"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research", "portfolio_intelligence", "defi_strategy", "market_pulse", "onchain_overview"],
     }
 
 
@@ -961,6 +967,7 @@ async def x402_manifest():
         {"path": "/v1/portfolio", "method": "GET", "price": "$0.10", "description": "Portfolio intelligence — price + signal + risk + sentiment in one call"},
         {"path": "/v1/defi-strategy", "method": "GET", "price": "$0.25", "description": "DeFi strategy report — yields + TVL + comparison + risk analysis"},
         {"path": "/v1/market-pulse", "method": "GET", "price": "$0.05", "description": "Market pulse — sentiment + trending + news + whales + global snapshot"},
+        {"path": "/v1/onchain-overview", "method": "GET", "price": "$0.15", "description": "On-chain overview — whales + exchange flows + stablecoin flows + correlation + DeFi TVL"},
     ]
     paid_endpoints = [endpoint for endpoint in endpoints if endpoint["price"] != "$0.00"]
     return {
@@ -1109,6 +1116,7 @@ async def x402_json_manifest():
         {"method": "GET", "path": "/v1/portfolio/{symbol}", "price": "$0.10"},
         {"method": "GET", "path": "/v1/defi-strategy", "price": "$0.25"},
         {"method": "GET", "path": "/v1/market-pulse", "price": "$0.05"},
+        {"method": "GET", "path": "/v1/onchain-overview", "price": "$0.15"},
     ]
     free_services = [
         {"method": "GET", "path": "/v1/price/{symbol}", "price": "$0.00"},
@@ -1210,6 +1218,7 @@ async def llms_txt():
         "- GET /v1/portfolio?symbol=... — Portfolio intelligence: price + signal + risk + sentiment ($0.10)",
         "- GET /v1/defi-strategy?chain=... — DeFi strategy: yields + TVL + comparison + risk ($0.25)",
         "- GET /v1/market-pulse — Market pulse: sentiment + trending + news + whales ($0.05)",
+        "- GET /v1/onchain-overview — On-chain intelligence: whales + flows + correlation + DeFi TVL ($0.15)",
         "",
         "## Free Agent Tools",
         "- GET /v1/agent-context — Paste-ready market context for LLM prompts",
@@ -1614,4 +1623,17 @@ async def market_pulse_endpoint():
     Returns synthesized market direction signal for rapid agent decision-making.
     """
     return market_pulse()
+
+
+@app.get("/v1/onchain-overview", tags=["Intelligence"],
+         summary="On-Chain Overview — Whales + Flows + Correlation + TVL",
+         description="Comprehensive on-chain intelligence: whale movements, exchange flows, stablecoin flows, correlation matrix, and DeFi TVL in one call. Replaces 5+ API calls. $0.15 USDC via x402.")
+async def onchain_overview_endpoint():
+    """
+    On-Chain Overview ($0.15 per call via x402)
+
+    Bundles: whale activity + exchange flows + stablecoin flows + correlation matrix + DeFi TVL.
+    Returns synthesized on-chain assessment for smart money tracking and liquidity flow analysis.
+    """
+    return onchain_overview()
 

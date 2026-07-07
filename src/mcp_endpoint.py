@@ -354,6 +354,15 @@ MCP_TOOLS = [
             "properties": {},
             "required": []
         }
+    },
+    {
+        "name": "onchain_overview",
+        "description": "On-chain intelligence — whale movements + exchange flows + stablecoin flows + correlation matrix + DeFi TVL in one report ($0.15 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "required": []
+        }
     }
 ]
 
@@ -377,7 +386,7 @@ SERVER_CARD = {
     "serverInfo": {
         "name": "AgentServices",
         "version": "5.1.0",
-        "description": "Paid APIs for AI agents — 49 services, 37 paid. Crypto, stocks, SEC, commodities, FX, inference, signals, extraction, security, portfolio intelligence, DeFi strategy, market pulse. x402 on Base."
+        "description": "Paid APIs for AI agents — 50 services, 38 paid. Crypto, stocks, SEC, commodities, FX, inference, signals, extraction, security, portfolio intelligence, DeFi strategy, market pulse, on-chain overview. x402 on Base."
     },
     "transport": {
         "type": "streamable-http",
@@ -669,6 +678,9 @@ async def _execute_tool(tool_name: str, args: dict):
         elif tool_name == "market_pulse":
             from synthesis_data import market_pulse
             return market_pulse()
+        elif tool_name == "onchain_overview":
+            from synthesis_data import onchain_overview
+            return onchain_overview()
 
         else:
             return {"error": f"Unknown tool: {tool_name}"}

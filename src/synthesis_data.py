@@ -835,6 +835,102 @@ def portfolio_intelligence(symbol: str):
     return results
 
 
+def onchain_overview():
+    """
+    SYNTHESIZED ON-CHAIN OVERVIEW — Aggregates whale movements, exchange flows,
+    stablecoin flows, correlation matrix, and DeFi TVL into one comprehensive
+    on-chain intelligence report.
+
+    Bundles what would be 5+ separate API calls:
+    - Whale movements ($0.02 equivalent)
+    - Exchange flows ($0.02 equivalent)
+    - Stablecoin flows ($0.02 equivalent)
+    - Correlation matrix ($0.02 equivalent)
+    - DeFi TVL ($0.02 equivalent)
+
+    Priced at $0.15 — comprehensive on-chain intelligence for agent decision-making.
+    """
+    results = {
+        "research_type": "onchain_overview",
+        "modules": {},
+        "errors": [],
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
+
+    # Module 1: Whale Movements
+    try:
+        from onchain_data import get_whales
+        whales = get_whales()
+        results["modules"]["whale_activity"] = whales if isinstance(whales, dict) else {"data": whales}
+    except Exception as e:
+        results["errors"].append(f"whale_activity: {str(e)[:80]}")
+
+    # Module 2: Exchange Flows
+    try:
+        from onchain_data import get_exchange_flows
+        flows = get_exchange_flows()
+        results["modules"]["exchange_flows"] = flows if isinstance(flows, dict) else {"data": flows}
+    except Exception as e:
+        results["errors"].append(f"exchange_flows: {str(e)[:80]}")
+
+    # Module 3: Stablecoin Flows
+    try:
+        from onchain_data import get_stablecoin_flows
+        sc = get_stablecoin_flows()
+        results["modules"]["stablecoin_flows"] = sc if isinstance(sc, dict) else {"data": sc}
+    except Exception as e:
+        results["errors"].append(f"stablecoin_flows: {str(e)[:80]}")
+
+    # Module 4: Correlation Matrix
+    try:
+        from onchain_data import get_correlation_matrix
+        corr = get_correlation_matrix()
+        results["modules"]["correlation_matrix"] = corr if isinstance(corr, dict) else {"data": corr}
+    except Exception as e:
+        results["errors"].append(f"correlation_matrix: {str(e)[:80]}")
+
+    # Module 5: DeFi TVL
+    try:
+        from onchain_data import get_defi_tvl
+        tvl = get_defi_tvl(limit=10)
+        results["modules"]["defi_tvl"] = tvl if isinstance(tvl, dict) else {"data": tvl}
+    except Exception as e:
+        results["errors"].append(f"defi_tvl: {str(e)[:80]}")
+
+    # Synthesis: On-Chain Signal
+    modules_active = sum(1 for v in results["modules"].values() if v)
+    whale_data = results["modules"].get("whale_activity", {})
+    flow_data = results["modules"].get("exchange_flows", {})
+    stable_data = results["modules"].get("stablecoin_flows", {})
+
+    signals = []
+    if whale_data:
+        signals.append("whale tracking active")
+    if flow_data:
+        signals.append("exchange flow monitoring active")
+    if stable_data:
+        signals.append("stablecoin flow tracking active")
+
+    net_assessment = (
+        f"On-chain intelligence covering {modules_active} data modules. "
+        f"Active signals: {', '.join(signals) if signals else 'limited data available'}. "
+        f"Use for deep on-chain analysis, smart money tracking, and liquidity flow assessment."
+    )
+
+    results["synthesis"] = {
+        "modules_active": modules_active,
+        "modules_available": list(results["modules"].keys()),
+        "assessment": net_assessment,
+    }
+
+    results["pricing_advantage"] = (
+        "This call replaced 5+ separate API calls (whales + exchange flows + stablecoin flows + "
+        "correlation + DeFi TVL). Cost: $0.15 vs $0.10+ separately — comprehensive on-chain snapshot."
+    )
+
+    return results
+
+
 # ============================================================
 # DEFI STRATEGY REPORT — Comprehensive DeFi investment analysis
 # Bundles: yields + TVL + yield comparison + risk into one report
