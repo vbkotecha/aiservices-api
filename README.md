@@ -260,6 +260,22 @@ AgentServices includes an AI-powered dispute resolution system with 7 policy tem
 - **USDC** on **Base Mainnet** (EIP-3009 gasless transfers)
 - Deployed on Railway with custom domain + TLS
 
+## Coinbase AgentKit Integration
+
+AgentServices includes a built-in [Coinbase AgentKit](https://github.com/coinbase/agentkit) action provider (`agentkit/` directory). This lets any AgentKit agent use AgentServices APIs with typed, documented actions:
+
+```python
+from coinbase_agentkit import AgentKit, AgentKitConfig
+from agentkit import agentservices_action_provider
+
+agent_kit = AgentKit(AgentKitConfig(
+    wallet_provider=wallet_provider,
+    action_providers=[agentservices_action_provider()]
+))
+```
+
+**18 actions** covering free (prices, fear-greed, trending, gas) and paid endpoints (indicators, DeFi yields, portfolio intelligence, research, onchain analytics, AI inference, and more). See [`agentkit/README.md`](agentkit/README.md) for full documentation.
+
 ## License
 
 MIT — Build on it, fork it, integrate it.
