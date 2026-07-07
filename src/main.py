@@ -154,13 +154,16 @@ async def enrich_402_bazaar(request, call_next):
 X402_WALLET = os.environ.get("X402_PAY_TO", os.environ.get("X402_WALLET_ADDRESS", AISERVICES_PAY_TO))
 X402_BASE_NETWORK = "eip155:8453"
 X402_BSC_NETWORK = "eip155:56"
+X402_SVM_NETWORK = "solana:5eychk4D"  # Solana mainnet
 X402_FACILITATOR_URL = os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402")
 
 # Multi-chain: Dexter facilitator (x402.dexter.cash) supports Base + BSC + more.
-# CDP facilitator supports Base only. We detect and register accordingly.
+# CDP facilitator supports Base + Solana. We detect and register accordingly.
 X402_IS_MULTICHAIN = any(d in X402_FACILITATOR_URL.lower() for d in ("dexter", "infra402", "aeon"))
-X402_NETWORKS = [X402_BASE_NETWORK] + ([X402_BSC_NETWORK] if X402_IS_MULTICHAIN else [])
-X402_NETWORK_LABEL = "Base + BSC" if X402_IS_MULTICHAIN else "Base"
+
+# Build network list: Always Base, add Solana (CDP supports it), add BSC if multichain facilitator
+X402_NETWORKS = [X402_BASE_NETWORK, X402_SVM_NETWORK] + ([X402_BSC_NETWORK] if X402_IS_MULTICHAIN else [])
+X402_NETWORK_LABEL = "Base + Solana" + (" + BSC" if X402_IS_MULTICHAIN else "")
 
 X402_ENABLED = False
 X402_ERROR = "Not initialized"
@@ -181,16 +184,33 @@ try:
 
     facilitator = HTTPFacilitatorClient(FacilitatorConfig(**facilitator_config_kwargs))
     payment_server = x402ResourceServer(facilitator)
-    for net in X402_NETWORKS:
-        payment_server.register(net, ExactEvmServerScheme())
+    # Register EVM networks (Base, BSC)
+    payment_server.register(X402_BASE_NETWORK, ExactEvmServerScheme())
+    if X402_IS_MULTICHAIN:
+        payment_server.register(X402_BSC_NETWORK, ExactEvmServerScheme())
+    # Register Solana (SVM) — CDP facilitator supports Solana mainnet
+    try:
+        from x402.mechanisms.svm.exact import ExactSvmServerScheme
+        payment_server.register(X402_SVM_NETWORK, ExactSvmServerScheme())
+        print(f"[x402] Solana (SVM) support registered on {X402_SVM_NETWORK}", flush=True)
+    except Exception as svm_err:
+        print(f"[x402] WARNING: SVM scheme registration failed: {svm_err}", flush=True)
+        X402_NETWORKS = [n for n in X402_NETWORKS if n != X402_SVM_NETWORK]
+        X402_NETWORK_LABEL = "Base" + (" + BSC" if X402_IS_MULTICHAIN else "")
     payment_server.register_extension(bazaar_resource_server_extension)
 
     def _payment_options(wallet: str, price: str) -> list:
         """Generate PaymentOption for every supported network (multi-chain)."""
-        return [
-            PaymentOption(scheme="exact", pay_to=wallet, price=price, network=net)
-            for net in X402_NETWORKS
-        ]
+        options = []
+        for net in X402_NETWORKS:
+            if net.startswith("solana:"):
+                # Solana needs a separate SPL wallet address
+                svm_wallet = os.environ.get("X402_SVM_PAY_TO", "")
+                if svm_wallet:
+                    options.append(PaymentOption(scheme="exact", pay_to=svm_wallet, price=price, network=net))
+            else:
+                options.append(PaymentOption(scheme="exact", pay_to=wallet, price=price, network=net))
+        return options
 
     payment_routes = {
         "POST /v1/disputes": RouteConfig(
