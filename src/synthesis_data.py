@@ -833,3 +833,250 @@ def portfolio_intelligence(symbol: str):
     )
 
     return results
+
+
+# ============================================================
+# DEFI STRATEGY REPORT — Comprehensive DeFi investment analysis
+# Bundles: yields + TVL + yield comparison + risk into one report
+# Target: $0.25 per call (high-value investment intelligence tier)
+# ============================================================
+
+def defi_strategy_report(chain: str = ""):
+    """
+    SYNTHESIZED DEFI STRATEGY — Aggregates yield farming opportunities,
+    protocol TVL, cross-chain yield comparison, and risk assessment into
+    one comprehensive investment brief.
+
+    Bundles what would be 4+ separate API calls:
+    - DeFi yields from multiple protocols ($0.02 equivalent)
+    - Protocol TVL rankings ($0.02 equivalent)
+    - Cross-chain yield comparison ($0.03 equivalent)
+    - Risk-adjusted scoring (synthesized)
+
+    Priced at $0.25 — targeting the $0.10-$1.00 value tier where 95% of
+    x402 transaction volume flows.
+    """
+    results = {
+        "research_type": "defi_strategy",
+        "chain_filter": chain or "all",
+        "modules": {},
+        "errors": [],
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
+
+    # Module 1: Top DeFi Yields
+    try:
+        from crypto_data import get_defi_yields
+        yields = get_defi_yields()
+        if isinstance(yields, dict) and "data" in yields:
+            top_yields = yields["data"][:10] if isinstance(yields["data"], list) else yields["data"]
+            results["modules"]["top_yields"] = {
+                "count": len(top_yields) if isinstance(top_yields, list) else 0,
+                "opportunities": top_yields,
+            }
+        elif isinstance(yields, list):
+            results["modules"]["top_yields"] = {
+                "count": len(yields),
+                "opportunities": yields[:10],
+            }
+        else:
+            results["modules"]["top_yields"] = yields
+    except Exception as e:
+        results["errors"].append(f"top_yields: {str(e)[:80]}")
+
+    # Module 2: Protocol TVL Rankings
+    try:
+        from onchain_data import get_defi_tvl
+        tvl = get_defi_tvl(limit=15, chain=chain or "all")
+        if isinstance(tvl, dict) and "data" in tvl:
+            results["modules"]["protocol_tvl"] = {
+                "total_tvl": tvl.get("total_tvl", tvl.get("total", 0)),
+                "top_protocols": tvl["data"][:10] if isinstance(tvl.get("data"), list) else tvl["data"],
+            }
+        else:
+            results["modules"]["protocol_tvl"] = tvl
+    except Exception as e:
+        results["errors"].append(f"protocol_tvl: {str(e)[:80]}")
+
+    # Module 3: Cross-chain Yield Comparison
+    try:
+        comparison = get_yield_comparison(chain)
+        results["modules"]["yield_comparison"] = comparison
+    except Exception as e:
+        results["errors"].append(f"yield_comparison: {str(e)[:80]}")
+
+    # Module 4: Risk Assessment for Top Yields
+    try:
+        raw_yields = results["modules"].get("top_yields", {})
+        opportunities = raw_yields.get("opportunities", []) if isinstance(raw_yields, dict) else []
+        high_apy = []
+        suspicious = []
+        for opp in opportunities[:10] if isinstance(opportunities, list) else []:
+            if isinstance(opp, dict):
+                apy = float(opp.get("apy", opp.get("apy_base", 0)) or 0)
+                if apy > 50:
+                    suspicious.append({
+                        "protocol": opp.get("project", opp.get("name", "Unknown")),
+                        "chain": opp.get("chain", "Unknown"),
+                        "apy": apy,
+                        "risk_note": "APY >50% — exercise extreme caution, possible impermanent loss risk",
+                    })
+                elif apy > 15:
+                    high_apy.append({
+                        "protocol": opp.get("project", opp.get("name", "Unknown")),
+                        "chain": opp.get("chain", "Unknown"),
+                        "apy": apy,
+                        "risk_note": "Above-average yield — verify protocol audits",
+                    })
+        results["modules"]["risk_assessment"] = {
+            "high_yield_opportunities": high_apy,
+            "high_risk_flags": suspicious,
+            "recommendation": (
+                f"{len(suspicious)} opportunities with APY >50% (high risk). "
+                f"{len(high_apy)} opportunities with APY 15-50% (moderate risk). "
+                "Always verify protocol audits and TVL sustainability."
+            ),
+        }
+    except Exception as e:
+        results["errors"].append(f"risk_assessment: {str(e)[:80]}")
+
+    # Synthesis: Strategy Verdict
+    yield_count = len(results["modules"].get("top_yields", {}).get("opportunities", [])) if isinstance(results["modules"].get("top_yields"), dict) else 0
+    risk_count = len(suspicious) if 'suspicious' in dir() else 0
+    results["synthesis"] = {
+        "verdict": (
+            f"DeFi market analysis complete: {yield_count} yield opportunities identified. "
+            f"{risk_count} flagged as high-risk (APY >50%). "
+            "Recommendation: Diversify across audited protocols with sustainable yield models."
+        ),
+        "data_points_analyzed": yield_count,
+        "high_risk_count": risk_count,
+    }
+
+    results["pricing_advantage"] = (
+        "This call replaced 4+ separate API calls (yields + TVL + comparison + risk). "
+        "Cost: $0.25 vs $0.09+ separately — plus synthesized investment strategy."
+    )
+
+    return results
+
+
+# ============================================================
+# MARKET PULSE — Real-time crypto market overview
+# Bundles: fear-greed + trending + news + social + whales + global
+# Target: $0.05 per call (rapid market snapshot tier)
+# ============================================================
+
+def market_pulse():
+    """
+    SYNTHESIZED MARKET PULSE — Aggregates sentiment, trending tokens,
+    latest news, social signals, whale movements, and global market stats
+    into one real-time market snapshot.
+
+    Bundles what would be 6+ separate API calls:
+    - Fear & Greed Index (free)
+    - Trending tokens ($0.02 equivalent)
+    - Crypto news ($0.02 equivalent)
+    - Social trending ($0.02 equivalent)
+    - Whale movements ($0.02 equivalent)
+    - Global market cap / dominance (free)
+
+    Priced at $0.05 — rapid market intelligence for agent decision-making.
+    """
+    results = {
+        "research_type": "market_pulse",
+        "modules": {},
+        "errors": [],
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
+
+    # Module 1: Fear & Greed
+    try:
+        fg = _fetch_json("https://api.alternative.me/fng/?limit=1", timeout=5)
+        if fg and "data" in fg and fg["data"]:
+            item = fg["data"][0]
+            val = int(item.get("value", 50))
+            results["modules"]["sentiment"] = {
+                "fear_greed_value": val,
+                "fear_greed_label": item.get("value_classification", "Neutral"),
+                "interpretation": (
+                    "Extreme Fear — potential buy zone" if val < 25
+                    else "Fear — market wary" if val < 45
+                    else "Greed — market confident" if val < 75
+                    else "Extreme Greed — potential sell zone"
+                ),
+            }
+    except Exception as e:
+        results["errors"].append(f"sentiment: {str(e)[:80]}")
+
+    # Module 2: Trending Tokens
+    try:
+        from dex_data import get_trending_tokens
+        trending = get_trending_tokens()
+        results["modules"]["trending"] = trending if isinstance(trending, dict) else {"data": trending}
+    except Exception as e:
+        results["errors"].append(f"trending: {str(e)[:80]}")
+
+    # Module 3: Crypto News
+    try:
+        from news_data import get_crypto_news
+        news = get_crypto_news(limit=5)
+        results["modules"]["news"] = news if isinstance(news, dict) else {"headlines": news}
+    except Exception as e:
+        results["errors"].append(f"news: {str(e)[:80]}")
+
+    # Module 4: Social Trending
+    try:
+        from news_data import get_social_trending
+        social = get_social_trending()
+        results["modules"]["social"] = social if isinstance(social, dict) else {"data": social}
+    except Exception as e:
+        results["errors"].append(f"social: {str(e)[:80]}")
+
+    # Module 5: Whale Movements
+    try:
+        from onchain_data import get_whales
+        whales = get_whales()
+        whale_data = whales if isinstance(whales, dict) else {"data": whales}
+        results["modules"]["whale_activity"] = whale_data
+    except Exception as e:
+        results["errors"].append(f"whale_activity: {str(e)[:80]}")
+
+    # Module 6: Global Market
+    try:
+        from news_data import get_global_market
+        global_mkt = get_global_market()
+        results["modules"]["global_market"] = global_mkt if isinstance(global_mkt, dict) else {"data": global_mkt}
+    except Exception as e:
+        results["errors"].append(f"global_market: {str(e)[:80]}")
+
+    # Synthesis: Market Direction Signal
+    fg_val = results["modules"].get("sentiment", {}).get("fear_greed_value", 50)
+    news_available = "news" in results["modules"]
+    trending_available = "trending" in results["modules"]
+    whale_available = "whale_activity" in results["modules"]
+
+    if fg_val < 25:
+        direction = "BEARISH — Extreme fear. Contrarian buy signal."
+    elif fg_val < 45:
+        direction = "SLIGHTLY BEARISH — Fear dominant. Cautious accumulation zone."
+    elif fg_val < 55:
+        direction = "NEUTRAL — Balanced sentiment. Range-bound market."
+    elif fg_val < 75:
+        direction = "BULLISH — Greed building. Trend continuation likely."
+    else:
+        direction = "VERY BULLISH — Extreme greed. Consider taking profits."
+
+    results["synthesis"] = {
+        "market_direction": direction,
+        "sentiment_score": fg_val,
+        "data_modules_active": sum(1 for v in results["modules"].values() if v),
+        "modules_available": list(results["modules"].keys()),
+    }
+
+    results["pricing_advantage"] = (
+        "This call replaced 6+ separate API calls (sentiment + trending + news + social + whales + global). "
+        "Cost: $0.05 vs $0.10+ separately — instant market snapshot for agent decision-making."
+    )
+
+    return results

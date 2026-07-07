@@ -42,6 +42,7 @@ from onchain_data import (
 from synthesis_data import (
     get_token_risk, get_crypto_signal, get_hn_sentiment, get_npm_stats,
     get_github_trending, get_yield_comparison, deep_research, portfolio_intelligence,
+    defi_strategy_report, market_pulse,
 )
 from inference_gateway import list_models as list_inference_models, inference, quick_complete
 from tradfi_data import get_stock_quote, get_stock_history, get_sec_filings, get_commodities, get_economic_indicators, get_fx_rates
@@ -52,7 +53,7 @@ WALLET = os.environ.get("WALLET_ADDRESS", AISERVICES_PAY_TO)
 
 app = FastAPI(
     title="AgentServices",
-    version="5.0.0",
+    version="5.2.0",
     description="""Paid APIs for AI agents — data, intelligence, inference, and more.
 Crypto market data, DeFi yields, DEX quotes, prediction markets, news, search, IP geolocation,
 URL metadata, on-chain analytics, whale tracking, correlation matrix, DeFi TVL, stablecoin flows,
@@ -377,6 +378,18 @@ try:
             accepts=_payment_options(X402_WALLET, "$0.10"),
             mime_type="application/json",
             description="Portfolio intelligence — price + signal + risk + sentiment in one call",
+        ),
+        # --- NEW: DeFi Strategy Report (high-value bundled) ---
+        "GET /v1/defi-strategy": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.25"),
+            mime_type="application/json",
+            description="DeFi strategy report — yields + TVL + comparison + risk in one call",
+        ),
+        # --- NEW: Market Pulse (rapid snapshot) ---
+        "GET /v1/market-pulse": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.05"),
+            mime_type="application/json",
+            description="Market pulse — sentiment + trending + news + social + whales + global in one call",
         ),
     }
 
@@ -851,6 +864,8 @@ async def api_discovery():
                 "web_search": {"endpoint": "GET /v1/search?q=...", "price": "$0.01", "desc": "AI-powered web search"},
                 "deep_research": {"endpoint": "GET /v1/research?q=...", "price": "$0.05", "desc": "Search + extract + synthesize in one call"},
                 "portfolio_intelligence": {"endpoint": "GET /v1/portfolio?symbol=...", "price": "$0.10", "desc": "Price + signal + risk + sentiment in one call"},
+                "defi_strategy": {"endpoint": "GET /v1/defi-strategy?chain=...", "price": "$0.25", "desc": "DeFi yields + TVL + comparison + risk analysis"},
+                "market_pulse": {"endpoint": "GET /v1/market-pulse", "price": "$0.05", "desc": "Sentiment + trending + news + whales + global in one call"},
             },
             "dex": {
                 "swap_quote": {"endpoint": "GET /v1/swap/quote", "price": "free", "desc": "DEX swap quote (0x API, 6 chains)"},
@@ -904,7 +919,7 @@ async def health():
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,
         "x402_facilitator": X402_FACILITATOR_URL,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research", "portfolio_intelligence"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research", "portfolio_intelligence", "defi_strategy", "market_pulse"],
     }
 
 
@@ -944,6 +959,8 @@ async def x402_manifest():
         {"path": "/v1/macro", "method": "GET", "price": "$0.02", "description": "Macro economic and crypto indicators"},
         {"path": "/v1/research", "method": "GET", "price": "$0.05", "description": "Deep research — search + extract + synthesize in one call"},
         {"path": "/v1/portfolio", "method": "GET", "price": "$0.10", "description": "Portfolio intelligence — price + signal + risk + sentiment in one call"},
+        {"path": "/v1/defi-strategy", "method": "GET", "price": "$0.25", "description": "DeFi strategy report — yields + TVL + comparison + risk analysis"},
+        {"path": "/v1/market-pulse", "method": "GET", "price": "$0.05", "description": "Market pulse — sentiment + trending + news + whales + global snapshot"},
     ]
     paid_endpoints = [endpoint for endpoint in endpoints if endpoint["price"] != "$0.00"]
     return {
@@ -1090,6 +1107,8 @@ async def x402_json_manifest():
         # Intelligence (bundled high-value)
         {"method": "GET", "path": "/v1/research", "price": "$0.05"},
         {"method": "GET", "path": "/v1/portfolio/{symbol}", "price": "$0.10"},
+        {"method": "GET", "path": "/v1/defi-strategy", "price": "$0.25"},
+        {"method": "GET", "path": "/v1/market-pulse", "price": "$0.05"},
     ]
     free_services = [
         {"method": "GET", "path": "/v1/price/{symbol}", "price": "$0.00"},
@@ -1189,6 +1208,8 @@ async def llms_txt():
         "- GET /v1/seo/keywords?keyword=... — SEO keyword research ($0.01)",
         "- GET /v1/research?q=... — Deep research: search + extract + synthesize ($0.05)",
         "- GET /v1/portfolio?symbol=... — Portfolio intelligence: price + signal + risk + sentiment ($0.10)",
+        "- GET /v1/defi-strategy?chain=... — DeFi strategy: yields + TVL + comparison + risk ($0.25)",
+        "- GET /v1/market-pulse — Market pulse: sentiment + trending + news + whales ($0.05)",
         "",
         "## Free Agent Tools",
         "- GET /v1/agent-context — Paste-ready market context for LLM prompts",
@@ -1563,4 +1584,34 @@ async def portfolio_endpoint(symbol: str):
     Returns a synthesized verdict combining all modules.
     """
     return portfolio_intelligence(symbol)
+
+
+# --- DeFi Strategy Report (High-Value Bundled Endpoint) ---
+
+@app.get("/v1/defi-strategy", tags=["Intelligence"],
+         summary="DeFi Strategy — Yields + TVL + Comparison + Risk",
+         description="Comprehensive DeFi investment analysis: top yield opportunities, protocol TVL rankings, cross-chain yield comparison, and risk assessment with high-APY flags. Replaces 4+ API calls. $0.25 USDC via x402.")
+async def defi_strategy_endpoint(chain: str = ""):
+    """
+    DeFi Strategy Report ($0.25 per call via x402)
+
+    Bundles: yield opportunities + protocol TVL + yield comparison + risk flags.
+    Returns synthesized investment strategy with risk-adjusted recommendations.
+    """
+    return defi_strategy_report(chain)
+
+
+# --- Market Pulse (Rapid Market Snapshot) ---
+
+@app.get("/v1/market-pulse", tags=["Intelligence"],
+         summary="Market Pulse — Sentiment + Trending + News + Whales",
+         description="Real-time crypto market snapshot: Fear & Greed index, trending tokens, latest news, social signals, whale movements, and global market stats. Replaces 6+ API calls. $0.05 USDC via x402.")
+async def market_pulse_endpoint():
+    """
+    Market Pulse ($0.05 per call via x402)
+
+    Bundles: sentiment + trending + news + social + whales + global market.
+    Returns synthesized market direction signal for rapid agent decision-making.
+    """
+    return market_pulse()
 
