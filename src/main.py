@@ -1331,43 +1331,140 @@ metadata:
   mcp_endpoint: "https://agentservices.to/mcp"
 ---
 
-# AgentServices -- Data APIs for AI Agents
+# AgentServices -- Paid Data APIs for AI Agents
 
 ## Overview
 
 AgentServices provides 50 API endpoints for AI agents, covering crypto data,
 on-chain analytics, market intelligence, web research, and AI inference.
 Paid endpoints use x402 micropayments ($0.01-$0.25 per call in USDC on Base).
-12 endpoints are completely free.
+12 endpoints are completely free -- no payment, no signup, no API key.
 
 ## Quick Start
 
-### Free Endpoints (no payment needed)
+### Free Endpoints (no payment, no key)
 
     curl https://agentservices.to/v1/prices
     curl https://agentservices.to/v1/price/BTC
     curl https://agentservices.to/v1/fear-greed
     curl https://agentservices.to/v1/trending
     curl https://agentservices.to/v1/news
+    curl https://agentservices.to/v1/global
 
-### Paid Endpoints (x402 payment)
+### Paid Endpoints (x402 micropayment)
 
-Paid endpoints return HTTP 402 with payment instructions. Use any x402-compatible
-client to complete payment automatically.
-
-## Categories
-
-- Crypto Data: prices (free), indicators ($0.02), yields ($0.02)
-- On-Chain: whales ($0.02), exchange flows ($0.02), correlation ($0.03), TVL ($0.02)
-- Market Intel: sentiment ($0.03), trends ($0.03), competitors ($0.05)
-- Bundled: research ($0.05), portfolio ($0.10), defi-strategy ($0.25), onchain-overview ($0.15), market-pulse ($0.05)
-- Research: search ($0.01), metadata ($0.01)
-- Inference: /v1/inference ($0.03), /v1/complete ($0.03)
-- MCP: https://agentservices.to/mcp (36 tools)
+When you call a paid endpoint, the server returns HTTP 402 with payment
+instructions in the response body. Pay with USDC on Base, then retry
+with the payment proof.
 
 ## Payment Setup
 
-Uses x402 protocol. Coinbase agentic wallet recommended. CDP Paymaster = gasless.
+### Option 1: Coinbase Agentic Wallet (recommended)
+
+Install the agentic wallet CLI and fund with USDC on Base:
+
+    npx awal@latest wallet generate
+    npx awal@latest wallet fund --amount 5    # $5 USDC
+
+Then pay for any endpoint:
+
+    npx awal@latest x402 pay 'https://agentservices.to/v1/indicators/BTC'
+
+### Option 2: Any x402-compatible wallet
+
+Use @x402/fetch or any x402 client library. The server's 402 response
+includes a complete payment descriptor (amount, payTo address, network,
+and facilitator URL).
+
+CDP Paymaster makes payments gasless -- no ETH needed, only USDC.
+
+## MCP Integration
+
+Connect AgentServices to any MCP-compatible client (Claude Desktop,
+Cursor, Cline, Windsurf, VS Code):
+
+### Claude Desktop
+
+Add to claude_desktop_config.json:
+
+    {
+      "mcpServers": {
+        "agentservices": {
+          "url": "https://agentservices.to/mcp"
+        }
+      }
+    }
+
+### Cursor / Cline / Generic MCP Client
+
+    Server URL: https://agentservices.to/mcp
+    Transport: SSE (Server-Sent Events)
+
+36 tools available covering all endpoints.
+
+## Endpoint Reference
+
+### Free Endpoints (no payment)
+
+| Endpoint | Description |
+|---|---|
+| GET /v1/prices | All crypto prices |
+| GET /v1/price/{symbol} | Single crypto price |
+| GET /v1/fear-greed | Fear & Greed Index |
+| GET /v1/trending | Trending tokens |
+| GET /v1/news | Latest crypto news |
+| GET /v1/global | Global market stats |
+| GET /v1/social-trending | Social media trends |
+| GET /v1/gas | Gas prices |
+| GET /v1/predictions | Price predictions |
+| GET /v1/swap-quote | DEX swap quotes |
+| GET /v1/geo | IP geolocation |
+| GET /v1/policies | Dispute templates |
+
+### Paid Endpoints (x402)
+
+| Endpoint | Price | Description |
+|---|---|---|
+| GET /v1/indicators/{symbol} | $0.02 | Technical indicators (RSI, MACD, etc.) |
+| GET /v1/yields | $0.02 | DeFi yield rates across protocols |
+| GET /v1/whales | $0.02 | Whale transaction tracking |
+| GET /v1/exchange-flows | $0.02 | Exchange inflow/outflow data |
+| GET /v1/correlation | $0.03 | Token correlation matrix |
+| GET /v1/stablecoin-flows | $0.02 | Stablecoin flow analysis |
+| GET /v1/defi-tvl | $0.02 | DeFi TVL by protocol |
+| GET /v1/search | $0.01 | Web search |
+| GET /v1/metadata | $0.01 | URL metadata extraction |
+| GET /v1/sentiment | $0.03 | Market sentiment analysis |
+| GET /v1/trends | $0.03 | Market trend analysis |
+| GET /v1/competitors | $0.05 | Competitor analysis |
+| GET /v1/token-risk/{symbol} | $0.03 | Token risk assessment |
+| GET /v1/crypto-signals/{symbol} | $0.04 | Crypto trading signals |
+| GET /v1/portfolio?symbol=BTC | $0.10 | Portfolio intelligence report |
+| GET /v1/defi-strategy | $0.25 | DeFi investment strategy report |
+| GET /v1/market-pulse | $0.05 | Market overview (6 modules) |
+| GET /v1/onchain-overview | $0.15 | On-chain analytics (5 modules) |
+| GET /v1/research | $0.05 | Deep research (search+extract+synthesize) |
+| POST /v1/inference | $0.03 | AI inference (GPT models) |
+| POST /v1/complete | $0.03 | AI text completion |
+
+Full list at https://agentservices.to/docs
+
+## Use Cases
+
+- **Portfolio Monitor**: /v1/portfolio + /v1/indicators + /v1/token-risk
+- **DeFi Yield Optimizer**: /v1/defi-strategy + /v1/yields + /v1/defi-tvl
+- **Market Intelligence Agent**: /v1/market-pulse + /v1/sentiment + /v1/trends
+- **Trading Bot**: /v1/crypto-signals + /v1/whales + /v1/exchange-flows
+- **Research Agent**: /v1/research + /v1/search + /v1/metadata
+
+## Discovery
+
+- x402 Manifest: https://agentservices.to/.well-known/x402.json
+- OpenAPI Spec: https://agentservices.to/openapi.json
+- Agent Skill Card: https://agentservices.to/.well-known/mcp/server-card.json
+- MCP Registry: to.agentservices/agentservices
+- Network: Base (eip155:8453)
+- Facilitator: Coinbase CDP (https://api.cdp.coinbase.com/platform/v2/x402)
 ''',
         media_type="text/markdown",
         headers={"Cache-Control": "public, max-age=3600"}
