@@ -390,7 +390,7 @@ SERVER_CARD = {
     },
     "transport": {
         "type": "streamable-http",
-        "endpoint": "https://api.aiservices.to/mcp"
+        "endpoint": "https://agentservices.to/mcp"
     },
     "pricing": {
         "model": "pay-per-use",
@@ -412,7 +412,7 @@ SERVER_CARD = {
         }
     },
     "repository": "https://github.com/vbkotecha/aiservices-api",
-    "documentation": "https://api.aiservices.to/docs",
+    "documentation": "https://agentservices.to/docs",
     "tools": [{"name": t["name"], "description": t["description"]} for t in MCP_TOOLS]
 }
 
@@ -713,7 +713,7 @@ async def mcp_well_known():
             "description": "Paid APIs for AI agents — crypto market data, DeFi yields, on-chain analytics, dispute resolution. x402 payments on Base.",
             "transports": {
                 "streamable-http": {
-                    "endpoint": "https://api.aiservices.to/mcp",
+                    "endpoint": "https://agentservices.to/mcp",
                     "capabilities": {"tools": True, "resources": False, "prompts": False}
                 }
             },
@@ -722,9 +722,9 @@ async def mcp_well_known():
             "repository": "https://github.com/vbkotecha/aiservices-api",
             "tools_count": len(MCP_TOOLS),
             "links": {
-                "server-card": "https://api.aiservices.to/.well-known/mcp/server-card.json",
-                "documentation": "https://api.aiservices.to/docs",
-                "health": "https://api.aiservices.to/health"
+                "server-card": "https://agentservices.to/.well-known/mcp/server-card.json",
+                "documentation": "https://agentservices.to/docs",
+                "health": "https://agentservices.to/health"
             }
         },
         headers={"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"}

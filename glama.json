@@ -8,7 +8,7 @@
   "maintainers": ["vbkotecha"],
   "server": {
     "transport": "sse",
-    "url": "https://api.aiservices.to/mcp"
+    "url": "https://agentservices.to/mcp"
   },
   "tools": [
     {"name": "crypto_prices", "description": "Get current crypto prices for one or more symbols. FREE."},

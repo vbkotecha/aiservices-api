@@ -6,9 +6,9 @@
 [![Network](https://img.shields.io/badge/network-Base%20Mainnet-blue)](https://base.org)
 [![Payment](https://img.shields.io/badge/payment-x402%20%2F%20USDC-purple)](https://x402.org)
 [![MCP](https://img.shields.io/badge/MCP-compatible-orange)](https://modelcontextprotocol.io)
-[![Status](https://img.shields.io/badge/status-live-success)](https://api.aiservices.to/health)
+[![Status](https://img.shields.io/badge/status-live-success)](https://agentservices.to/health)
 
-**Live at:** [api.aiservices.to](https://api.aiservices.to) | **MCP Server:** `https://api.aiservices.to/mcp` (SSE) | **Discovery:** `/.well-known/x402`
+**Live at:** [agentservices.to](https://agentservices.to) | **MCP Server:** `https://agentservices.to/mcp` (SSE) | **Discovery:** `/.well-known/x402`
 
 ## What is this?
 
@@ -83,83 +83,83 @@ AgentServices is the monetized API layer for AI agents. No API keys, no subscrip
 ```bash
 # ALL-IN-ONE: Get portfolio intelligence in a single call ($0.10)
 # Returns: price + technical signal + risk score + market sentiment + verdict
-curl "https://api.aiservices.to/v1/portfolio?symbol=BTC"
+curl "https://agentservices.to/v1/portfolio?symbol=BTC"
 
 # Or build it yourself from individual endpoints:
 # Get current prices (FREE)
-curl https://api.aiservices.to/v1/prices?symbols=BTC,ETH,SOL
+curl https://agentservices.to/v1/prices?symbols=BTC,ETH,SOL
 
 # Get technical signals for entry/exit ($0.04)
-curl https://api.aiservices.to/v1/crypto-signals
+curl https://agentservices.to/v1/crypto-signals
 
 # Check token risk before buying ($0.03)
-curl https://api.aiservices.to/v1/token-risk/PEPE
+curl https://agentservices.to/v1/token-risk/PEPE
 ```
 
 ### DeFi Yield Optimizer
 ```bash
 # ALL-IN-ONE: Get DeFi strategy report ($0.25)
 # Returns: top yields + protocol TVL + cross-chain comparison + risk flags
-curl "https://api.aiservices.to/v1/defi-strategy"
+curl "https://agentservices.to/v1/defi-strategy"
 
 # Get all yield pools ranked by TVL ($0.02)
-curl https://api.aiservices.to/v1/yields
+curl https://agentservices.to/v1/yields
 
 # Compare yields with risk-adjusted returns ($0.03)
-curl https://api.aiservices.to/v1/yield-comparison
+curl https://agentservices.to/v1/yield-comparison
 
 # Check on-chain position for any wallet ($0.02)
-curl https://api.aiservices.to/v1/onchain/0x9863aB6242663FCc84c33632741711dB78f8Fd15
+curl https://agentservices.to/v1/onchain/0x9863aB6242663FCc84c33632741711dB78f8Fd15
 ```
 
 ### Market Intelligence Agent
 ```bash
 # ALL-IN-ONE: Get market pulse report ($0.05)
 # Returns: fear-greed + trending + news + social + whales + global market
-curl "https://api.aiservices.to/v1/market-pulse"
+curl "https://agentservices.to/v1/market-pulse"
 
 # Get market sentiment (FREE)
-curl https://api.aiservices.to/v1/fear-greed
+curl https://agentservices.to/v1/fear-greed
 
 # Search for latest news on any topic ($0.01)
-curl "https://api.aiservices.to/v1/search?q=base+chain+ecosystem"
+curl "https://agentservices.to/v1/search?q=base+chain+ecosystem"
 
 # Get trending tokens (FREE)
-curl https://api.aiservices.to/v1/trending
+curl https://agentservices.to/v1/trending
 
 # Get marketing intelligence report ($0.05)
-curl "https://api.aiservices.to/v1/marketing-intel?competitor=blockrun&topic=x402"
+curl "https://agentservices.to/v1/marketing-intel?competitor=blockrun&topic=x402"
 ```
 
 ### Technical Analysis Bot
 ```bash
 # Full technical indicator suite ($0.02)
-curl https://api.aiservices.to/v1/indicators/BTC
+curl https://agentservices.to/v1/indicators/BTC
 # Returns: RSI, MACD, Bollinger Bands, ATR, Support/Resistance levels
 
 # AI-generated market predictions (FREE)
-curl https://api.aiservices.to/v1/predictions
+curl https://agentservices.to/v1/predictions
 
 # Combine with on-chain analytics ($0.03)
-curl https://api.aiservices.to/v1/onchain/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/tokens
+curl https://agentservices.to/v1/onchain/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/tokens
 ```
 
 ### Developer Research Agent
 ```bash
 # GitHub trending repos ($0.02)
-curl "https://api.aiservices.to/v1/github-trending?language=python&since=weekly"
+curl "https://agentservices.to/v1/github-trending?language=python&since=weekly"
 
 # NPM package stats ($0.02)
-curl https://api.aiservices.to/v1/npm-stats/react
+curl https://agentservices.to/v1/npm-stats/react
 
 # Hacker News sentiment ($0.02)
-curl "https://api.aiservices.to/v1/hn-sentiment?q=AI+agents"
+curl "https://agentservices.to/v1/hn-sentiment?q=AI+agents"
 ```
 
 ### AI Chat / Inference
 ```bash
 # Chat completions via x402 ($0.03)
-curl -X POST https://api.aiservices.to/v1/inference \
+curl -X POST https://agentservices.to/v1/inference \
   -H "Content-Type: application/json" \
   -d '{"model":"gpt-5.4-mini","messages":[{"role":"user","content":"Explain x402 in 3 sentences"}]}'
 ```
@@ -168,13 +168,13 @@ curl -X POST https://api.aiservices.to/v1/inference \
 ```bash
 # ALL-IN-ONE: Get full on-chain overview ($0.15)
 # Returns: whale movements + exchange flows + stablecoin flows + correlation matrix + DeFi TVL
-curl "https://api.aiservices.to/v1/onchain-overview"
+curl "https://agentservices.to/v1/onchain-overview"
 
 # On-chain analytics for any wallet ($0.02)
-curl https://api.aiservices.to/v1/onchain/0x9863aB6242663FCc84c33632741711dB78f8Fd15
+curl https://agentservices.to/v1/onchain/0x9863aB6242663FCc84c33632741711dB78f8Fd15
 
 # Token holdings for any wallet ($0.03)
-curl https://api.aiservices.to/v1/onchain/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/tokens
+curl https://agentservices.to/v1/onchain/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/tokens
 ```
 
 ---
@@ -184,10 +184,10 @@ curl https://api.aiservices.to/v1/onchain/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA9
 ### Using curl
 ```bash
 # Free — no payment needed
-curl https://api.aiservices.to/v1/prices?symbols=BTC,ETH
+curl https://agentservices.to/v1/prices?symbols=BTC,ETH
 
 # Paid — returns HTTP 402 with payment instructions in the header
-curl -i https://api.aiservices.to/v1/indicators/BTC
+curl -i https://agentservices.to/v1/indicators/BTC
 # Response includes x402 payment envelope: network, amount, payTo address
 # Agent pays via x402 client, retries with X-Payment header, gets data
 ```
@@ -197,7 +197,7 @@ curl -i https://api.aiservices.to/v1/indicators/BTC
 {
   "mcpServers": {
     "agentservices": {
-      "url": "https://api.aiservices.to/mcp",
+      "url": "https://agentservices.to/mcp",
       "transport": "sse"
     }
   }
@@ -211,25 +211,25 @@ curl -i https://api.aiservices.to/v1/indicators/BTC
 import httpx
 
 # Free endpoints
-resp = httpx.get("https://api.aiservices.to/v1/prices?symbols=BTC,ETH")
+resp = httpx.get("https://agentservices.to/v1/prices?symbols=BTC,ETH")
 prices = resp.json()
 
 # Paid endpoints — use x402 client to handle payment
 from x402.client import x402Client
 client = x402Client()
-result = client.get("https://api.aiservices.to/v1/indicators/BTC")
+result = client.get("https://agentservices.to/v1/indicators/BTC")
 # Client handles 402 → pays USDC → retries with payment proof → returns data
 ```
 
 ### Using with JavaScript/TypeScript
 ```typescript
 // Free endpoints
-const prices = await fetch("https://api.aiservices.to/v1/prices?symbols=BTC,ETH").then(r => r.json());
+const prices = await fetch("https://agentservices.to/v1/prices?symbols=BTC,ETH").then(r => r.json());
 
 // Paid endpoints — use @x402/facilitator
 import { wrapFetchWithPayment } from "@x402/facilitator";
 const paidFetch = wrapFetchWithPayment(fetch);
-const indicators = await paidFetch("https://api.aiservices.to/v1/indicators/BTC").then(r => r.json());
+const indicators = await paidFetch("https://agentservices.to/v1/indicators/BTC").then(r => r.json());
 ```
 
 ## Dispute Resolution Engine
@@ -248,7 +248,7 @@ AgentServices includes an AI-powered dispute resolution system with 7 policy tem
 
 ## Discovery & Listings
 
-- [x402 Discovery](https://api.aiservices.to/.well-known/x402) — Live
+- [x402 Discovery](https://agentservices.to/.well-known/x402) — Live
 - [MCP Registry](https://registry.modelcontextprotocol.io) — Listed as `to.agentservices/agentservices`
 - [CDP Bazaar](https://bazaar.coinbase.com) — Extension enabled
 - [awesome-x402](https://github.com/xpaysh/awesome-x402) — PR submitted
@@ -266,9 +266,9 @@ MIT — Build on it, fork it, integrate it.
 
 ## Links
 
-- **API:** [api.aiservices.to](https://api.aiservices.to)
-- **MCP:** [api.aiservices.to/mcp](https://api.aiservices.to/mcp)
-- **Discovery:** [api.aiservices.to/.well-known/x402](https://api.aiservices.to/.well-known/x402)
+- **API:** [agentservices.to](https://agentservices.to)
+- **MCP:** [agentservices.to/mcp](https://agentservices.to/mcp)
+- **Discovery:** [agentservices.to/.well-known/x402](https://agentservices.to/.well-known/x402)
 - **GitHub:** [github.com/vbkotecha/aiservices-api](https://github.com/vbkotecha/aiservices-api)
 - **x402 Protocol:** [x402.org](https://x402.org)
 - **Base:** [base.org](https://base.org)

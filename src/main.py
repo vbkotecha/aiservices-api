@@ -801,13 +801,13 @@ def _get_landing():
 
 @app.get("/")
 async def root(request: Request):
-    """Route based on domain: aiservices.to = website, api.aiservices.to = API JSON."""
+    """Route based on domain: agentservices.to serves website HTML, all paths serve API."""
     host = request.headers.get("host", "").split(":")[0].lower()
     if host.startswith("api."):
         return {
             "name": "AgentServices",
             "tagline": "Paid APIs for AI agents — data, inference, and market intelligence",
-            "version": "4.1.0",
+            "version": "5.3.0",
             "payment": "x402 / USDC on Base",
             "wallet": X402_WALLET,
             "services": {
@@ -983,9 +983,9 @@ async def x402_manifest():
         "categories": ["Data", "Market Data", "On-chain Analytics", "Geolocation", "DEX", "Prediction Markets", "Search", "News", "Governance", "Dispute Resolution", "MCP", "Marketing Intelligence"],
         "payTo": X402_WALLET,
         "contact": "https://github.com/vbkotecha",
-        "website": "https://api.aiservices.to",
+        "website": "https://agentservices.to",
         "repository": "https://github.com/vbkotecha/aiservices-api",
-        "homepage": "https://api.aiservices.to",
+        "homepage": "https://agentservices.to",
         "license": "MIT",
         "spec": "x402-service-manifest/1",
     }
@@ -996,9 +996,9 @@ async def agent_json():
     """Agent discovery manifest for AI agent platforms and crawlers."""
     return {
         "name": "AgentServices",
-        "version": "4.1.0",
+        "version": "5.3.0",
         "description": "Paid data APIs for AI agents — crypto, DeFi, DEX, prediction markets, news, search, geolocation, metadata, on-chain analytics, whale tracking, DeFi TVL, correlation matrix, stablecoin flows, GitHub velocity, macro indicators",
-        "url": "https://api.aiservices.to",
+        "url": "https://agentservices.to",
         "capabilities": [
             "crypto-market-data",
             "technical-indicators",
@@ -1065,7 +1065,7 @@ async def agent_json():
                 {"path": "GET /v1/macro", "price": "$0.02"},
             ],
         },
-        "docs": "https://api.aiservices.to/docs",
+        "docs": "https://agentservices.to/docs",
         "github": "https://github.com/vbkotecha/aiservices-api",
         "wallet": X402_WALLET,
     }
@@ -1142,9 +1142,9 @@ async def x402_json_manifest():
         "payTo": X402_WALLET,
         "currency": "USDC",
         "website": "https://aiservices.to",
-        "apiBaseUrl": "https://api.aiservices.to",
+        "apiBaseUrl": "https://agentservices.to",
         "repository": "https://github.com/vbkotecha/aiservices-api",
-        "documentation": "https://api.aiservices.to/docs",
+        "documentation": "https://agentservices.to/docs",
         "services": paid_services + free_services,
         "extensions": {
             "bazaar": {"discoverable": True}
@@ -1376,16 +1376,16 @@ a:hover{text-decoration:underline}
 <h2>Quick Start</h2>
 <p>No signup. No API keys. Free endpoints work immediately. Paid endpoints use x402 micropayments.</p>
 <pre><code># Free: Get BTC price
-curl https://api.aiservices.to/v1/price/BTC
+curl https://agentservices.to/v1/price/BTC
 
 # Free: Batch prices
-curl "https://api.aiservices.to/v1/prices?symbols=BTC,ETH,SOL"
+curl "https://agentservices.to/v1/prices?symbols=BTC,ETH,SOL"
 
 # Free: Fear & Greed Index
-curl https://api.aiservices.to/v1/fear-greed
+curl https://agentservices.to/v1/fear-greed
 
 # MCP: Connect your AI tool
-# URL: https://api.aiservices.to/mcp (Streamable HTTP)</code></pre>
+# URL: https://agentservices.to/mcp (Streamable HTTP)</code></pre>
 </section>
 
 <section>
@@ -1439,7 +1439,7 @@ curl https://api.aiservices.to/v1/fear-greed
 <section>
 <h2>MCP Integration</h2>
 <p>Connect AgentServices directly to Claude, Cursor, or any MCP client:</p>
-<pre><code>MCP Server URL: https://api.aiservices.to/mcp
+<pre><code>MCP Server URL: https://agentservices.to/mcp
 Transport: Streamable HTTP</code></pre>
 <p>8 tools available immediately. No installation required.</p>
 </section>
