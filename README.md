@@ -1,8 +1,8 @@
 # AgentServices
 
-> 47-endpoint crypto, market intelligence, and AI inference API for AI agents — with x402 micropayments on Base
+> 49-endpoint crypto, market intelligence, and AI inference API for AI agents — with x402 micropayments on Base
 
-[![Version](https://img.shields.io/badge/version-5.1.0-brightgreen)](https://github.com/vbkotecha/aiservices-api)
+[![Version](https://img.shields.io/badge/version-5.2.0-brightgreen)](https://github.com/vbkotecha/aiservices-api)
 [![Network](https://img.shields.io/badge/network-Base%20Mainnet-blue)](https://base.org)
 [![Payment](https://img.shields.io/badge/payment-x402%20%2F%20USDC-purple)](https://x402.org)
 [![MCP](https://img.shields.io/badge/MCP-compatible-orange)](https://modelcontextprotocol.io)
@@ -14,7 +14,7 @@
 
 AgentServices is the monetized API layer for AI agents. No API keys, no subscriptions — agents pay per-request with USDC on Base using the [x402 payment protocol](https://x402.org).
 
-**47 endpoints** across crypto data, market intelligence, DeFi analytics, AI inference, portfolio intelligence, and dispute resolution. 12 are free. 35 are paid via x402 (from $0.002 to $0.10 per call).
+**49 endpoints** across crypto data, market intelligence, DeFi analytics, AI inference, portfolio intelligence, and dispute resolution. 12 are free. 37 are paid via x402 (from $0.002 to $0.25 per call).
 
 ## Endpoints
 
@@ -55,6 +55,14 @@ AgentServices is the monetized API layer for AI agents. No API keys, no subscrip
 | `GET /v1/github-trending` | $0.02 | Trending GitHub repos by language/topic |
 | `GET /v1/marketing-intel` | $0.05 | Marketing intelligence: competitors, content gaps, ad copy |
 
+### Paid — Bundled Intelligence (x402)
+| Endpoint | Price | Description |
+|----------|-------|-------------|
+| `GET /v1/research?q=` | $0.05 | Deep research: search + extract + synthesize in one call |
+| `GET /v1/portfolio?symbol=BTC` | $0.10 | Portfolio intelligence: price + signal + risk + sentiment + verdict |
+| `GET /v1/defi-strategy` | $0.25 | DeFi strategy report: top yields + TVL + comparison + risk flags |
+| `GET /v1/market-pulse` | $0.05 | Market pulse: fear-greed + trending + news + social + whales + global |
+
 ### Paid — AI Inference (x402)
 | Endpoint | Price | Description |
 |----------|-------|-------------|
@@ -89,6 +97,10 @@ curl https://api.aiservices.to/v1/token-risk/PEPE
 
 ### DeFi Yield Optimizer
 ```bash
+# ALL-IN-ONE: Get DeFi strategy report ($0.25)
+# Returns: top yields + protocol TVL + cross-chain comparison + risk flags
+curl "https://api.aiservices.to/v1/defi-strategy"
+
 # Get all yield pools ranked by TVL ($0.02)
 curl https://api.aiservices.to/v1/yields
 
@@ -101,6 +113,10 @@ curl https://api.aiservices.to/v1/onchain/0x9863aB6242663FCc84c33632741711dB78f8
 
 ### Market Intelligence Agent
 ```bash
+# ALL-IN-ONE: Get market pulse report ($0.05)
+# Returns: fear-greed + trending + news + social + whales + global market
+curl "https://api.aiservices.to/v1/market-pulse"
+
 # Get market sentiment (FREE)
 curl https://api.aiservices.to/v1/fear-greed
 
@@ -174,7 +190,7 @@ curl -i https://api.aiservices.to/v1/indicators/BTC
 }
 ```
 
-13+ MCP tools available: `crypto_prices`, `trending_tokens`, `global_market`, `gas_prices`, `market_predictions`, `crypto_news`, `social_trending`, `technical_indicators`, `defi_yields`, `search_web`, `token_risk`, `crypto_signals`, `onchain_analytics`
+13+ MCP tools available: `crypto_prices`, `trending_tokens`, `global_market`, `gas_prices`, `market_predictions`, `crypto_news`, `social_trending`, `technical_indicators`, `defi_yields`, `search_web`, `token_risk`, `crypto_signals`, `onchain_analytics`, `deep_research`, `portfolio_intelligence`, `defi_strategy`, `market_pulse`
 
 ### Using with Python
 ```python
@@ -219,7 +235,7 @@ AgentServices includes an AI-powered dispute resolution system with 7 policy tem
 ## Discovery & Listings
 
 - [x402 Discovery](https://api.aiservices.to/.well-known/x402) — Live
-- [MCP Registry](https://registry.modelcontextprotocol.io) — Listed as `to.aiservices/aiservices`
+- [MCP Registry](https://registry.modelcontextprotocol.io) — Listed as `to.agentservices/agentservices`
 - [CDP Bazaar](https://bazaar.coinbase.com) — Extension enabled
 - [awesome-x402](https://github.com/xpaysh/awesome-x402) — PR submitted
 
