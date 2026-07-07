@@ -1158,10 +1158,10 @@ async def llms_txt():
     lines = [
         "# AgentServices",
         "",
-        "> Paid APIs for AI agents. 47 services, 35 paid. Crypto data, stocks, SEC filings, commodities, FX, inference gateway (gpt-5.4/5.5), token risk scoring, crypto signals, web extraction, package security, SEO research, and more. All via x402 (USDC on Base).",
+        "> Paid APIs for AI agents. 50 services, 38 paid. Crypto data, stocks, SEC filings, commodities, FX, inference gateway (gpt-5.4/5.5), token risk scoring, crypto signals, web extraction, package security, SEO research, and more. All via x402 (USDC on Base).",
         "",
         "## Base URL",
-        "https://api.aiservices.to",
+        "https://agentservices.to",
         "",
         "## Authentication",
         "Paid endpoints use x402 protocol (USDC on Base Mainnet). Free endpoints require no auth.",
@@ -1226,19 +1226,61 @@ async def llms_txt():
         "## Example Usage",
         "```",
         "# Free: Get BTC price",
-        "curl https://api.aiservices.to/v1/price/BTC",
+        "curl https://agentservices.to/v1/price/BTC",
         "",
         "# Paid: Get BTC indicators (requires x402 payment)",
-        "curl https://api.aiservices.to/v1/indicators/BTC",
+        "curl https://agentservices.to/v1/indicators/BTC",
         "```",
         "",
         f"## Payment Wallet\n{WALLET}",
         "",
         "## Links",
-        "- API Docs: https://api.aiservices.to/docs",
+        "- API Docs: https://agentservices.to/docs",
         "- GitHub: https://github.com/vbkotecha/aiservices-api",
     ]
     from starlette.responses import PlainTextResponse
+    return PlainTextResponse(content="\n".join(lines), media_type="text/plain")
+
+
+@app.get("/robots.txt")
+async def robots_txt():
+    """Robots.txt with explicit AI crawler rules for agent discovery."""
+    from starlette.responses import PlainTextResponse
+    lines = [
+        "# AgentServices — robots.txt",
+        "# AI agents and crawlers are explicitly allowed",
+        "",
+        "User-agent: GPTBot",
+        "Allow: /",
+        "",
+        "User-agent: ClaudeBot",
+        "Allow: /",
+        "",
+        "User-agent: ChatGPT-User",
+        "Allow: /",
+        "",
+        "User-agent: anthropic-ai",
+        "Allow: /",
+        "",
+        "User-agent: Google-Extended",
+        "Allow: /",
+        "",
+        "User-agent: PerplexityBot",
+        "Allow: /",
+        "",
+        "User-agent: Amazonbot",
+        "Allow: /",
+        "",
+        "User-agent: *",
+        "Allow: /",
+        "",
+        "# Key endpoints for AI agents",
+        "# /llms.txt — Machine-readable service description",
+        "# /openapi.json — OpenAPI 3.1 specification",
+        "# /mcp — MCP server (SSE)",
+        "# /.well-known/x402 — x402 payment discovery",
+        "# /.well-known/mcp/server-card.json — MCP server card",
+    ]
     return PlainTextResponse(content="\n".join(lines), media_type="text/plain")
 
 
