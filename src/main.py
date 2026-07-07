@@ -1297,11 +1297,29 @@ async def web_manifest():
         "name": "AgentServices",
         "short_name": "AgentServices",
         "description": "Paid data APIs for AI agents — crypto, DeFi, geo, web metadata, marketing intelligence, dispute resolution",
-        "start_url": "https://api.aiservices.to",
+        "start_url": "https://agentservices.to",
         "scope": "/",
         "display": "standalone",
         "categories": ["developer", "finance", "data"],
         "icons": [],
+    }
+
+
+@app.get("/.well-known/ai-plugin.json")
+async def ai_plugin_manifest():
+    """OpenAI plugin manifest for ChatGPT plugin discovery."""
+    return {
+        "schema_version": "v1",
+        "name_for_human": "AgentServices",
+        "name_for_model": "agentservices",
+        "description_for_human": "Paid APIs for AI agents — crypto data, market intelligence, DeFi analytics, on-chain analytics, search, and AI inference. Pay per request with USDC on Base.",
+        "description_for_model": "Access 50+ API endpoints for crypto prices, technical indicators, DeFi yields, on-chain analytics, whale tracking, market sentiment, web search, LLM inference, portfolio intelligence, and dispute resolution. Free endpoints need no payment. Paid endpoints use x402 protocol (USDC on Base).",
+        "auth": {"type": "none"},
+        "api": {"type": "openapi", "url": "https://agentservices.to/openapi.json"},
+        "logo_url": "https://agentservices.to/logo.png",
+        "contact_email": "vbkotecha@gmail.com",
+        "legal_info_url": "https://agentservices.to",
+        "url": "https://agentservices.to",
     }
 
 
