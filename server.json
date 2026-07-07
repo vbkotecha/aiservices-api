@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "to.aiservices/aiservices",
+  "name": "to.agentservices/agentservices",
   "version": "5.1.0",
   "description": "Paid APIs for AI agents — crypto, stocks, SEC, FX, inference, security. 46 services. x402.",
   "title": "AgentServices",
