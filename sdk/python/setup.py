@@ -3,8 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name="aiservices",
     version="2.0.0",
-    description="Python SDK for AIServices — paid APIs for AI agents (crypto data, DeFi yields, dispute resolution)",
-    long_description="""AIServices SDK
+    description="Python SDK for AgentServices — paid APIs for AI agents (crypto data, DeFi yields, market intelligence, and dispute resolution)",
+    long_description="""AgentServices SDK
 ============
 Paid APIs for AI agents with built-in x402 payments.
 
@@ -15,7 +15,7 @@ Features:
 - Fear & Greed index (FREE)
 - IP geolocation (FREE)
 - URL metadata extraction ($0.01)
-- AI-powered dispute resolution ($0.05)
+- AI-powered market intelligence, and dispute resolution ($0.05)
 
 Works as a LangChain tool, CrewAI tool, or standalone client.""",
     long_description_content_type="text/markdown",
@@ -24,7 +24,7 @@ Works as a LangChain tool, CrewAI tool, or standalone client.""",
     python_requires=">=3.10",
     author="Vivek Kotecha",
     author_email="support@aiservices.to",
-    url="https://api.aiservices.to",
+    url="https://agentservices.to",
     license="MIT",
     keywords=["x402", "crypto", "ai-agents", "langchain", "crewai", "dispute-resolution", "base", "usdc", "mcp"],
     classifiers=[

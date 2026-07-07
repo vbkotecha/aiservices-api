@@ -7,12 +7,12 @@
     "source": "github"
   },
   "version": "2.0.0",
-  "homepage": "https://api.aiservices.to",
+  "homepage": "https://agentservices.to",
   "license": "MIT",
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://api.aiservices.to/mcp"
+      "url": "https://agentservices.to/mcp"
     }
   ]
 }

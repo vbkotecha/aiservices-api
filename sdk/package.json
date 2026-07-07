@@ -1,7 +1,7 @@
 {
-  "name": "aiservices-client",
-  "version": "1.0.0",
-  "description": "Client SDK for AIServices x402 APIs — crypto market data, DeFi yields, IP geolocation, URL metadata, and dispute resolution",
+  "name": "agentservices-client",
+  "version": "5.3.0",
+  "description": "Client SDK for AgentServices — 50+ paid APIs for AI agents with crypto data, DeFi yields, on-chain analytics, portfolio intelligence, and market intelligence. x402 micropayments via USDC on Base.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
@@ -12,11 +12,13 @@
     "crypto",
     "api",
     "ai-agents",
-    "dispute-resolution",
     "defi",
     "base",
     "usdc",
-    "agentcourt"
+    "portfolio",
+    "market-intelligence",
+    "onchain",
+    "agentservices"
   ],
   "author": "Vivek Kotecha",
   "license": "MIT",
@@ -24,7 +26,7 @@
     "type": "git",
     "url": "https://github.com/vbkotecha/aiservices-api"
   },
-  "homepage": "https://api.aiservices.to",
+  "homepage": "https://agentservices.to",
   "dependencies": {
     "x402": "^0.1.0"
   }

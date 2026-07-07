@@ -10,13 +10,13 @@
  * @module aiservices-client
  */
 
-const DEFAULT_BASE_URL = "https://api.aiservices.to";
+const DEFAULT_BASE_URL = "https://agentservices.to";
 
 class AIServicesClient {
   /**
    * Create an AIServices client.
    * @param {Object} options
-   * @param {string} [options.baseUrl] - API base URL (default: https://api.aiservices.to)
+   * @param {string} [options.baseUrl] - API base URL (default: https://agentservices.to)
    * @param {string} [options.walletAddress] - Wallet for x402 payments (required for paid endpoints)
    * @param {string} [options.privateKey] - Private key for signing x402 payments
    */

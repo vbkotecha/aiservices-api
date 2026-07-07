@@ -1,6 +1,6 @@
-# AIServices Client SDK
+# AgentServices Client SDK
 
-Client SDK for [AIServices](https://api.aiservices.to) — paid data APIs for AI agents.
+Client SDK for [AgentServices](https://agentservices.to) — paid data APIs for AI agents.
 
 ## Install
 
@@ -11,9 +11,9 @@ npm install aiservices-client
 ## Quick Start
 
 ```javascript
-const { AIServicesClient } = require("aiservices-client");
+const { AgentServicesClient } = require("aiservices-client");
 
-const client = new AIServicesClient();
+const client = new AgentServicesClient();
 
 // Free endpoints — no payment needed
 const btc = await client.getPrice("BTC");
@@ -70,7 +70,7 @@ Paid endpoints use the [x402 protocol](https://x402.org) with USDC on Base Mainn
 To enable automatic payment, pass wallet credentials:
 
 ```javascript
-const client = new AIServicesClient({
+const client = new AgentServicesClient({
   walletAddress: "0x...",
   privateKey: "0x...",
 });
