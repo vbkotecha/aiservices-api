@@ -1,8 +1,8 @@
 # AgentServices
 
-> 49-endpoint crypto, market intelligence, and AI inference API for AI agents — with x402 micropayments on Base
+> 50-endpoint crypto, market intelligence, and AI inference API for AI agents — with x402 micropayments on Base
 
-[![Version](https://img.shields.io/badge/version-5.2.0-brightgreen)](https://github.com/vbkotecha/aiservices-api)
+[![Version](https://img.shields.io/badge/version-5.3.0-brightgreen)](https://github.com/vbkotecha/aiservices-api)
 [![Network](https://img.shields.io/badge/network-Base%20Mainnet-blue)](https://base.org)
 [![Payment](https://img.shields.io/badge/payment-x402%20%2F%20USDC-purple)](https://x402.org)
 [![MCP](https://img.shields.io/badge/MCP-compatible-orange)](https://modelcontextprotocol.io)
@@ -14,7 +14,7 @@
 
 AgentServices is the monetized API layer for AI agents. No API keys, no subscriptions — agents pay per-request with USDC on Base using the [x402 payment protocol](https://x402.org).
 
-**49 endpoints** across crypto data, market intelligence, DeFi analytics, AI inference, portfolio intelligence, and dispute resolution. 12 are free. 37 are paid via x402 (from $0.002 to $0.25 per call).
+**50 endpoints** across crypto data, market intelligence, DeFi analytics, on-chain analytics, AI inference, portfolio intelligence, and dispute resolution. 12 are free. 38 are paid via x402 (from $0.002 to $0.25 per call).
 
 ## Endpoints
 
@@ -62,6 +62,7 @@ AgentServices is the monetized API layer for AI agents. No API keys, no subscrip
 | `GET /v1/portfolio?symbol=BTC` | $0.10 | Portfolio intelligence: price + signal + risk + sentiment + verdict |
 | `GET /v1/defi-strategy` | $0.25 | DeFi strategy report: top yields + TVL + comparison + risk flags |
 | `GET /v1/market-pulse` | $0.05 | Market pulse: fear-greed + trending + news + social + whales + global |
+| `GET /v1/onchain-overview` | $0.15 | On-chain overview: whales + exchange flows + stablecoin flows + correlation + DeFi TVL |
 
 ### Paid — AI Inference (x402)
 | Endpoint | Price | Description |
@@ -163,6 +164,19 @@ curl -X POST https://api.aiservices.to/v1/inference \
   -d '{"model":"gpt-5.4-mini","messages":[{"role":"user","content":"Explain x402 in 3 sentences"}]}'
 ```
 
+### On-Chain Analytics
+```bash
+# ALL-IN-ONE: Get full on-chain overview ($0.15)
+# Returns: whale movements + exchange flows + stablecoin flows + correlation matrix + DeFi TVL
+curl "https://api.aiservices.to/v1/onchain-overview"
+
+# On-chain analytics for any wallet ($0.02)
+curl https://api.aiservices.to/v1/onchain/0x9863aB6242663FCc84c33632741711dB78f8Fd15
+
+# Token holdings for any wallet ($0.03)
+curl https://api.aiservices.to/v1/onchain/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045/tokens
+```
+
 ---
 
 ## Quick Start
@@ -190,7 +204,7 @@ curl -i https://api.aiservices.to/v1/indicators/BTC
 }
 ```
 
-13+ MCP tools available: `crypto_prices`, `trending_tokens`, `global_market`, `gas_prices`, `market_predictions`, `crypto_news`, `social_trending`, `technical_indicators`, `defi_yields`, `search_web`, `token_risk`, `crypto_signals`, `onchain_analytics`, `deep_research`, `portfolio_intelligence`, `defi_strategy`, `market_pulse`
+13+ MCP tools available: `crypto_prices`, `trending_tokens`, `global_market`, `gas_prices`, `market_predictions`, `crypto_news`, `social_trending`, `technical_indicators`, `defi_yields`, `search_web`, `token_risk`, `crypto_signals`, `onchain_analytics`, `deep_research`, `portfolio_intelligence`, `defi_strategy`, `market_pulse`, `onchain_overview`
 
 ### Using with Python
 ```python
