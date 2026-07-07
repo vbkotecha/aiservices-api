@@ -920,7 +920,7 @@ async def api_discovery():
 async def health():
     return {
         "status": "ok",
-        "version": "4.0.0",
+        "version": "5.3.0",
         "x402_enabled": X402_ENABLED,
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,

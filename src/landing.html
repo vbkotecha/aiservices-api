@@ -973,6 +973,35 @@ footer {
   .features-grid { grid-template-columns: 1fr; }
 }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebAPI",
+  "name": "AgentServices",
+  "description": "Paid APIs for AI agents — crypto market data, DeFi intelligence, market intelligence, search, inference, and on-chain analytics. Powered by x402 micropayments in USDC on Base.",
+  "url": "https://agentservices.to",
+  "documentation": "https://agentservices.to/docs",
+  "provider": {
+    "@type": "Organization",
+    "name": "AgentServices",
+    "url": "https://agentservices.to"
+  },
+  "termsOfService": "https://agentservices.to",
+  "category": "API Services, Cryptocurrency, Artificial Intelligence",
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "USD",
+    "lowPrice": "0.00",
+    "highPrice": "0.25",
+    "offerCount": "50"
+  },
+  "endpointSpecification": {
+    "@type": "CreativeWork",
+    "encodingFormat": "application/json",
+    "url": "https://agentservices.to/openapi.json"
+  }
+}
+</script>
 </head>
 <body>
 
@@ -991,7 +1020,7 @@ footer {
       <a href="#endpoints">Endpoints</a>
       <a href="#payments">Payments</a>
       <a href="#mcp">MCP</a>
-      <a href="https://api.agentservices.to/docs" target="_blank">Docs</a>
+      <a href="https://agentservices.to/docs" target="_blank">Docs</a>
       <a href="https://github.com/vbkotecha/aiservices-api" target="_blank" class="nav-cta">GitHub</a>
     </div>
   </div>
@@ -1253,44 +1282,44 @@ footer {
         </div>
         <div class="code-body">
           <pre id="code-curl"><span class="com"># Free: Get live BTC price</span>
-<span class="fn">curl</span> https://api.agentservices.to/v1/price/BTC
+<span class="fn">curl</span> https://agentservices.to/v1/price/BTC
 
 <span class="com"># Free: Batch prices</span>
-<span class="fn">curl</span> <span class="str">"https://api.agentservices.to/v1/prices?symbols=BTC,ETH,SOL"</span>
+<span class="fn">curl</span> <span class="str">"https://agentservices.to/v1/prices?symbols=BTC,ETH,SOL"</span>
 
 <span class="com"># Free: Fear & Greed Index</span>
-<span class="fn">curl</span> https://api.agentservices.to/v1/fear-greed
+<span class="fn">curl</span> https://agentservices.to/v1/fear-greed
 
 <span class="com"># Paid: Technical indicators (x402 payment)</span>
-<span class="fn">curl</span> https://api.agentservices.to/v1/indicators/BTC</pre>
+<span class="fn">curl</span> https://agentservices.to/v1/indicators/BTC</pre>
 
           <pre id="code-python" style="display:none"><span class="com"># Free: Get live BTC price</span>
 <span class="kw">import</span> requests
 
-response = requests.get(<span class="str">"https://api.agentservices.to/v1/price/BTC"</span>)
+response = requests.get(<span class="str">"https://agentservices.to/v1/price/BTC"</span>)
 data = response.json()
 <span class="fn">print</span>(<span class="str">f"BTC: $</span>{data[<span class="str">'price_usd'</span>]:,.0f}<span class="str">"</span>)
 
 <span class="com"># Batch prices</span>
 response = requests.get(
-    <span class="str">"https://api.agentservices.to/v1/prices"</span>,
+    <span class="str">"https://agentservices.to/v1/prices"</span>,
     params={<span class="str">"symbols"</span>: <span class="str">"BTC,ETH,SOL,XRP"</span>}
 )
 <span class="kw">for</span> coin <span class="kw">in</span> response.json()[<span class="str">"data"</span>]:
     <span class="fn">print</span>(<span class="str">f"</span>{coin[<span class="str">'symbol'</span>]}<span class="str">: $</span>{coin[<span class="str">'price_usd'</span>]:,.2f}<span class="str">"</span>)</pre>
 
           <pre id="code-js" style="display:none"><span class="com">// Free: Get live BTC price</span>
-<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://api.agentservices.to/v1/price/BTC"</span>);
+<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://agentservices.to/v1/price/BTC"</span>);
 <span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
 console.<span class="fn">log</span>(<span class="str">`BTC: $$</span>{data.price_usd.<span class="fn">toLocaleString</span>()}<span class="str">`</span>);
 
 <span class="com">// Batch prices</span>
 <span class="kw">const</span> batch = <span class="kw">await</span> <span class="fn">fetch</span>(
-  <span class="str">"https://api.agentservices.to/v1/prices?symbols=BTC,ETH,SOL"</span>
+  <span class="str">"https://agentservices.to/v1/prices?symbols=BTC,ETH,SOL"</span>
 ).<span class="fn">then</span>(r => r.<span class="fn">json</span>());
 
 <span class="com">// Fear & Greed</span>
-<span class="kw">const</span> sentiment = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://api.agentservices.to/v1/fear-greed"</span>)
+<span class="kw">const</span> sentiment = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">"https://agentservices.to/v1/fear-greed"</span>)
   .<span class="fn">then</span>(r => r.<span class="fn">json</span>());
 console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>${sentiment.label}<span class="str">`</span>);</pre>
         </div>
@@ -1364,10 +1393,10 @@ console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>
         <div class="section-eyebrow">MCP Protocol</div>
         <h2 class="section-title" style="text-align:left">Connect to<br>Claude & Cursor<br><em>Instantly</em></h2>
         <p style="color:var(--text-light); font-size:1.05rem; margin-top:16px;">
-          AgentServices ships with a built-in MCP (Model Context Protocol) server. Connect any MCP-compatible AI tool and get instant access to all eight tools — no SDK installation required.
+          AgentServices ships with a built-in MCP (Model Context Protocol) server. Connect any MCP-compatible AI tool and get instant access to all 36 tools — no SDK installation required.
         </p>
         <div style="margin-top:24px;">
-          <a href="https://api.agentservices.to/mcp" target="_blank" class="btn btn-primary">
+          <a href="https://agentservices.to/mcp" target="_blank" class="btn btn-primary">
             Try MCP Endpoint
             <span>→</span>
           </a>
@@ -1375,8 +1404,8 @@ console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>
       </div>
       <div class="mcp-card">
         <div class="label">MCP Server URL</div>
-        <div class="url">https://api.agentservices.to/mcp</div>
-        <div class="label" style="margin-top:20px;">Available Tools (8)</div>
+        <div class="url">https://agentservices.to/mcp</div>
+        <div class="label" style="margin-top:20px;">Available Tools (36)</div>
         <div class="tools">
           <span class="tool-chip">get_price</span>
           <span class="tool-chip">get_batch_prices</span>
@@ -1385,7 +1414,15 @@ console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>
           <span class="tool-chip">get_defi_yields</span>
           <span class="tool-chip">get_ip_geo</span>
           <span class="tool-chip">get_url_metadata</span>
+          <span class="tool-chip">web_search</span>
           <span class="tool-chip">resolve_dispute</span>
+          <span class="tool-chip">analyze_sentiment</span>
+          <span class="tool-chip">deep_research</span>
+          <span class="tool-chip">portfolio_intelligence</span>
+          <span class="tool-chip">defi_strategy</span>
+          <span class="tool-chip">market_pulse</span>
+          <span class="tool-chip">onchain_overview</span>
+          <span class="tool-chip">+21 more</span>
         </div>
       </div>
     </div>
@@ -1398,7 +1435,7 @@ console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>
     <h2>Build Something<br><em>Extraordinary</em></h2>
     <p>Your agents deserve premium data. Start making calls in under 60 seconds.</p>
     <div class="hero-actions">
-      <a href="https://api.agentservices.to/docs" target="_blank" class="btn btn-primary">
+      <a href="https://agentservices.to/docs" target="_blank" class="btn btn-primary">
         View API Docs
         <span>→</span>
       </a>
@@ -1415,17 +1452,17 @@ console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>
     <div class="footer-logo">AgentServices</div>
     <p class="footer-tagline">Premium APIs for the machine economy — powered by x402 micropayments</p>
     <div class="footer-links">
-      <a href="https://api.agentservices.to/docs">API Docs</a>
-      <a href="https://api.agentservices.to/llms.txt">llms.txt</a>
-      <a href="https://api.agentservices.to/.well-known/x402">x402 Manifest</a>
-      <a href="https://api.agentservices.to/health">Health</a>
+      <a href="https://agentservices.to/docs">API Docs</a>
+      <a href="https://agentservices.to/llms.txt">llms.txt</a>
+      <a href="https://agentservices.to/.well-known/x402">x402 Manifest</a>
+      <a href="https://agentservices.to/health">Health</a>
       <a href="https://github.com/vbkotecha/aiservices-api">GitHub</a>
     </div>
     <div class="footer-wallet">
       Payment Wallet: 0x9863aB6242663FCc84c33632741711dB78f8Fd15
     </div>
     <div class="footer-bottom">
-      AgentServices v2.1.0 · MIT License · Built with x402 + USDC on Base
+      AgentServices v5.3.0 · MIT License · Built with x402 + USDC on Base
     </div>
   </div>
 </footer>
