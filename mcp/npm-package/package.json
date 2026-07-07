@@ -1,7 +1,7 @@
 {
   "name": "agentservices-mcp",
   "version": "5.3.0",
-  "description": "MCP server for AgentServices — 50+ paid APIs for AI agents with crypto data, DeFi yields, on-chain analytics, portfolio intelligence, deep research, and market intelligence. x402 micropayments via USDC on Base.",
+  "description": "MCP server for AgentServices — 50+ paid APIs for AI agents with crypto data, DeFi yields, on-chain analytics, portfolio intelligence, deep research, and market intelligence. x402 micropayments via USDC on Base. Pure JavaScript, zero dependencies, no Python required.",
   "main": "index.js",
   "bin": {
     "agentservices-mcp": "./index.js"
@@ -9,6 +9,7 @@
   "scripts": {
     "start": "node index.js"
   },
+  "type": "commonjs",
   "keywords": [
     "mcp",
     "model-context-protocol",
