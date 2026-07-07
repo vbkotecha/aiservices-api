@@ -1290,6 +1290,89 @@ async def openapi_schema():
     return app.openapi()
 
 
+@app.get("/.well-known/agentskills/agentservices/SKILL.md")
+async def agentskills_manifest():
+    """AgentSkills.io SKILL.md — discoverable skill for agent platforms (AIsa, etc)."""
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(
+        content='''---
+name: agentservices
+description: >-
+  Access paid data APIs for AI agents including crypto prices, technical indicators,
+  DeFi yields, on-chain analytics (whale tracking, exchange flows, stablecoin flows),
+  market intelligence (sentiment, trends, competitor analysis, content gaps, ad copy),
+  portfolio intelligence, DeFi strategy optimization, web search and extraction,
+  URL metadata, IP geolocation, AI inference (GPT models), fear-greed index, and
+  MCP integration. Use when the agent needs real-time financial data, crypto market
+  data, on-chain analysis, marketing intelligence, research, or AI inference.
+  Payments via x402 protocol (USDC on Base). Free endpoints available for prices,
+  trending, news, and social data.
+license: MIT
+compatibility: >-
+  Network access required. Supports x402 micropayments (USDC on Base) for paid
+  endpoints. Works with any HTTP client or MCP-compatible agent. No SDK installation
+  required -- standard REST API with optional MCP transport.
+metadata:
+  author: AgentServices
+  version: "5.3.0"
+  website: "https://agentservices.to"
+  api_base_url: "https://agentservices.to"
+  repository: "https://github.com/vbkotecha/aiservices-api"
+  documentation: "https://agentservices.to/docs"
+  payment_protocol: "x402"
+  payment_currency: "USDC"
+  payment_network: "Base (eip155:8453)"
+  payment_facilitator: "Coinbase CDP"
+  total_services: "50"
+  paid_services: "38"
+  free_services: "12"
+  mcp_tools: "36"
+  mcp_endpoint: "https://agentservices.to/mcp"
+---
+
+# AgentServices -- Data APIs for AI Agents
+
+## Overview
+
+AgentServices provides 50 API endpoints for AI agents, covering crypto data,
+on-chain analytics, market intelligence, web research, and AI inference.
+Paid endpoints use x402 micropayments ($0.01-$0.25 per call in USDC on Base).
+12 endpoints are completely free.
+
+## Quick Start
+
+### Free Endpoints (no payment needed)
+
+    curl https://agentservices.to/v1/prices
+    curl https://agentservices.to/v1/price/BTC
+    curl https://agentservices.to/v1/fear-greed
+    curl https://agentservices.to/v1/trending
+    curl https://agentservices.to/v1/news
+
+### Paid Endpoints (x402 payment)
+
+Paid endpoints return HTTP 402 with payment instructions. Use any x402-compatible
+client to complete payment automatically.
+
+## Categories
+
+- Crypto Data: prices (free), indicators ($0.02), yields ($0.02)
+- On-Chain: whales ($0.02), exchange flows ($0.02), correlation ($0.03), TVL ($0.02)
+- Market Intel: sentiment ($0.03), trends ($0.03), competitors ($0.05)
+- Bundled: research ($0.05), portfolio ($0.10), defi-strategy ($0.25), onchain-overview ($0.15), market-pulse ($0.05)
+- Research: search ($0.01), metadata ($0.01)
+- Inference: /v1/inference ($0.03), /v1/complete ($0.03)
+- MCP: https://agentservices.to/mcp (36 tools)
+
+## Payment Setup
+
+Uses x402 protocol. Coinbase agentic wallet recommended. CDP Paymaster = gasless.
+''',
+        media_type="text/markdown",
+        headers={"Cache-Control": "public, max-age=3600"}
+    )
+
+
 @app.get("/manifest.json")
 async def web_manifest():
     """Web app manifest for browser/agent discovery."""
