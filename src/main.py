@@ -1780,3 +1780,245 @@ async def onchain_overview_endpoint():
     """
     return onchain_overview()
 
+
+# --- Agent-Friendly Examples Page ---
+
+_examples_html = None
+def _get_examples():
+    global _examples_html
+    if _examples_html is None:
+        _examples_html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentServices — Agent Integration Examples</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SF Mono','Fira Code',monospace;background:#0a0a0a;color:#e0e0e0;line-height:1.6;padding:20px}
+.container{max-width:900px;margin:0 auto}
+h1{color:#fff;font-size:1.8em;margin-bottom:10px}
+h1 a{color:#4A90D9;text-decoration:none}
+.subtitle{color:#888;margin-bottom:30px;font-size:0.95em}
+h2{color:#4A90D9;font-size:1.2em;margin:30px 0 12px;border-bottom:1px solid #222;padding-bottom:6px}
+h3{color:#e8e8e8;font-size:1em;margin:20px 0 8px}
+.section{background:#111;border-radius:8px;padding:20px;margin-bottom:20px;border:1px solid #1a1a1a}
+.code-block{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:6px;padding:14px;overflow-x:auto;margin:8px 0;font-size:0.85em;color:#a8ffa8}
+.code-block .comment{color:#666}
+.code-block .var{color:#4A90D9}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.75em;font-weight:bold;margin-left:8px}
+.badge-free{background:#1a3a1a;color:#4ade80}
+.badge-paid{background:#3a2a1a;color:#fbbf24}
+.badge-bundle{background:#2a1a3a;color:#a78bfa}
+.tag{display:inline-block;background:#1a1a2e;color:#6b7afe;padding:2px 8px;border-radius:3px;font-size:0.75em;margin:2px}
+.note{color:#888;font-size:0.85em;font-style:italic;margin:5px 0}
+a{color:#4A90D9}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🔗 <a href="/">AgentServices</a> — Agent Integration Examples</h1>
+<p class="subtitle">Ready-to-use prompts and commands for AI agents. Copy, paste, execute.</p>
+
+<div class="section">
+<h2>Quick Start for AI Agents</h2>
+<p>AgentServices provides 50+ APIs for AI agents. Free endpoints work immediately. Paid endpoints use x402 (USDC micropayments on Base).</p>
+<p style="margin-top:8px">
+<span class="tag">x402</span>
+<span class="tag">USDC</span>
+<span class="tag">Base Mainnet</span>
+<span class="tag">MCP</span>
+<span class="tag">OpenAPI 3.1</span>
+</p>
+</div>
+
+<div class="section">
+<h2>1. Free Endpoints — No Payment Needed</h2>
+<h3>Crypto Prices</h3>
+<div class="code-block"><span class="comment"># Get current price for any crypto</span>
+curl https://agentservices.to/v1/prices?symbols=BTC,ETH,SOL
+
+<span class="comment"># Single asset</span>
+curl https://agentservices.to/v1/price/BTC</div>
+
+<h3>Market Overview</h3>
+<div class="code-block"><span class="comment"># Global market stats</span>
+curl https://agentservices.to/v1/global
+
+<span class="comment"># Fear & Greed Index</span>
+curl https://agentservices.to/v1/fear-greed
+
+<span class="comment"># Trending tokens</span>
+curl https://agentservices.to/v1/trending
+
+<span class="comment"># Latest crypto news</span>
+curl https://agentservices.to/v1/news</div>
+
+<h3>Agent-Ready Context</h3>
+<div class="code-block"><span class="comment"># Paste-ready market context for LLMs</span>
+curl https://agentservices.to/v1/agent-context</div>
+</div>
+
+<div class="section">
+<h2>2. MCP Integration — Connect to Claude, Cursor, or Any MCP Client</h2>
+<p>AgentServices exposes a remote MCP server at <code>/mcp</code>. No installation required.</p>
+<div class="code-block"><span class="comment"># Claude Desktop / Cursor config (add to mcp.json)</span>
+{
+  "mcpServers": {
+    "agentservices": {
+      "url": "https://agentservices.to/mcp"
+    }
+  }
+}
+
+<span class="comment"># List available MCP tools</span>
+curl https://agentservices.to/mcp/tools</div>
+<p class="note">36 MCP tools available — crypto data, market intelligence, search, DeFi, on-chain analytics, and more.</p>
+</div>
+
+<div class="section">
+<h2>3. Paid Endpoints — x402 Payments <span class="badge badge-paid">$0.01-$0.25</span></h2>
+<p>Paid endpoints return HTTP 402 with payment instructions. Use any x402-compatible wallet.</p>
+
+<h3>Web Search <span class="badge badge-paid">$0.01</span></h3>
+<div class="code-block"><span class="comment"># AI-powered web search</span>
+curl https://agentservices.to/v1/search?q=latest+AI+agent+frameworks
+
+<span class="comment"># Returns 402 → pay with x402 wallet → get results</span></div>
+
+<h3>Technical Indicators <span class="badge badge-paid">$0.02</span></h3>
+<div class="code-block">curl https://agentservices.to/v1/indicators/BTC
+<span class="comment"># RSI, Bollinger Bands, ATR, Support/Resistance</span></div>
+
+<h3>DeFi Yields <span class="badge badge-paid">$0.02</span></h3>
+<div class="code-block">curl https://agentservices.to/v1/yields
+<span class="comment"># Top yield pools by TVL across chains</span></div>
+</div>
+
+<div class="section">
+<h2>4. Bundled Intelligence — One Call, Full Analysis <span class="badge badge-bundle">BEST VALUE</span></h2>
+<p>Aggregated endpoints that replace multiple API calls. Higher value, lower total cost.</p>
+
+<h3>Deep Research <span class="badge badge-bundle">$0.05</span></h3>
+<div class="code-block"><span class="comment"># Search + Extract + Synthesize in one call</span>
+curl "https://agentservices.to/v1/research?q=ethereum+merge+impact+on+defi"</div>
+
+<h3>Portfolio Intelligence <span class="badge badge-bundle">$0.10</span></h3>
+<div class="code-block"><span class="comment"># Price + Signal + Risk + Sentiment + Verdict</span>
+curl "https://agentservices.to/v1/portfolio?symbol=BTC"</div>
+
+<h3>Market Pulse <span class="badge badge-bundle">$0.05</span></h3>
+<div class="code-block"><span class="comment"># Sentiment + Trending + News + Whales + Global snapshot</span>
+curl https://agentservices.to/v1/market-pulse</div>
+
+<h3>DeFi Strategy Report <span class="badge badge-bundle">$0.25</span></h3>
+<div class="code-block"><span class="comment"># Yields + TVL + Cross-chain comparison + Risk assessment</span>
+curl "https://agentservices.to/v1/defi-strategy?chain=ethereum"</div>
+
+<h3>On-Chain Overview <span class="badge badge-bundle">$0.15</span></h3>
+<div class="code-block"><span class="comment"># Whales + Exchange flows + Stablecoin flows + Correlation + DeFi TVL</span>
+curl https://agentservices.to/v1/onchain-overview</div>
+</div>
+
+<div class="section">
+<h2>5. LLM Inference Gateway <span class="badge badge-paid">$0.03</span></h3>
+<div class="code-block"><span class="comment"># List models</span>
+curl https://agentservices.to/v1/models
+
+<span class="comment"># Chat completion (OpenAI-compatible)</span>
+curl -X POST https://agentservices.to/v1/inference \\
+  -H "Content-Type: application/json" \\
+  -d '{"model":"gpt-5.4-mini","messages":[{"role":"user","content":"What is DeFi?"}]}'</div>
+</div>
+
+<div class="section">
+<h2>6. Use-Case: Portfolio Monitoring Agent</h2>
+<div class="code-block"><span class="comment"># Step 1: Get free prices</span>
+curl "https://agentservices.to/v1/prices?symbols=BTC,ETH,LINK"
+
+<span class="comment"># Step 2: Get technical signals ($0.02)</span>
+curl https://agentservices.to/v1/indicators/BTC
+
+<span class="comment"># Step 3: Get full portfolio intelligence ($0.10)</span>
+curl "https://agentservices.to/v1/portfolio?symbol=ETH"
+
+<span class="comment"># Total cost for full portfolio check: ~$0.14</span></div>
+</div>
+
+<div class="section">
+<h2>7. Use-Case: Market Intelligence Agent</h2>
+<div class="code-block"><span class="comment"># Step 1: Market pulse ($0.05) — full snapshot</span>
+curl https://agentservices.to/v1/market-pulse
+
+<span class="comment"># Step 2: Deep research on a topic ($0.05)</span>
+curl "https://agentservices.to/v1/research?q=base+chain+ecosystem+growth+2026"
+
+<span class="comment"># Step 3: On-chain overview ($0.15) — smart money flows</span>
+curl https://agentservices.to/v1/onchain-overview
+
+<span class="comment"># Total cost for full market intelligence: ~$0.25</span></div>
+</div>
+
+<div class="section">
+<h2>8. Discovery Manifests</h2>
+<div class="code-block"><span class="comment"># x402 payment manifest</span>
+curl https://agentservices.to/.well-known/x402
+
+<span class="comment"># OpenAPI 3.1 spec</span>
+curl https://agentservices.to/openapi.json
+
+<span class="comment"># Agent skills manifest</span>
+curl https://agentservices.to/.well-known/agentskills/agentservices/SKILL.md
+
+<span class="comment"># MCP server card</span>
+curl https://agentservices.to/.well-known/mcp/server-card.json
+
+<span class="comment"># llms.txt for LLM crawlers</span>
+curl https://agentservices.to/llms.txt</div>
+</div>
+
+<div class="section">
+<h2>9. x402 Payment Flow</h2>
+<p>All paid endpoints use the x402 protocol. When you hit a paid endpoint:</p>
+<div class="code-block"><span class="comment"># 1. Agent sends GET request</span>
+curl https://agentservices.to/v1/search?q=base+chain
+
+<span class="comment"># 2. Server responds with 402 Payment Required:</span>
+<span class="comment"># {</span>
+<span class="comment">#   "x402Version": 2,</span>
+<span class="comment">#   "accepts": {</span>
+<span class="comment">#     "url": "https://agentservices.to/v1/search?q=base+chain",</span>
+<span class="comment">#     "maxAmountRequired": 1000,</span>
+<span class="comment">#     "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",</span>
+<span class="comment">#     "network": "eip155:8453"</span>
+<span class="comment">#   }</span>
+<span class="comment"># }</span>
+
+<span class="comment"># 3. Agent pays via x402 wallet (CDP, Coinbase Smart Wallet, etc.)</span>
+<span class="comment"># 4. Server returns data with payment receipt</span></div>
+<p class="note">Network: Base Mainnet (Chain ID 8453). Asset: USDC. Facilitator: CDP.</p>
+</div>
+
+<div class="section" style="text-align:center">
+<p>
+<a href="/">← Back to AgentServices</a> | 
+<a href="/docs">API Docs</a> | 
+<a href="/openapi.json">OpenAPI Spec</a> | 
+<a href="https://github.com/vbkotecha/aiservices-api">GitHub</a>
+</p>
+<p style="margin-top:8px;color:#555;font-size:0.8em">
+AgentServices — Paid APIs for AI agents. 50 services. x402/USDC on Base.
+</p>
+</div>
+
+</div>
+</body>
+</html>"""
+    return _examples_html
+
+
+@app.get("/examples", tags=["Developer"], response_class=HTMLResponse)
+async def examples_page():
+    """Agent-friendly examples page with ready-to-use prompts and curl commands."""
+    return HTMLResponse(content=_get_examples())
+
