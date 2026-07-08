@@ -239,7 +239,11 @@ async def enrich_402_bazaar(request, call_next):
                 payload["resource"] = resource
 
                 # Add extensions.bazaar to each accept entry
-                route_path = resource.get("url", "").split("aiservices.to", 1)[-1] if "aiservices.to" in resource.get("url", "") else resource.get("url", "")
+                route_path = resource.get("url", "")
+                if "agentservices.to" in route_path:
+                    route_path = route_path.split("agentservices.to", 1)[-1]
+                elif "aiservices.to" in route_path:
+                    route_path = route_path.split("aiservices.to", 1)[-1]
                 route_desc = resource.get("description", "AgentServices API")
 
                 for accept in payload.get("accepts", []):
@@ -655,6 +659,11 @@ try:
                         payload["resource"] = resource
 
                         route_desc = resource.get("description", "AgentServices API")
+                        route_path = resource.get("url", "")
+                        if "agentservices.to" in route_path:
+                            route_path = route_path.split("agentservices.to", 1)[-1]
+                        elif "aiservices.to" in route_path:
+                            route_path = route_path.split("aiservices.to", 1)[-1]
 
                         # Enrich accepts with bazaar extension + fix payTo
                         for accept in payload.get("accepts", []):
