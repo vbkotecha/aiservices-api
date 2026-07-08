@@ -13,7 +13,7 @@ if env_file.exists():
             key, val = line.split("=", 1)
             os.environ.setdefault(key.strip(), val.strip())
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Query
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -2561,7 +2561,10 @@ async def defi_strategy_endpoint(chain: str = ""):
 @app.get("/v1/market-pulse", tags=["Intelligence"],
          summary="Market Pulse — Sentiment + Trending + News + Whales",
          description="Real-time crypto market snapshot: Fear & Greed index, trending tokens, latest news, social signals, whale movements, and global market stats. Replaces 6+ API calls. $0.05 USDC via x402.")
-async def market_pulse_endpoint():
+async def market_pulse_endpoint(
+    depth: str = Query("full", description="Detail level: 'summary' for key signals only, 'full' for complete data"),
+    currency: str = Query("usd", description="Currency for market cap and price denominations")
+):
     """
     Market Pulse ($0.05 per call via x402)
 
@@ -2574,7 +2577,10 @@ async def market_pulse_endpoint():
 @app.get("/v1/onchain-overview", tags=["Intelligence"],
          summary="On-Chain Overview — Whales + Flows + Correlation + TVL",
          description="Comprehensive on-chain intelligence: whale movements, exchange flows, stablecoin flows, correlation matrix, and DeFi TVL in one call. Replaces 5+ API calls. $0.15 USDC via x402.")
-async def onchain_overview_endpoint():
+async def onchain_overview_endpoint(
+    depth: str = Query("full", description="Detail level: 'summary' for key signals only, 'full' for complete data"),
+    chain: str = Query("all", description="Blockchain filter: 'ethereum', 'base', 'arbitrum', 'solana', or 'all'")
+):
     """
     On-Chain Overview ($0.15 per call via x402)
 
@@ -2954,7 +2960,9 @@ async def skill_stock(req: SkillRequest):
 @app.get("/v1/skills/market-overview", tags=["Skill Packs"],
           summary="Market Overview",
           description="Full market pulse: fear/greed + BTC signal + whales + regime classification. $0.05 via x402.")
-async def skill_market():
+async def skill_market(
+    depth: str = Query("full", description="Detail level: 'summary' for key signals, 'full' for complete dataset")
+):
     """Market overview ($0.05 via x402)"""
     return market_overview()
 
