@@ -84,6 +84,122 @@ app.add_middleware(
 # responses with the required bazaar discovery metadata.
 _BAZAAR_TAGS = ["data", "crypto", "defi", "search", "inference", "marketing-intelligence", "onchain", "analytics"]
 
+# --- Bazaar Discovery Info Lookup Table ---
+# CDP Bazaar probes endpoints using declared example inputs. Without proper
+# bazaar.info (input/output/routeTemplate/schema), probes fail and endpoints
+# stay invisible. This maps route patterns to discovery metadata.
+# AgentForge reported: fixing this went from 2/16 to 15/16 indexed in hours.
+_BAZAAR_ENDPOINT_INFO = {
+    "/v1/indicators": {"method": "GET", "route": "/v1/indicators/:symbol", "path_params": {"symbol": "BTC"}, "query": {}, "body": None,
+        "output_example": {"symbol": "BTC", "rsi": 45.2, "bollinger_bands": {"upper": 68500, "middle": 67000, "lower": 65500}, "atr": 1200}},
+    "/v1/yields": {"method": "GET", "route": "/v1/yields", "path_params": {}, "query": {"chain": "ethereum"}, "body": None,
+        "output_example": [{"protocol": "Aave V3", "asset": "USDC", "apy": 4.52, "tvl": 1200000000}]},
+    "/v1/metadata": {"method": "GET", "route": "/v1/metadata", "path_params": {}, "query": {"url": "https://example.com"}, "body": None,
+        "output_example": {"title": "Example", "description": "Sample metadata", "og_image": "https://example.com/img.png"}},
+    "/v1/search": {"method": "GET", "route": "/v1/search", "path_params": {}, "query": {"q": "bitcoin price"}, "body": None,
+        "output_example": [{"title": "Bitcoin Price", "url": "https://example.com", "snippet": "Current BTC price..."}]},
+    "/v1/disputes": {"method": "POST", "route": "/v1/disputes", "path_params": {}, "query": {}, "body": {"dispute_type": "transaction", "description": "Sample dispute"},
+        "output_example": {"dispute_id": "dsp_123", "status": "filed", "verdict": "pending"}},
+    "/v1/marketing/sentiment": {"method": "POST", "route": "/v1/marketing/sentiment", "path_params": {}, "query": {}, "body": {"topic": "AI agents", "sources": ["twitter", "reddit"]},
+        "output_example": {"topic": "AI agents", "sentiment_score": 0.72, "volume": 15420}},
+    "/v1/marketing/trends": {"method": "POST", "route": "/v1/marketing/trends", "path_params": {}, "query": {}, "body": {"keywords": ["AI", "crypto"], "region": "US"},
+        "output_example": [{"keyword": "AI agents", "trend_score": 89, "change": "+12%"}]},
+    "/v1/marketing/competitors": {"method": "POST", "route": "/v1/marketing/competitors", "path_params": {}, "query": {}, "body": {"domain": "example.com", "keywords": ["API", "data"]},
+        "output_example": [{"domain": "competitor.com", "overlap": 45, "gaps": ["blockchain"]}]},
+    "/v1/marketing/content-gaps": {"method": "POST", "route": "/v1/marketing/content-gaps", "path_params": {}, "query": {}, "body": {"domain": "example.com", "topic": "AI"},
+        "output_example": [{"keyword": "AI agent security", "difficulty": 35, "volume": 2400}]},
+    "/v1/marketing/ad-copy": {"method": "POST", "route": "/v1/marketing/ad-copy", "path_params": {}, "query": {}, "body": {"product": "AgentServices", "audience": "developers", "tone": "professional"},
+        "output_example": {"headlines": ["Build Faster with AgentServices"], "descriptions": ["50+ paid API endpoints for AI agents"]}},
+    "/v1/whales": {"method": "GET", "route": "/v1/whales", "path_params": {}, "query": {"symbol": "BTC", "min_usd": "100000"}, "body": None,
+        "output_example": [{"symbol": "BTC", "amount_usd": 5000000, "type": "buy", "exchange": "Binance"}]},
+    "/v1/exchange-flows": {"method": "GET", "route": "/v1/exchange-flows", "path_params": {}, "query": {"symbol": "ETH"}, "body": None,
+        "output_example": {"symbol": "ETH", "inflow_24h": 125000000, "outflow_24h": 98000000, "net_flow": -27000000}},
+    "/v1/correlation": {"method": "GET", "route": "/v1/correlation", "path_params": {}, "query": {"symbols": "BTC,ETH,LINK"}, "body": None,
+        "output_example": {"matrix": {"BTC-ETH": 0.85, "BTC-LINK": 0.62, "ETH-LINK": 0.71}}},
+    "/v1/defi-tvl": {"method": "GET", "route": "/v1/defi-tvl", "path_params": {}, "query": {"chain": "ethereum"}, "body": None,
+        "output_example": [{"protocol": "Lido", "tvl": 32000000000, "chain": "Ethereum"}]},
+    "/v1/stablecoin-flows": {"method": "GET", "route": "/v1/stablecoin-flows", "path_params": {}, "query": {"chain": "ethereum"}, "body": None,
+        "output_example": {"chain": "Ethereum", "inflow": 450000000, "outflow": 380000000}},
+    "/v1/macro": {"method": "GET", "route": "/v1/macro", "path_params": {}, "query": {}, "body": None,
+        "output_example": {"gdp_growth": 2.1, "inflation": 3.2, "unemployment": 4.1, "fed_rate": 5.25}},
+    "/v1/inference": {"method": "POST", "route": "/v1/inference", "path_params": {}, "query": {}, "body": {"model": "gpt-5.4-mini", "messages": [{"role": "user", "content": "Hello"}]},
+        "output_example": {"model": "gpt-5.4-mini", "choices": [{"message": {"role": "assistant", "content": "Hello! How can I help?"}}]}},
+    "/v1/complete": {"method": "POST", "route": "/v1/complete", "path_params": {}, "query": {}, "body": {"model": "gpt-5.4-mini", "prompt": "What is Bitcoin?"},
+        "output_example": {"model": "gpt-5.4-mini", "text": "Bitcoin is a decentralized digital currency..."}},
+    "/v1/token-risk": {"method": "GET", "route": "/v1/token-risk/:token", "path_params": {"token": "BTC"}, "query": {}, "body": None,
+        "output_example": {"token": "BTC", "risk_score": 15, "risk_level": "LOW", "factors": {"liquidity": "HIGH", "concentration": "LOW"}}},
+    "/v1/crypto-signals": {"method": "GET", "route": "/v1/crypto-signals", "path_params": {}, "query": {"symbol": "BTC"}, "body": None,
+        "output_example": {"symbol": "BTC", "signal": "BULLISH", "strength": 72, "indicators": {"rsi": 45, "macd": "positive"}}},
+    "/v1/yield-comparison": {"method": "GET", "route": "/v1/yield-comparison", "path_params": {}, "query": {"asset": "USDC"}, "body": None,
+        "output_example": [{"protocol": "Aave V3", "apy": 4.52}, {"protocol": "Compound V3", "apy": 3.89}]},
+    "/v1/hn-sentiment": {"method": "GET", "route": "/v1/hn-sentiment", "path_params": {}, "query": {"topic": "AI"}, "body": None,
+        "output_example": {"topic": "AI", "avg_sentiment": 0.65, "post_count": 142, "top_keywords": ["agents", "LLM", "automation"]}},
+    "/v1/portfolio": {"method": "GET", "route": "/v1/portfolio", "path_params": {}, "query": {"symbol": "BTC"}, "body": None,
+        "output_example": {"symbol": "BTC", "price": 64000, "signal": "BULLISH", "risk": "LOW", "verdict": "Hold with confidence"}},
+    "/v1/defi-strategy": {"method": "GET", "route": "/v1/defi-strategy", "path_params": {}, "query": {}, "body": None,
+        "output_example": {"top_yields": [{"protocol": "Aave", "apy": 4.5}], "tvl_comparison": {}, "risk_assessment": "MODERATE"}},
+    "/v1/market-pulse": {"method": "GET", "route": "/v1/market-pulse", "path_params": {}, "query": {}, "body": None,
+        "output_example": {"fear_greed": 72, "trending": ["BTC", "SOL"], "direction": "BULLISH"}},
+    "/v1/onchain-overview": {"method": "GET", "route": "/v1/onchain-overview", "path_params": {}, "query": {}, "body": None,
+        "output_example": {"whales": [], "exchange_flows": {}, "stablecoin_flows": {}, "defi_tvl": {}}},
+    "/v1/arbitrage": {"method": "GET", "route": "/v1/arbitrage", "path_params": {}, "query": {"symbol": "BTC"}, "body": None,
+        "output_example": {"symbol": "BTC", "spreads": [{"exchange_a": "Coinbase", "exchange_b": "CoinGecko", "spread_pct": 0.12}]}},
+    "/v1/liquidation-map": {"method": "GET", "route": "/v1/liquidation-map", "path_params": {}, "query": {"symbols": "BTC,ETH"}, "body": None,
+        "output_example": {"liquidation_zones": [{"symbol": "BTC", "protocols": {"Aave V3": {"liquidation_price": 55000}}}], "cascading_risk": "LOW"}},
+    "/v1/research": {"method": "GET", "route": "/v1/research", "path_params": {}, "query": {"q": "Bitcoin ETF flows"}, "body": None,
+        "output_example": {"query": "Bitcoin ETF flows", "sources": [], "synthesis": "ETF inflows have accelerated..."}},
+    "/v1/web-extract": {"method": "POST", "route": "/v1/web-extract", "path_params": {}, "query": {}, "body": {"url": "https://example.com"},
+        "output_example": {"url": "https://example.com", "content": "Extracted text...", "title": "Example"}},
+    "/v1/package-security": {"method": "GET", "route": "/v1/package-security", "path_params": {}, "query": {"package": "express", "version": "4.18.0"}, "body": None,
+        "output_example": {"package": "express", "vulnerabilities": [], "score": 95}},
+    "/v1/seo-keywords": {"method": "GET", "route": "/v1/seo-keywords", "path_params": {}, "query": {"domain": "example.com", "topic": "AI"}, "body": None,
+        "output_example": [{"keyword": "AI API", "volume": 12000, "difficulty": 45}]},
+    "/v1/deep-research": {"method": "GET", "route": "/v1/deep-research", "path_params": {}, "query": {"q": "DeFi liquidation risks"}, "body": None,
+        "output_example": {"query": "DeFi liquidation risks", "analysis": "Deep research findings...", "sources": []}},
+    "/v1/github-velocity": {"method": "GET", "route": "/v1/github-velocity", "path_params": {}, "query": {"repo": "langchain-ai/langchain"}, "body": None,
+        "output_example": {"repo": "langchain-ai/langchain", "commits_7d": 142, "stars": 95000, "velocity_trend": "UP"}},
+}
+
+def _match_bazaar_info(route_path):
+    """Match a route path to its bazaar info entry."""
+    # Remove query string
+    path = route_path.split("?")[0]
+    # Try exact prefix match (longest first)
+    for prefix, info in sorted(_BAZAAR_ENDPOINT_INFO.items(), key=lambda x: -len(x[0])):
+        if path.startswith(prefix):
+            return info
+    return None
+
+def _build_bazaar_extension(route_path, route_desc):
+    """Build the full bazaar extension with discovery info for CDP Bazaar indexing."""
+    base = {
+        "name": "AgentServices",
+        "description": route_desc,
+    }
+    info_data = _match_bazaar_info(route_path)
+    if info_data:
+        input_obj = {
+            "type": "http",
+            "method": info_data["method"],
+        }
+        if info_data.get("path_params"):
+            input_obj["pathParams"] = info_data["path_params"]
+        if info_data.get("query"):
+            input_obj["query"] = info_data["query"]
+        if info_data.get("body"):
+            input_obj["body"] = info_data["body"]
+            input_obj["bodyType"] = "json"
+
+        base["info"] = {
+            "input": input_obj,
+            "output": {
+                "type": "json",
+                "example": info_data.get("output_example", {}),
+            },
+            "routeTemplate": info_data["route"],
+        }
+    return base
+
 @app.middleware("http")
 async def enrich_402_bazaar(request, call_next):
     response = await call_next(request)
@@ -132,14 +248,10 @@ async def enrich_402_bazaar(request, call_next):
                     if pay_to and not pay_to.startswith("0x"):
                         accept["payTo"] = "0x" + pay_to
 
-                    # Add bazaar extension if not present
+                    # Add bazaar extension with full discovery info
                     if "extensions" not in accept:
                         accept["extensions"] = {}
-                    if "bazaar" not in accept["extensions"]:
-                        accept["extensions"]["bazaar"] = {
-                            "name": "AgentServices",
-                            "description": route_desc,
-                        }
+                    accept["extensions"]["bazaar"] = _build_bazaar_extension(route_path, route_desc)
 
                 # Re-encode and update header
                 updated_json = _json.dumps(payload, separators=(',', ':'))
@@ -551,14 +663,10 @@ try:
                             if pay_to and not pay_to.startswith("0x"):
                                 accept["payTo"] = "0x" + pay_to
 
-                            # Add bazaar extension
+                            # Add bazaar extension with full discovery info
                             if "extensions" not in accept:
                                 accept["extensions"] = {}
-                            if "bazaar" not in accept["extensions"]:
-                                accept["extensions"]["bazaar"] = {
-                                    "name": "AgentServices",
-                                    "description": route_desc,
-                                }
+                            accept["extensions"]["bazaar"] = _build_bazaar_extension(route_path, route_desc)
 
                         # Re-encode and update header
                         updated_json = _json_enrich.dumps(payload, separators=(',', ':'))
