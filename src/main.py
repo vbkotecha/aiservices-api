@@ -3041,6 +3041,87 @@ async def oauth_authorization_server():
     }
 
 
+# --- llms.txt (agent-accessible documentation index) ---
+@app.get("/llms.txt", tags=["Discovery"],
+         summary="LLM-readable service index",
+         response_class=PlainTextResponse)
+async def llms_txt():
+    """Canonical index for AI agents and LLM crawlers. Follows the llms.txt convention."""
+    from starlette.responses import PlainTextResponse
+    return PlainTextResponse(content="""# AgentServices
+
+> Paid APIs for AI agents. 53 services, 41 paid. Data, search, market intelligence, and inference. Agents pay per call via x402 (USDC on Base).
+
+## Quick Start
+- Free endpoints: GET https://agentservices.to/v1/prices (crypto prices), GET https://agentservices.to/v1/fear-greed (market sentiment)
+- Paid endpoints: GET https://agentservices.to/v1/indicators/BTC (0.02 USDC), GET https://agentservices.to/v1/search?q=... (0.01 USDC)
+- MCP server: https://agentservices.to/mcp (38 tools, Streamable HTTP)
+- Full docs: https://agentservices.to/docs
+- OpenAPI spec: https://agentservices.to/openapi.json
+- Health check: https://agentservices.to/health
+
+## Key Endpoints
+- [Crypto Prices](https://agentservices.to/v1/prices): Free. Real-time prices for 1000+ tokens.
+- [Technical Indicators](https://agentservices.to/v1/indicators/BTC): $0.02. RSI, MACD, Bollinger, ATR, volume analysis.
+- [DeFi Yields](https://agentservices.to/v1/yields): $0.02. Yield farming opportunities across protocols.
+- [Search](https://agentservices.to/v1/search): $0.01. Web search with structured extraction.
+- [Market Pulse](https://agentservices.to/v1/market-pulse): $0.05. Sentiment + trending + news + whales in one call.
+- [On-Chain Overview](https://agentservices.to/v1/onchain-overview): $0.15. Whales + flows + correlation + TVL.
+- [Portfolio Intelligence](https://agentservices.to/v1/portfolio): $0.10. Price + signal + risk + sentiment bundled.
+- [DeFi Strategy](https://agentservices.to/v1/defi-strategy): $0.25. Full strategy report with recommendations.
+
+## Payment
+- Protocol: x402 (HTTP 402 Payment Required)
+- Asset: USDC on Base (eip155:8453)
+- Wallet: 0x9863aB6242663FCc84c33632741711dB78f8Fd15
+- No API keys, no accounts, no subscriptions
+
+## Integration
+- MCP: Add https://agentservices.to/mcp to your MCP client
+- Python SDK: pip install agentservices
+- npm: npx agentservices-mcp
+""", media_type="text/plain")
+
+
+# --- agents.txt (agent instructions) ---
+@app.get("/agents.txt", tags=["Discovery"],
+         summary="Agent instructions file",
+         response_class=PlainTextResponse)
+async def agents_txt():
+    """Instructions for AI agents crawling or using AgentServices."""
+    from starlette.responses import PlainTextResponse
+    return PlainTextResponse(content="""# AgentServices — Agent Instructions
+
+## What This Service Does
+AgentServices provides paid API endpoints for AI agents. 53 services covering crypto market data, on-chain analytics, DeFi intelligence, market sentiment, stock data, web extraction, and AI inference.
+
+## How to Pay
+1. Make a GET/POST request to any paid endpoint
+2. Server responds with HTTP 402 + payment details (x402 protocol)
+3. Sign payment with your wallet (USDC on Base)
+4. Retry request with payment proof in header
+5. Server verifies on-chain and returns data
+
+## Free Endpoints (no payment needed)
+- GET /v1/prices — Crypto prices
+- GET /v1/fear-greed — Fear & Greed index
+- GET /v1/trending — Trending tokens
+- GET /v1/gas — Gas prices
+- GET /v1/news — Crypto news
+- GET /v1/global — Global market stats
+
+## MCP Server
+Endpoint: https://agentservices.to/mcp
+Transport: Streamable HTTP
+Tools: 38 (free + paid)
+Auth: None for free tools. Paid tools use x402.
+
+## Contact
+Email: hustlemode@agentmail.to
+Website: https://agentservices.to
+""", media_type="text/plain")
+
+
 # --- Custom OpenAPI with x-payment-info (x402 v2 discovery convention) ---
 # Modern x402 indexers scan OpenAPI specs for x-payment-info per operation
 # instead of relying solely on /.well-known/x402.json
