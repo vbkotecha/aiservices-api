@@ -19,6 +19,8 @@ MCP_TOOLS = [
     {
         "name": "crypto_prices",
         "description": "Get current crypto prices for one or more symbols (FREE)",
+        "title": "Get Crypto Prices",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -33,6 +35,8 @@ MCP_TOOLS = [
     {
         "name": "technical_indicators",
         "description": "Get technical indicators (RSI, MACD, Bollinger Bands) for a crypto symbol ($0.02 x402)",
+        "title": "Technical Indicators Analysis",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -44,6 +48,8 @@ MCP_TOOLS = [
     {
         "name": "defi_yields",
         "description": "Get top DeFi yield pools ranked by TVL ($0.02 x402)",
+        "title": "DeFi Yield Pools",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -54,11 +60,15 @@ MCP_TOOLS = [
     {
         "name": "fear_greed",
         "description": "Get crypto Fear & Greed sentiment index (FREE)",
+        "title": "Fear & Greed Index",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {"type": "object", "properties": {}}
     },
     {
         "name": "ip_geolocation",
         "description": "Get geolocation data for an IP address (FREE)",
+        "title": "IP Geolocation Lookup",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -70,6 +80,8 @@ MCP_TOOLS = [
     {
         "name": "url_metadata",
         "description": "Extract metadata from a URL — title, description, images ($0.01 x402)",
+        "title": "URL Metadata Extractor",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -81,6 +93,8 @@ MCP_TOOLS = [
     {
         "name": "resolve_dispute",
         "description": "Submit a dispute for AI-powered policy-driven ruling. 7 policy templates available ($0.05 x402)",
+        "title": "AI Dispute Resolution",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -104,11 +118,15 @@ MCP_TOOLS = [
     {
         "name": "list_policies",
         "description": "List all available dispute resolution policy templates (FREE)",
+        "title": "List Dispute Policies",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {"type": "object", "properties": {}}
     },
     {
         "name": "marketing_sentiment",
         "description": "AI-powered brand sentiment analysis across platforms (FREE beta)",
+        "title": "Brand Sentiment Analysis",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -126,6 +144,8 @@ MCP_TOOLS = [
     {
         "name": "marketing_trends",
         "description": "Detect trending marketing topics in any industry (FREE beta)",
+        "title": "Marketing Trends Detection",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -138,6 +158,8 @@ MCP_TOOLS = [
     {
         "name": "marketing_ad_copy",
         "description": "Generate ad copy for Google, Meta, TikTok, or Taboola (FREE beta)",
+        "title": "Ad Copy Generator",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -152,21 +174,29 @@ MCP_TOOLS = [
     {
         "name": "whale_tracking",
         "description": "Large whale transactions on BTC (>=10 BTC) and ETH chains ($0.02 x402)",
+        "title": "Whale Transaction Tracker",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {"type": "object", "properties": {}}
     },
     {
         "name": "exchange_flows",
         "description": "CEX reserve flows and 24h changes from DeFi Llama ($0.02 x402)",
+        "title": "Exchange Flow Monitor",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {"type": "object", "properties": {}}
     },
     {
         "name": "correlation_matrix",
         "description": "30-day Pearson correlation matrix across top crypto assets ($0.03 x402)",
+        "title": "Asset Correlation Matrix",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {"type": "object", "properties": {}}
     },
     {
         "name": "defi_tvl",
         "description": "Top DeFi protocols ranked by TVL from DeFi Llama ($0.02 x402)",
+        "title": "DeFi Protocol TVL",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -178,11 +208,15 @@ MCP_TOOLS = [
     {
         "name": "stablecoin_flows",
         "description": "Stablecoin market caps and supply data ($0.02 x402)",
+        "title": "Stablecoin Supply Monitor",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {"type": "object", "properties": {}}
     },
     {
         "name": "github_velocity",
         "description": "Trending crypto/web3 GitHub repos with velocity scores ($0.02 x402)",
+        "title": "GitHub Velocity Tracker",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -194,17 +228,23 @@ MCP_TOOLS = [
     {
         "name": "agent_context",
         "description": "Paste-ready multi-source market context for LLM system prompts (FREE)",
+        "title": "Agent Market Context",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {"type": "object", "properties": {}}
     },
     {
         "name": "macro_indicators",
         "description": "Macro economic indicators: global market cap, dominance, derivatives ($0.02 x402)",
+        "title": "Macro Economic Indicators",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {"type": "object", "properties": {}}
     },
     # v5.0.0 — Inference Gateway
     {
         "name": "llm_inference",
         "description": "LLM inference gateway — chat completions via gpt-5.4/5.4-mini/5.5 ($0.03 x402)",
+        "title": "LLM Inference Gateway",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -219,6 +259,8 @@ MCP_TOOLS = [
     {
         "name": "token_risk",
         "description": "Token risk scoring — volatility, liquidity, market cap analysis ($0.03 x402)",
+        "title": "Token Risk Assessment",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {"token": {"type": "string", "description": "CoinGecko token ID (e.g. bitcoin)"}},
@@ -228,6 +270,8 @@ MCP_TOOLS = [
     {
         "name": "crypto_signals",
         "description": "Crypto buy/sell signals from RSI, moving averages, Bollinger Bands ($0.04 x402)",
+        "title": "Crypto Trading Signals",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {"symbol": {"type": "string", "description": "Symbol (BTC, ETH, etc.)"}},
@@ -238,6 +282,8 @@ MCP_TOOLS = [
     {
         "name": "stock_quote",
         "description": "Real-time stock market quote from Yahoo Finance ($0.02 x402)",
+        "title": "Stock Quote Lookup",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {"ticker": {"type": "string", "description": "Stock ticker (e.g. AAPL, TSLA)"}},
@@ -247,6 +293,8 @@ MCP_TOOLS = [
     {
         "name": "stock_history",
         "description": "Historical OHLCV stock data ($0.03 x402)",
+        "title": "Stock Price History",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -259,6 +307,8 @@ MCP_TOOLS = [
     {
         "name": "sec_filings",
         "description": "SEC filings parser — 10-K, 10-Q, 8-K from EDGAR ($0.03 x402)",
+        "title": "SEC Filings Parser",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -271,11 +321,15 @@ MCP_TOOLS = [
     {
         "name": "commodities",
         "description": "Commodity prices — oil, gold, silver, copper, wheat ($0.03 x402)",
+        "title": "Commodity Prices",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {"type": "object", "properties": {}}
     },
     {
         "name": "fx_rates",
         "description": "Real-time FX/forex rates for 30+ currencies ($0.003 x402)",
+        "title": "FX Exchange Rates",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {"base": {"type": "string", "default": "USD"}}
@@ -285,6 +339,8 @@ MCP_TOOLS = [
     {
         "name": "web_extract",
         "description": "Extract clean text from any URL — strips ads, nav, scripts ($0.002 x402)",
+        "title": "Web Content Extractor",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {"url": {"type": "string", "description": "URL to extract content from"}},
@@ -294,6 +350,8 @@ MCP_TOOLS = [
     {
         "name": "package_security",
         "description": "Check PyPI/npm package for known vulnerabilities ($0.02 x402)",
+        "title": "Package Security Scanner",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -306,6 +364,8 @@ MCP_TOOLS = [
     {
         "name": "seo_keywords",
         "description": "SEO keyword research with volume estimates and competition ($0.01 x402)",
+        "title": "SEO Keyword Research",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {"keyword": {"type": "string"}},
@@ -315,6 +375,8 @@ MCP_TOOLS = [
     {
         "name": "deep_research",
         "description": "Deep research — search web + extract content + synthesize intelligence brief ($0.05 x402)",
+        "title": "Deep Research Intelligence",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -327,6 +389,8 @@ MCP_TOOLS = [
     {
         "name": "portfolio_intelligence",
         "description": "Portfolio intelligence — price + technical signal + risk score + market sentiment in one call ($0.10 x402)",
+        "title": "Portfolio Intelligence Report",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -338,6 +402,8 @@ MCP_TOOLS = [
     {
         "name": "defi_strategy",
         "description": "DeFi strategy report — top yields + protocol TVL + cross-chain comparison + risk assessment with high-APY flags ($0.25 x402)",
+        "title": "DeFi Strategy Report",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -349,6 +415,8 @@ MCP_TOOLS = [
     {
         "name": "market_pulse",
         "description": "Market pulse — Fear & Greed + trending tokens + news + social + whale movements + global market in one snapshot ($0.05 x402)",
+        "title": "Market Pulse Snapshot",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {},
@@ -358,6 +426,8 @@ MCP_TOOLS = [
     {
         "name": "onchain_overview",
         "description": "On-chain intelligence — whale movements + exchange flows + stablecoin flows + correlation matrix + DeFi TVL in one report ($0.15 x402)",
+        "title": "On-Chain Intelligence Report",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {},
@@ -367,6 +437,8 @@ MCP_TOOLS = [
     {
         "name": "arbitrage_scanner",
         "description": "Cross-DEX arbitrage scanner — compares token prices across exchanges, models gas-adjusted profitability at different trade sizes, estimates slippage, flags actionable opportunities ($0.08 x402)",
+        "title": "Cross-DEX Arbitrage Scanner",
+        "annotations": {"readOnlyHint": true},
         "inputSchema": {
             "type": "object",
             "properties": {
