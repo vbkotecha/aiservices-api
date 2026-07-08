@@ -1570,6 +1570,12 @@ def liquidation_map(symbols: str = "BTC,ETH,LINK,AAVE,UNI"):
             else:
                 proto_tvl = 5000000000  # MakerDAO ~$5B estimate
 
+            # Ensure proto_tvl is numeric (DeFi Llama may return strings/None)
+            try:
+                proto_tvl = float(proto_tvl)
+            except (TypeError, ValueError):
+                proto_tvl = 0
+
             # Token-specific TVL allocation (rough: major tokens share ~30% of protocol TVL)
             token_alloc = proto_tvl * 0.15 if symbol in ["ETH", "BTC"] else proto_tvl * 0.03
             est_liq_vol_at_max = token_alloc * 0.12  # 12% of positions near liquidation at max LTV
