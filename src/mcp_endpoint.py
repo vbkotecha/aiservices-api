@@ -503,6 +503,19 @@ SERVER_CARD = {
 }
 
 
+@router.options("/mcp")
+async def mcp_options():
+    """CORS preflight handler for browser-based MCP clients."""
+    return JSONResponse(
+        {"status": "ok"},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Mcp-Method, Mcp-Name, Authorization",
+            "Access-Control-Max-Age": "86400",
+        }
+    )
+
 @router.post("/mcp")
 async def mcp_handler(request: Request):
     """
@@ -514,7 +527,17 @@ async def mcp_handler(request: Request):
       Mcp-Name: The server name for routing
 
     Falls back to body.method for legacy clients.
+    Includes CORS headers for browser-based MCP clients (Claude.ai, Cursor web).
     """
+    # CORS preflight
+    origin = request.headers.get("origin", "")
+    cors_headers = {
+        "Access-Control-Allow-Origin": origin or "*",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Mcp-Method, Mcp-Name, Authorization",
+        "Access-Control-Max-Age": "86400",
+    }
+
     try:
         body = await request.json()
     except Exception:
@@ -586,9 +609,12 @@ async def mcp_handler(request: Request):
                         "cacheScope": "global",
                     }
                 }
+            },
+            headers={
+                "Cache-Control": "public, max-age=300",
+                "Access-Control-Allow-Origin": "*",
             }
         )
-        response.headers["Cache-Control"] = "public, max-age=300"
         return response
 
     # --- resources/list ---
