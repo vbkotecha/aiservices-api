@@ -47,6 +47,8 @@ from synthesis_data import (
 from inference_gateway import list_models as list_inference_models, inference, quick_complete
 from tradfi_data import get_stock_quote, get_stock_history, get_sec_filings, get_commodities, get_economic_indicators, get_fx_rates
 from utility_data import extract_web_content, scan_package_security, seo_keywords
+from agent_memory import store as mem_store, retrieve as mem_retrieve, list_keys as mem_list, delete as mem_delete, search as mem_search
+from skill_packs import crypto_dossier, stock_dossier, market_overview, available_skills
 
 AISERVICES_PAY_TO = "0x9863aB6242663FCc84c33632741711dB78f8Fd15"
 WALLET = os.environ.get("WALLET_ADDRESS", AISERVICES_PAY_TO)
@@ -420,6 +422,43 @@ try:
             accepts=_payment_options(X402_WALLET, "$0.08"),
             mime_type="application/json",
             description="Cross-DEX arbitrage scanner — price discrepancies, gas-adjusted profitability, slippage modeling",
+        ),
+        # --- Agent Memory (retention hook) ---
+        "POST /v1/memory/*": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.01"),
+            mime_type="application/json",
+            description="Store agent memory — persistent wallet-keyed KV",
+        ),
+        "GET /v1/memory/*": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.01"),
+            mime_type="application/json",
+            description="Retrieve agent memory",
+        ),
+        "DELETE /v1/memory/*": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.01"),
+            mime_type="application/json",
+            description="Delete agent memory entry",
+        ),
+        "POST /v1/memory/search": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.02"),
+            mime_type="application/json",
+            description="Semantic search across agent memory",
+        ),
+        # --- Skill Packs (bundled intelligence) ---
+        "POST /v1/skills/crypto-dossier": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.10"),
+            mime_type="application/json",
+            description="Crypto dossier — price + indicators + risk + signal + fear/greed + whales in one call",
+        ),
+        "POST /v1/skills/stock-dossier": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.05"),
+            mime_type="application/json",
+            description="Stock dossier — quote + FX rates + sentiment in one call",
+        ),
+        "GET /v1/skills/market-overview": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.05"),
+            mime_type="application/json",
+            description="Market pulse — fear/greed + BTC signal + whales + regime classification",
         ),
     }
 
@@ -2237,4 +2276,92 @@ AgentServices — Paid APIs for AI agents. 51 services. x402/USDC on Base.
 async def examples_page():
     """Agent-friendly examples page with ready-to-use prompts and curl commands."""
     return HTMLResponse(content=_get_examples())
+
+
+# ============================================================
+# AGENT MEMORY (v5.2.0 — Retention Hook)
+# ============================================================
+
+class MemoryRequest(BaseModel):
+    value: str = Field(description="Value to store")
+    ttl_seconds: int = Field(default=0, description="TTL in seconds (0 = permanent)")
+
+@app.post("/v1/memory/{key}", tags=["Agent Memory"],
+          summary="Store Agent Memory",
+          description="Store a value keyed to the caller's wallet. Persistent across sessions. $0.01 via x402.")
+async def memory_store(key: str, req: MemoryRequest, request: Request):
+    """Store agent memory ($0.01 via x402)"""
+    wallet = request.headers.get("x-payment-payer", request.client.host)
+    return mem_store(wallet, key, req.value, req.ttl_seconds)
+
+@app.get("/v1/memory/{key}", tags=["Agent Memory"],
+          summary="Retrieve Agent Memory",
+          description="Retrieve a stored value by key. $0.01 via x402.")
+async def memory_get(key: str, request: Request):
+    """Retrieve agent memory ($0.01 via x402)"""
+    wallet = request.headers.get("x-payment-payer", request.client.host)
+    return mem_retrieve(wallet, key)
+
+@app.delete("/v1/memory/{key}", tags=["Agent Memory"],
+          summary="Delete Agent Memory",
+          description="Delete a stored value. $0.01 via x402.")
+async def memory_del(key: str, request: Request):
+    """Delete agent memory ($0.01 via x402)"""
+    wallet = request.headers.get("x-payment-payer", request.client.host)
+    return mem_delete(wallet, key)
+
+@app.get("/v1/memory", tags=["Agent Memory"],
+          summary="List Agent Memory Keys",
+          description="List all stored keys for the caller's wallet. $0.01 via x402.")
+async def memory_list(request: Request):
+    """List agent memory keys ($0.01 via x402)"""
+    wallet = request.headers.get("x-payment-payer", request.client.host)
+    return mem_list(wallet)
+
+class MemorySearchRequest(BaseModel):
+    query: str = Field(description="Search query")
+
+@app.post("/v1/memory/search", tags=["Agent Memory"],
+          summary="Search Agent Memory",
+          description="Semantic search across all stored values. $0.02 via x402.")
+async def memory_search_endpoint(req: MemorySearchRequest, request: Request):
+    """Search agent memory ($0.02 via x402)"""
+    wallet = request.headers.get("x-payment-payer", request.client.host)
+    return mem_search(wallet, req.query)
+
+
+# ============================================================
+# SKILL PACKS (v5.2.0 — Bundled Intelligence)
+# ============================================================
+
+class SkillRequest(BaseModel):
+    symbol: str = Field(default="", description="Crypto symbol or stock ticker")
+
+@app.get("/v1/skills", tags=["Skill Packs"],
+          summary="List Available Skills",
+          description="List all available skill packs (bundled multi-endpoint intelligence). FREE.")
+async def skills_list():
+    """List available skills (FREE)"""
+    return available_skills()
+
+@app.post("/v1/skills/crypto-dossier", tags=["Skill Packs"],
+          summary="Crypto Dossier",
+          description="Full crypto intelligence in one call: price + indicators + risk + signal + fear/greed + whales. $0.10 via x402.")
+async def skill_crypto(req: SkillRequest):
+    """Crypto dossier ($0.10 via x402)"""
+    return crypto_dossier(req.symbol)
+
+@app.post("/v1/skills/stock-dossier", tags=["Skill Packs"],
+          summary="Stock Dossier",
+          description="Full stock intelligence: quote + FX + sentiment. $0.05 via x402.")
+async def skill_stock(req: SkillRequest):
+    """Stock dossier ($0.05 via x402)"""
+    return stock_dossier(req.symbol)
+
+@app.get("/v1/skills/market-overview", tags=["Skill Packs"],
+          summary="Market Overview",
+          description="Full market pulse: fear/greed + BTC signal + whales + regime classification. $0.05 via x402.")
+async def skill_market():
+    """Market overview ($0.05 via x402)"""
+    return market_overview()
 
