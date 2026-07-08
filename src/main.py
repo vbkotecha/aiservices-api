@@ -42,7 +42,7 @@ from onchain_data import (
 from synthesis_data import (
     get_token_risk, get_crypto_signal, get_hn_sentiment, get_npm_stats,
     get_github_trending, get_yield_comparison, deep_research, portfolio_intelligence,
-    defi_strategy_report, market_pulse, onchain_overview, arbitrage_scanner,
+    defi_strategy_report, market_pulse, onchain_overview, arbitrage_scanner, liquidation_map,
 )
 from inference_gateway import list_models as list_inference_models, inference, quick_complete
 from tradfi_data import get_stock_quote, get_stock_history, get_sec_filings, get_commodities, get_economic_indicators, get_fx_rates
@@ -901,7 +901,7 @@ def _get_llms_full_markdown():
     """Return a concise markdown version of the landing page for content negotiation."""
     return """# AgentServices — Premium APIs for AI Agents
 
-52 paid APIs for AI agents. Data, search, market intelligence, DeFi strategy, cross-DEX arbitrage, AI inference. All via x402 (USDC on Base).
+53 paid APIs for AI agents. Data, search, market intelligence, DeFi strategy, cross-DEX arbitrage, AI inference. All via x402 (USDC on Base).
 
 ## What We Offer
 
@@ -1018,6 +1018,7 @@ async def api_discovery():
                 "market_pulse": {"endpoint": "GET /v1/market-pulse", "price": "$0.05", "desc": "Sentiment + trending + news + whales + global in one call"},
                 "onchain_overview": {"endpoint": "GET /v1/onchain-overview", "price": "$0.15", "desc": "Whales + exchange flows + stablecoin flows + correlation + DeFi TVL"},
                 "arbitrage_scanner": {"endpoint": "GET /v1/arbitrage?symbols=BTC,ETH,SOL", "price": "$0.08", "desc": "Cross-DEX price discrepancies + gas-adjusted profitability modeling"},
+                "liquidation_map": {"endpoint": "GET /v1/liquidation-map?symbols=BTC,ETH,LINK", "price": "$0.12", "desc": "DeFi liquidation heatmap across Aave/Compound/MakerDAO with cascading risk modeling"},
             },
             "dex": {
                 "swap_quote": {"endpoint": "GET /v1/swap/quote", "price": "free", "desc": "DEX swap quote (0x API, 6 chains)"},
@@ -1071,7 +1072,7 @@ async def health():
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,
         "x402_facilitator": X402_FACILITATOR_URL,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research", "portfolio_intelligence", "defi_strategy", "market_pulse", "onchain_overview", "arbitrage_scanner"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research", "portfolio_intelligence", "defi_strategy", "market_pulse", "onchain_overview", "arbitrage_scanner", "liquidation_map"],
     }
 
 
@@ -1144,7 +1145,7 @@ async def x402_service_json():
     return {
         "x402": "1.0",
         "name": "AgentServices",
-        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, DeFi, on-chain analytics, search, marketing intelligence, and more. 52 services, 38 paid. All via x402 (USDC on Base).",
+        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, DeFi, on-chain analytics, search, marketing intelligence, and more. 53 services, 38 paid. All via x402 (USDC on Base).",
         "capabilities": ["data", "crypto", "defi", "onchain", "search", "marketing", "stocks", "commodities", "fx", "inference"],
         "pricing": {"currency": "USDC", "base": "0.01", "unit": "request"},
         "payment": {"address": X402_WALLET, "chain": "base", "facilitator": X402_FACILITATOR_URL},
@@ -1283,6 +1284,7 @@ async def x402_json_manifest():
         {"method": "GET", "path": "/v1/market-pulse", "price": "$0.05"},
         {"method": "GET", "path": "/v1/onchain-overview", "price": "$0.15"},
         {"method": "GET", "path": "/v1/arbitrage", "price": "$0.08"},
+        {"method": "GET", "path": "/v1/liquidation-map", "price": "$0.12"},
     ]
     free_services = [
         {"method": "GET", "path": "/v1/price/{symbol}", "price": "$0.00"},
@@ -1303,7 +1305,7 @@ async def x402_json_manifest():
     return {
         "x402Version": 2,
         "name": "AgentServices",
-        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, inference gateway, market signals, web extraction, security scanning, MCP integration, cross-DEX arbitrage scanning. 52 services, 40 paid.",
+        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, inference gateway, market signals, web extraction, security scanning, MCP integration, cross-DEX arbitrage scanning. 53 services, 41 paid.",
         "network": "eip155:8453",
         "facilitator": {
             "type": "coinbase",
@@ -1322,13 +1324,13 @@ async def x402_json_manifest():
             "bazaar": {
                 "discoverable": True,
                 "name": "AgentServices",
-                "description": "Paid APIs for AI agents — crypto data, market intelligence, on-chain analytics, DeFi strategy, cross-DEX arbitrage, AI inference. 52 services, 40 paid.",
+                "description": "Paid APIs for AI agents — crypto data, market intelligence, on-chain analytics, DeFi strategy, cross-DEX arbitrage, AI inference. 53 services, 41 paid.",
                 "category": "data",
                 "tags": ["data", "crypto", "defi", "search", "inference", "market-intelligence", "onchain", "analytics"],
             },
             "listing": {
                 "name": "AgentServices",
-                "description": "52 paid APIs for AI agents. Data, search, market intelligence, and services agents pay for via x402.",
+                "description": "53 paid APIs for AI agents. Data, search, market intelligence, and services agents pay for via x402.",
                 "category": "Data & APIs",
                 "pricing_model": "per-request",
                 "price_range": "$0.002 - $0.25",
@@ -1371,11 +1373,11 @@ async def llms_full_txt():
     lines = [
         "# AgentServices — Complete API Reference",
         "",
-        "> Paid APIs for AI agents. 52 services, 40 paid. Data, search, market intelligence, inference, and services agents pay for via x402 (USDC on Base).",
+        "> Paid APIs for AI agents. 53 services, 41 paid. Data, search, market intelligence, inference, and services agents pay for via x402 (USDC on Base).",
         "",
         "## What is AgentServices?",
         "",
-        "AgentServices is a paid API platform for AI agents. Agents discover and pay for data, search, market intelligence, and other services via x402 (USDC on Base). 52 endpoints, 40 paid, MCP integration, and cross-DEX arbitrage scanning.",
+        "AgentServices is a paid API platform for AI agents. Agents discover and pay for data, search, market intelligence, and other services via x402 (USDC on Base). 53 endpoints, 41 paid, MCP integration, and cross-DEX arbitrage scanning.",
         "",
         "## Base URL",
         "https://agentservices.to",
@@ -1547,7 +1549,7 @@ async def json_feed():
                 "id": "https://agentservices.to",
                 "url": "https://agentservices.to",
                 "title": "AgentServices — 52 Paid APIs for AI Agents",
-                "content_text": "Paid APIs for AI agents. 52 services, 40 paid. Crypto data, stocks, SEC filings, commodities, FX, inference gateway, market signals, web extraction, security scanning, MCP integration, cross-DEX arbitrage. All via x402 (USDC on Base).",
+                "content_text": "Paid APIs for AI agents. 53 services, 41 paid. Crypto data, stocks, SEC filings, commodities, FX, inference gateway, market signals, web extraction, security scanning, MCP integration, cross-DEX arbitrage. All via x402 (USDC on Base).",
                 "date_published": "2026-07-08T00:00:00Z",
                 "tags": ["x402", "api", "ai-agents", "crypto", "defi", "mcp"],
             },
@@ -1576,7 +1578,7 @@ async def agent_card():
         "@context": "https://www.w3.org/ns/did/v1",
         "id": "did:web:agentservices.to",
         "name": "AgentServices",
-        "description": "Paid APIs for AI agents. 52 services, 40 paid. Data, search, market intelligence, inference, and services agents pay for via x402.",
+        "description": "Paid APIs for AI agents. 53 services, 41 paid. Data, search, market intelligence, inference, and services agents pay for via x402.",
         "type": "Service",
         "version": "5.3.0",
         "url": "https://agentservices.to",
@@ -1629,7 +1631,7 @@ async def agent_skills_index():
         "skills": [
             {
                 "name": "agentservices",
-                "description": "52 paid APIs for AI agents — crypto data, market intelligence, on-chain analytics, DeFi strategy, cross-DEX arbitrage, AI inference, web extraction, and more.",
+                "description": "53 paid APIs for AI agents — crypto data, market intelligence, on-chain analytics, DeFi strategy, cross-DEX arbitrage, AI inference, web extraction, and more.",
                 "manifest": "https://agentservices.to/.well-known/agentskills/agentservices/SKILL.md",
                 "version": "5.3.0",
                 "license": "MIT",
@@ -1660,7 +1662,7 @@ async def ai_catalog():
                 "displayName": "AgentServices MCP Server",
                 "type": "application/mcp-server-card+json",
                 "url": "https://agentservices.to/mcp",
-                "description": "52 paid APIs for AI agents — crypto data, market intelligence, on-chain analytics, cross-DEX arbitrage, AI inference, DeFi strategy, portfolio intelligence. 37 MCP tools. x402 payments (USDC on Base).",
+                "description": "53 paid APIs for AI agents — crypto data, market intelligence, on-chain analytics, cross-DEX arbitrage, AI inference, DeFi strategy, portfolio intelligence. 38 MCP tools. x402 payments (USDC on Base).",
                 "tags": ["crypto", "defi", "market-data", "x402", "payments", "analytics", "inference", "mcp", "agents", "blockchain"],
                 "capabilities": [
                     "crypto_prices", "technical_indicators", "defi_yields", "fear_greed",
@@ -1695,7 +1697,7 @@ async def ai_catalog():
                 "displayName": "AgentServices REST API",
                 "type": "application/vnd.oai.openapi+json",
                 "url": "https://agentservices.to/openapi.json",
-                "description": "REST API with 52 endpoints for crypto data, stocks, SEC filings, commodities, FX rates, web search, extraction, SEO analysis, package security, GitHub trending, HN sentiment, npm stats, and more.",
+                "description": "REST API with 53 endpoints for crypto data, stocks, SEC filings, commodities, FX rates, web search, extraction, SEO analysis, package security, GitHub trending, HN sentiment, npm stats, and more.",
                 "tags": ["api", "rest", "crypto", "finance", "data", "analytics"],
                 "capabilities": ["rest_api", "data_endpoints", "synthesis", "market_data"],
                 "representativeQueries": [
@@ -2487,6 +2489,22 @@ async def arbitrage_scanner_endpoint(symbols: str = "BTC,ETH,SOL,USDC,WETH,WBTC"
     return arbitrage_scanner(symbols)
 
 
+# --- DeFi Liquidation Map (High-Value Risk Computation) ---
+
+@app.get("/v1/liquidation-map", tags=["Intelligence"],
+         summary="Liquidation Map — DeFi Positions Near Liquidation + Cascading Risk",
+         description="DeFi liquidation heatmap: calculates liquidation prices across Aave V3, Compound V3, and MakerDAO for any token. Models cascading liquidation risk, estimates volume at risk, and flags critical price zones. Unique computation — no free API provides this. $0.12 USDC via x402.")
+async def liquidation_map_endpoint(symbols: str = "BTC,ETH,LINK,AAVE,UNI"):
+    """
+    DeFi Liquidation Map ($0.12 per call via x402)
+
+    Computes liquidation thresholds across 3 major lending protocols.
+    For each token: liquidation prices at different leverage levels,
+    estimated volume at risk, and cascading liquidation probability.
+    """
+    return liquidation_map(symbols)
+
+
 # --- Agent-Friendly Examples Page ---
 
 _examples_html = None
@@ -2943,6 +2961,7 @@ _PAID_OPERATIONS = {
     "/v1/market-pulse": "$0.05",
     "/v1/onchain-overview": "$0.15",
     "/v1/arbitrage": "$0.08",
+    "/v1/liquidation-map": "$0.12",
     "/v1/memory/{key}": "$0.01",
     "/v1/memory/search": "$0.02",
     "/v1/skills/crypto-dossier": "$0.10",

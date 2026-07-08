@@ -449,6 +449,22 @@ MCP_TOOLS = [
             },
             "required": []
         }
+    },
+    {
+        "name": "liquidation_map",
+        "description": "DeFi liquidation heatmap — calculates liquidation prices across Aave V3, Compound V3, and MakerDAO for any token. Models cascading liquidation risk, estimates volume at risk, flags critical price zones ($0.12 x402)",
+        "title": "DeFi Liquidation Map",
+        "annotations": {"readOnlyHint": True},
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "symbols": {
+                    "type": "string",
+                    "description": "Comma-separated token symbols to analyze (e.g. 'BTC,ETH,LINK'). Default: 'BTC,ETH,LINK,AAVE,UNI'"
+                }
+            },
+            "required": []
+        }
     }
 ]
 
@@ -796,6 +812,9 @@ async def _execute_tool(tool_name: str, args: dict):
         elif tool_name == "arbitrage_scanner":
             from synthesis_data import arbitrage_scanner
             return arbitrage_scanner(args.get("symbols", "BTC,ETH,SOL,USDC,WETH,WBTC"))
+        elif tool_name == "liquidation_map":
+            from synthesis_data import liquidation_map
+            return liquidation_map(args.get("symbols", "BTC,ETH,LINK,AAVE,UNI"))
 
         else:
             return {"error": f"Unknown tool: {tool_name}"}
