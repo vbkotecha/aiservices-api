@@ -2365,3 +2365,48 @@ async def skill_market():
     """Market overview ($0.05 via x402)"""
     return market_overview()
 
+
+# --- Privacy Policy (required for Anthropic Connector Directory) ---
+@app.get("/privacy", tags=["Legal"], summary="Privacy Policy")
+async def privacy_policy():
+    """AgentServices Privacy Policy — required for MCP directory submissions."""
+    return {
+        "policy_version": "1.0",
+        "last_updated": "2026-07-08",
+        "data_collection": {
+            "what_we_collect": [
+                "API request parameters (e.g., crypto symbols, URLs, IP addresses provided by caller)",
+                "Payment metadata from x402 protocol (transaction hashes, wallet addresses)",
+                "Standard HTTP request headers (User-Agent, Accept, Content-Type)",
+                "Timestamp and endpoint path for rate limiting and analytics"
+            ],
+            "what_we_do_not_collect": [
+                "Personal names, emails, phone numbers",
+                "Browser cookies or tracking pixels",
+                "Location data beyond what the caller explicitly provides",
+                "Biometric or identity data"
+            ]
+        },
+        "data_usage": {
+            "purpose": "All collected data is used solely for processing API requests and returning responses. Payment metadata is used for x402 protocol verification only.",
+            "retention": "Request logs are retained for 30 days for debugging and rate limiting, then automatically purged. Payment metadata is retained per on-chain immutability (we do not store it separately).",
+            "sharing": "We do not sell, share, or transfer data to third parties. Data is processed in-memory for request fulfillment and discarded."
+        },
+        "security": {
+            "transport": "All communication uses HTTPS/TLS 1.2+",
+            "authentication": "Free endpoints require no authentication. Paid endpoints use x402 (HTTP 402) payment protocol with USDC on Base blockchain. No passwords or OAuth tokens are collected.",
+            "infrastructure": "Hosted on Railway (SOC 2 Type II certified infrastructure provider). No on-disk persistent storage of request data."
+        },
+        "user_rights": {
+            "data_access": "Users can access their request history via API logs (available on request)",
+            "data_deletion": "Request data is automatically purged after 30 days. Users can request immediate deletion by contacting support.",
+            "opt_out": "Users can stop using the service at any time. No accounts or subscriptions to cancel."
+        },
+        "contact": "For privacy inquiries: hustlemode@agentmail.to",
+        "mcp_specific": {
+            "origin_validation": "The MCP server validates Origin headers for enhanced security in Claude environments.",
+            "no_user_data_modification": "All tools are read-only (readOnlyHint: true). AgentServices does not modify files, settings, or data on the user's system.",
+            "external_calls": "Tools call AgentServices' own first-party APIs. No third-party API calls are made on behalf of the user."
+        }
+    }
+
