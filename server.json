@@ -1,14 +1,14 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "to.agentservices/agentservices",
-  "version": "5.1.0",
-  "description": "Paid APIs for AI agents — crypto, stocks, SEC, FX, inference, security. 46 services. x402.",
+  "version": "5.3.0",
+  "description": "52 paid x402 API endpoints for AI agents — crypto, data, DeFi, market intelligence.",
   "title": "AgentServices",
   "websiteUrl": "https://agentservices.to",
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://api.aiservices.to/mcp"
+      "url": "https://agentservices.to/mcp"
     }
   ],
   "repository": {
@@ -49,6 +49,18 @@
     {"name": "fx_rates", "description": "30+ currency exchange rates ($0.003)"},
     {"name": "web_extract", "description": "Clean text extraction from any URL ($0.002)"},
     {"name": "package_security", "description": "Package vulnerability scan via OSV ($0.02)"},
-    {"name": "seo_keywords", "description": "SEO keyword research with volume estimates ($0.01)"}
+    {"name": "seo_keywords", "description": "SEO keyword research with volume estimates ($0.01)"},
+    {"name": "trending", "description": "Trending cryptocurrencies — FREE"},
+    {"name": "global_market", "description": "Global crypto market cap and BTC dominance — FREE"},
+    {"name": "gas_prices", "description": "Current Ethereum/Base gas prices — FREE"},
+    {"name": "swap_quote", "description": "DEX swap quote across major liquidity pools — FREE"},
+    {"name": "predictions", "description": "Crypto price predictions from on-chain models — FREE"},
+    {"name": "crypto_news", "description": "Latest crypto and blockchain news — FREE"},
+    {"name": "social_sentiment", "description": "Social media sentiment analysis for crypto — FREE"},
+    {"name": "research", "description": "Deep research: search + extract + synthesize in one call ($0.05)"},
+    {"name": "portfolio_intelligence", "description": "Portfolio analysis: price + signal + risk + sentiment + verdict ($0.10)"},
+    {"name": "defi_strategy", "description": "DeFi investment strategy: yields + TVL + comparison + risk ($0.25)"},
+    {"name": "market_pulse", "description": "Market overview: fear-greed + trending + news + whales + global ($0.05)"},
+    {"name": "onchain_overview", "description": "On-chain analytics: whales + flows + correlation + DeFi TVL ($0.15)"}
   ]
 }
