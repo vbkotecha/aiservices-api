@@ -1056,6 +1056,25 @@ async def x402_manifest():
     }
 
 
+@app.get("/.well-known/x402-service.json")
+async def x402_service_json():
+    """x402 service manifest in true402/open marketplace format.
+    Consumed by true402.dev, The Spawn, and other open x402 marketplaces."""
+    return {
+        "x402": "1.0",
+        "name": "AgentServices",
+        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, DeFi, on-chain analytics, search, marketing intelligence, and more. 52 services, 38 paid. All via x402 (USDC on Base).",
+        "capabilities": ["data", "crypto", "defi", "onchain", "search", "marketing", "stocks", "commodities", "fx", "inference"],
+        "pricing": {"currency": "USDC", "base": "0.01", "unit": "request"},
+        "payment": {"address": X402_WALLET, "chain": "base", "facilitator": X402_FACILITATOR_URL},
+        "endpoint": "https://agentservices.to",
+        "website": "https://agentservices.to",
+        "repository": "https://github.com/vbkotecha/aiservices-api",
+        "contact": "https://github.com/vbkotecha",
+        "license": "MIT",
+    }
+
+
 @app.get("/.well-known/agent.json")
 async def agent_json():
     """Agent discovery manifest for AI agent platforms and crawlers."""
