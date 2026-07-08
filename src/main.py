@@ -49,6 +49,8 @@ from tradfi_data import get_stock_quote, get_stock_history, get_sec_filings, get
 from utility_data import extract_web_content, scan_package_security, seo_keywords
 from agent_memory import store as mem_store, retrieve as mem_retrieve, list_keys as mem_list, delete as mem_delete, search as mem_search
 from skill_packs import crypto_dossier, stock_dossier, market_overview, available_skills
+from media_gateway import generate_image, text_to_speech, multi_model_inference, list_all_models
+from voice_gateway import get_phone_number, make_call, lookup_number
 
 AISERVICES_PAY_TO = "0x9863aB6242663FCc84c33632741711dB78f8Fd15"
 WALLET = os.environ.get("WALLET_ADDRESS", AISERVICES_PAY_TO)
@@ -459,6 +461,33 @@ try:
             accepts=_payment_options(X402_WALLET, "$0.05"),
             mime_type="application/json",
             description="Market pulse — fear/greed + BTC signal + whales + regime classification",
+        ),
+        # --- Media Gateway (image, TTS, multi-model) ---
+        "POST /v1/images/generations": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.05"),
+            mime_type="application/json",
+            description="AI image generation via gpt-image-2",
+        ),
+        "POST /v1/audio/speech": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.05"),
+            mime_type="application/json",
+            description="Text-to-speech via gpt-audio",
+        ),
+        "POST /v1/chat/completions": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.03"),
+            mime_type="application/json",
+            description="Multi-model LLM routing — 344+ models via OpenRouter",
+        ),
+        # --- Voice Gateway (phone, calls) ---
+        "POST /v1/calls": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.54"),
+            mime_type="application/json",
+            description="AI voice call — outbound phone call with text-to-speech",
+        ),
+        "GET /v1/lookup/*": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.05"),
+            mime_type="application/json",
+            description="Phone number lookup — carrier, type, fraud risk",
         ),
     }
 
@@ -2555,3 +2584,82 @@ def _custom_openapi():
 
 _original_openapi = app.openapi
 app.openapi = _custom_openapi
+
+
+# ============================================================
+# MEDIA GATEWAY (v5.3.0 — Image, TTS, Multi-Model)
+# ============================================================
+
+class ImageRequest(BaseModel):
+    prompt: str = Field(description="Image generation prompt")
+    size: str = Field(default="1024x1024", description="Image size: 1024x1024, 1792x1024, 1024x1792")
+    model: str = Field(default="gpt-image-2", description="Image model")
+
+@app.get("/v1/models/all", tags=["Media"],
+          summary="List All Models",
+          description="List all available models across CodexSale and OpenRouter. FREE.")
+async def all_models():
+    """List all models (FREE)"""
+    return list_all_models()
+
+@app.post("/v1/images/generations", tags=["Media"],
+          summary="AI Image Generation",
+          description="Generate images from text prompts via gpt-image-2. $0.05 via x402.")
+async def image_gen(req: ImageRequest):
+    """Image generation ($0.05 via x402)"""
+    return generate_image(req.prompt, req.size, req.model)
+
+class TTSRequest(BaseModel):
+    text: str = Field(description="Text to convert to speech")
+    model: str = Field(default="openai/gpt-audio-mini", description="TTS model")
+    voice: str = Field(default="alloy", description="Voice: alloy, echo, fable, onyx, nova, shimmer")
+
+@app.post("/v1/audio/speech", tags=["Media"],
+          summary="Text-to-Speech",
+          description="Convert text to speech audio. Multiple voices available. $0.05 via x402.")
+async def tts(req: TTSRequest):
+    """Text-to-speech ($0.05 via x402)"""
+    return text_to_speech(req.text, req.model, req.voice)
+
+class MultiModelRequest(BaseModel):
+    model: str = Field(description="Model ID (e.g., anthropic/claude-sonnet-4-6, google/gemini-3-pro)")
+    messages: List[dict] = Field(description="Chat messages [{role, content}]")
+    temperature: float = Field(default=0.7)
+    max_tokens: int = Field(default=1000)
+
+@app.post("/v1/chat/completions", tags=["Media"],
+          summary="Multi-Model LLM Routing",
+          description="Route to ANY of 344+ models via OpenRouter. GPT, Claude, Gemini, Grok, DeepSeek, Qwen, and more. $0.03 via x402.")
+async def multi_model(req: MultiModelRequest):
+    """Multi-model inference ($0.03 via x402)"""
+    return multi_model_inference(req.model, req.messages, req.temperature, req.max_tokens)
+
+
+# ============================================================
+# VOICE GATEWAY (v5.3.0 — Phone, Calls)
+# ============================================================
+
+@app.get("/v1/phone", tags=["Voice"],
+          summary="Phone Number Info",
+          description="Get the AgentServices phone number and capabilities. FREE.")
+async def phone_info():
+    """Phone number info (FREE)"""
+    return get_phone_number()
+
+class CallRequest(BaseModel):
+    to: str = Field(description="Phone number to call (E.164 format, e.g., +1234567890)")
+    message: str = Field(default="", description="Message to speak on the call (text-to-speech)")
+
+@app.post("/v1/calls", tags=["Voice"],
+          summary="AI Voice Call",
+          description="Make an outbound AI voice call with text-to-speech. $0.54 via x402.")
+async def voice_call(req: CallRequest):
+    """Voice call ($0.54 via x402)"""
+    return make_call(req.to, req.message)
+
+@app.get("/v1/lookup/{phone_number}", tags=["Voice"],
+          summary="Phone Number Lookup",
+          description="Look up carrier, type, and caller name for a phone number. $0.05 via x402.")
+async def phone_lookup(phone_number: str):
+    """Phone lookup ($0.05 via x402)"""
+    return lookup_number(phone_number)
