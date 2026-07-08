@@ -2440,3 +2440,99 @@ async def oauth_authorization_server():
     }
 
 
+# --- Custom OpenAPI with x-payment-info (x402 v2 discovery convention) ---
+# Modern x402 indexers scan OpenAPI specs for x-payment-info per operation
+# instead of relying solely on /.well-known/x402.json
+
+_PAID_OPERATIONS = {
+    "/v1/indicators/{symbol}": "$0.02",
+    "/v1/yields": "$0.02",
+    "/v1/metadata": "$0.01",
+    "/v1/search": "$0.01",
+    "/v1/marketing/sentiment": "$0.03",
+    "/v1/marketing/trends": "$0.04",
+    "/v1/marketing/competitors": "$0.05",
+    "/v1/marketing/content-gaps": "$0.04",
+    "/v1/marketing/ad-copy": "$0.05",
+    "/v1/whales": "$0.02",
+    "/v1/exchange-flows": "$0.02",
+    "/v1/correlation": "$0.03",
+    "/v1/defi-tvl": "$0.02",
+    "/v1/stablecoin-flows": "$0.02",
+    "/v1/github-velocity": "$0.02",
+    "/v1/agent-context": "$0.02",
+    "/v1/macro": "$0.03",
+    "/v1/inference": "$0.03",
+    "/v1/quick-complete": "$0.03",
+    "/v1/token-risk": "$0.03",
+    "/v1/crypto-signals": "$0.04",
+    "/v1/hn-sentiment": "$0.02",
+    "/v1/npm-stats": "$0.02",
+    "/v1/github-trending": "$0.02",
+    "/v1/yield-comparison": "$0.03",
+    "/v1/stock/quote": "$0.02",
+    "/v1/stock/history": "$0.02",
+    "/v1/sec/filings": "$0.03",
+    "/v1/commodities": "$0.02",
+    "/v1/economic": "$0.02",
+    "/v1/fx-rates": "$0.003",
+    "/v1/extract": "$0.002",
+    "/v1/security/{package}": "$0.02",
+    "/v1/seo/keywords": "$0.01",
+    "/v1/research": "$0.05",
+    "/v1/portfolio": "$0.10",
+    "/v1/defi-strategy": "$0.25",
+    "/v1/market-pulse": "$0.05",
+    "/v1/onchain-overview": "$0.15",
+    "/v1/arbitrage": "$0.08",
+    "/v1/memory/{key}": "$0.01",
+    "/v1/memory/search": "$0.02",
+    "/v1/skills/crypto-dossier": "$0.10",
+    "/v1/skills/stock-dossier": "$0.05",
+    "/v1/skills/market-overview": "$0.05",
+    "/v1/disputes": "$0.05",
+}
+
+
+def _custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    schema = _original_openapi()
+    # Inject x-payment-info into each paid operation
+    for path, path_item in schema.get("paths", {}).items():
+        for method, operation in path_item.items():
+            if method in ("get", "post", "put", "delete", "patch"):
+                # Check exact path or wildcard match
+                price = _PAID_OPERATIONS.get(path)
+                if not price:
+                    # Try wildcard match (e.g., /v1/security/{package} → /v1/security/*)
+                    for pattern, p in _PAID_OPERATIONS.items():
+                        if pattern.replace("*", "") in path:
+                            price = p
+                            break
+                if price:
+                    operation["x-payment-info"] = {
+                        "protocol": "x402",
+                        "version": "2",
+                        "amount": price,
+                        "asset": "USDC",
+                        "network": "base",
+                        "chainId": "eip155:8453",
+                        "payTo": os.environ.get("X402_WALLET_ADDRESS", os.environ.get("X402_PAY_TO", "0x9863aB6242663FCc84c33632741711dB78f8Fd15")),
+                        "facilitator": os.environ.get("X402_FACILITATOR_URL", "https://api.cdp.coinbase.com/platform/v2/x402"),
+                    }
+                else:
+                    operation["x-payment-info"] = {
+                        "protocol": "x402",
+                        "version": "2",
+                        "amount": "$0.00",
+                        "asset": "USDC",
+                        "network": "base",
+                        "free": True,
+                    }
+    app.openapi_schema = schema
+    return schema
+
+
+_original_openapi = app.openapi
+app.openapi = _custom_openapi

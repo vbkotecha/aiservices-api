@@ -1,7 +1,7 @@
 {
-  "name": "agentservices-client",
+  "name": "@agentservices/client",
   "version": "5.3.0",
-  "description": "Client SDK for AgentServices — 50+ paid APIs for AI agents with crypto data, DeFi yields, on-chain analytics, portfolio intelligence, and market intelligence. x402 micropayments via USDC on Base.",
+  "description": "Client SDK for AgentServices — 50+ paid APIs for AI agents with crypto data, stocks, SEC filings, commodities, FX, LLM inference, and market intelligence. x402 micropayments via USDC on Base.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
@@ -15,9 +15,9 @@
     "defi",
     "base",
     "usdc",
-    "portfolio",
-    "market-intelligence",
-    "onchain",
+    "stocks",
+    "sec",
+    "inference",
     "agentservices"
   ],
   "author": "Vivek Kotecha",
@@ -27,7 +27,5 @@
     "url": "https://github.com/vbkotecha/aiservices-api"
   },
   "homepage": "https://agentservices.to",
-  "dependencies": {
-    "x402": "^0.1.0"
-  }
+  "dependencies": {}
 }
