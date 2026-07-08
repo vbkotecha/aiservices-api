@@ -42,7 +42,7 @@ from onchain_data import (
 from synthesis_data import (
     get_token_risk, get_crypto_signal, get_hn_sentiment, get_npm_stats,
     get_github_trending, get_yield_comparison, deep_research, portfolio_intelligence,
-    defi_strategy_report, market_pulse, onchain_overview,
+    defi_strategy_report, market_pulse, onchain_overview, arbitrage_scanner,
 )
 from inference_gateway import list_models as list_inference_models, inference, quick_complete
 from tradfi_data import get_stock_quote, get_stock_history, get_sec_filings, get_commodities, get_economic_indicators, get_fx_rates
@@ -415,6 +415,11 @@ try:
             accepts=_payment_options(X402_WALLET, "$0.15"),
             mime_type="application/json",
             description="On-chain overview — whales + exchange flows + stablecoin flows + correlation + DeFi TVL",
+        ),
+        "GET /v1/arbitrage": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.08"),
+            mime_type="application/json",
+            description="Cross-DEX arbitrage scanner — price discrepancies, gas-adjusted profitability, slippage modeling",
         ),
     }
 
@@ -892,6 +897,7 @@ async def api_discovery():
                 "defi_strategy": {"endpoint": "GET /v1/defi-strategy?chain=...", "price": "$0.25", "desc": "DeFi yields + TVL + comparison + risk analysis"},
                 "market_pulse": {"endpoint": "GET /v1/market-pulse", "price": "$0.05", "desc": "Sentiment + trending + news + whales + global in one call"},
                 "onchain_overview": {"endpoint": "GET /v1/onchain-overview", "price": "$0.15", "desc": "Whales + exchange flows + stablecoin flows + correlation + DeFi TVL"},
+                "arbitrage_scanner": {"endpoint": "GET /v1/arbitrage?symbols=BTC,ETH,SOL", "price": "$0.08", "desc": "Cross-DEX price discrepancies + gas-adjusted profitability modeling"},
             },
             "dex": {
                 "swap_quote": {"endpoint": "GET /v1/swap/quote", "price": "free", "desc": "DEX swap quote (0x API, 6 chains)"},
@@ -945,7 +951,7 @@ async def health():
         "x402_error": X402_ERROR,
         "x402_networks": X402_NETWORKS,
         "x402_facilitator": X402_FACILITATOR_URL,
-        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research", "portfolio_intelligence", "defi_strategy", "market_pulse", "onchain_overview"],
+        "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research", "portfolio_intelligence", "defi_strategy", "market_pulse", "onchain_overview", "arbitrage_scanner"],
     }
 
 
@@ -1178,7 +1184,7 @@ async def llms_txt():
     lines = [
         "# AgentServices",
         "",
-        "> Paid APIs for AI agents. 50 services, 38 paid. Crypto data, stocks, SEC filings, commodities, FX, inference gateway (gpt-5.4/5.5), token risk scoring, crypto signals, web extraction, package security, SEO research, and more. All via x402 (USDC on Base).",
+        "> Paid APIs for AI agents. 51 services, 39 paid. Crypto data, stocks, SEC filings, commodities, FX, inference gateway (gpt-5.4/5.5), token risk scoring, crypto signals, cross-DEX arbitrage scanner, web extraction, package security, SEO research, and more. All via x402 (USDC on Base).",
         "",
         "## Base URL",
         "https://agentservices.to",
@@ -1899,6 +1905,28 @@ async def onchain_overview_endpoint():
     return onchain_overview()
 
 
+# --- Cross-DEX Arbitrage Scanner ---
+
+@app.get("/v1/arbitrage", tags=["Intelligence"],
+         summary="Arbitrage Scanner — Cross-DEX Price Discrepancies + Profitability",
+         description="Cross-DEX arbitrage scanner: compares token prices across exchanges, calculates gas-adjusted profitability, models slippage, and flags actionable opportunities. Unique computation — no free API provides this. $0.08 USDC via x402.")
+async def arbitrage_scanner_endpoint(symbols: str = "BTC,ETH,SOL,USDC,WETH,WBTC"):
+    """
+    Cross-DEX Arbitrage Scanner ($0.08 per call via x402)
+
+    Scans for price discrepancies across exchanges. For each symbol:
+    - Compares prices from CoinGecko (aggregated) vs Coinbase spot
+    - Calculates spread percentage and absolute
+    - Models profitability at $100/$1K/$10K/$100K trade sizes
+    - Factors in gas costs (Base L2) and slippage proportional to volume
+    - Flags opportunities where net ROI > 0.5% after costs
+
+    This is COMPUTATION, not data fetching. Addresses competitive feedback
+    that raw data endpoints are commoditized.
+    """
+    return arbitrage_scanner(symbols)
+
+
 # --- Agent-Friendly Examples Page ---
 
 _examples_html = None
@@ -2125,7 +2153,7 @@ curl https://agentservices.to/v1/search?q=base+chain
 <a href="https://github.com/vbkotecha/aiservices-api">GitHub</a>
 </p>
 <p style="margin-top:8px;color:#555;font-size:0.8em">
-AgentServices — Paid APIs for AI agents. 50 services. x402/USDC on Base.
+AgentServices — Paid APIs for AI agents. 51 services. x402/USDC on Base.
 </p>
 </div>
 

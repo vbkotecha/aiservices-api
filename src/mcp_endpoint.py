@@ -363,6 +363,20 @@ MCP_TOOLS = [
             "properties": {},
             "required": []
         }
+    },
+    {
+        "name": "arbitrage_scanner",
+        "description": "Cross-DEX arbitrage scanner — compares token prices across exchanges, models gas-adjusted profitability at different trade sizes, estimates slippage, flags actionable opportunities ($0.08 x402)",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "symbols": {
+                    "type": "string",
+                    "description": "Comma-separated token symbols to scan (e.g. 'BTC,ETH,SOL,USDC'). Default: 'BTC,ETH,SOL,USDC,WETH,WBTC'"
+                }
+            },
+            "required": []
+        }
     }
 ]
 
@@ -681,6 +695,9 @@ async def _execute_tool(tool_name: str, args: dict):
         elif tool_name == "onchain_overview":
             from synthesis_data import onchain_overview
             return onchain_overview()
+        elif tool_name == "arbitrage_scanner":
+            from synthesis_data import arbitrage_scanner
+            return arbitrage_scanner(args.get("symbols", "BTC,ETH,SOL,USDC,WETH,WBTC"))
 
         else:
             return {"error": f"Unknown tool: {tool_name}"}
