@@ -897,9 +897,56 @@ def _get_landing():
     return _landing_html
 
 
+def _get_llms_full_markdown():
+    """Return a concise markdown version of the landing page for content negotiation."""
+    return """# AgentServices — Premium APIs for AI Agents
+
+52 paid APIs for AI agents. Data, search, market intelligence, DeFi strategy, cross-DEX arbitrage, AI inference. All via x402 (USDC on Base).
+
+## What We Offer
+
+- **Crypto Data**: Prices, indicators (RSI, Bollinger, ATR), DeFi yields, whale tracking, exchange flows
+- **Market Intelligence**: Portfolio analysis, DeFi strategy reports, market pulse, on-chain overview
+- **Cross-DEX Arbitrage**: Real-time price discrepancies with gas-adjusted profitability modeling
+- **AI Inference**: LLM gateway (GPT-5.4, GPT-5.5, Gemini) via x402 micropayments
+- **Traditional Finance**: Stock quotes, SEC filings, commodities, FX rates, economic indicators
+- **Utility**: Web extraction, package security scans, SEO keyword research
+- **MCP Integration**: 36 tools via remote MCP server at /mcp
+
+## Quick Start
+
+```bash
+# Free: Get BTC price
+curl https://agentservices.to/v1/price/BTC
+
+# Paid: Get technical indicators (requires x402 payment)
+curl https://agentservices.to/v1/indicators/BTC
+
+# MCP config for Claude Desktop
+{"mcpServers":{"agentservices":{"url":"https://agentservices.to/mcp"}}}
+```
+
+## Links
+
+- [API Docs](https://agentservices.to/docs)
+- [Examples](https://agentservices.to/examples)
+- [GitHub](https://github.com/vbkotecha/aiservices-api)
+- [OpenAPI Spec](https://agentservices.to/openapi.json)
+- [x402 Manifest](https://agentservices.to/.well-known/x402.json)
+"""
+
+
 @app.get("/")
 async def root(request: Request):
     """Route based on domain: agentservices.to serves website HTML, all paths serve API."""
+    # Markdown content negotiation
+    accept = request.headers.get("accept", "")
+    if "text/markdown" in accept or "text/x-markdown" in accept:
+        from starlette.responses import PlainTextResponse
+        return PlainTextResponse(
+            content=_get_llms_full_markdown(),
+            media_type="text/markdown"
+        )
     host = request.headers.get("host", "").split(":")[0].lower()
     if host.startswith("api."):
         return {
@@ -1291,6 +1338,311 @@ async def x402_json_manifest():
     }
 
 
+@app.get("/sitemap.xml", include_in_schema=False)
+async def sitemap_xml():
+    """XML sitemap for search engines and AI crawlers."""
+    from starlette.responses import Response
+    urls = [
+        "https://agentservices.to",
+        "https://agentservices.to/docs",
+        "https://agentservices.to/examples",
+        "https://agentservices.to/llms.txt",
+        "https://agentservices.to/llms-full.txt",
+        "https://agentservices.to/openapi.json",
+        "https://agentservices.to/feed.json",
+        "https://agentservices.to/.well-known/x402.json",
+        "https://agentservices.to/.well-known/mcp/server-card.json",
+        "https://agentservices.to/.well-known/ai-catalog.json",
+        "https://agentservices.to/.well-known/agent-card.json",
+        "https://agentservices.to/.well-known/agentskills/agentservices/SKILL.md",
+    ]
+    xml_parts = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml_parts.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    for url in urls:
+        xml_parts.append(f"  <url><loc>{url}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>")
+    xml_parts.append('</urlset>')
+    return Response(content="\n".join(xml_parts), media_type="application/xml")
+
+
+@app.get("/llms-full.txt", include_in_schema=False)
+async def llms_full_txt():
+    """Full site content in clean markdown for LLM context windows."""
+    from starlette.responses import PlainTextResponse
+    lines = [
+        "# AgentServices — Complete API Reference",
+        "",
+        "> Paid APIs for AI agents. 52 services, 40 paid. Data, search, market intelligence, inference, and services agents pay for via x402 (USDC on Base).",
+        "",
+        "## What is AgentServices?",
+        "",
+        "AgentServices is a paid API platform for AI agents. Agents discover and pay for data, search, market intelligence, and other services via x402 (USDC on Base). 52 endpoints, 40 paid, MCP integration, and cross-DEX arbitrage scanning.",
+        "",
+        "## Base URL",
+        "https://agentservices.to",
+        "",
+        "## Authentication",
+        "Paid endpoints use the x402 protocol (USDC on Base Mainnet, chain ID 8453). Free endpoints require no authentication.",
+        f"Payment wallet: {X402_WALLET}",
+        "",
+        "## Free Endpoints (No Payment Required)",
+        "",
+        "### Cryptocurrency",
+        "- GET /v1/price/{symbol} — Current crypto price (BTC, ETH, SOL, etc.)",
+        "- GET /v1/prices?symbols=BTC,ETH,SOL — Batch crypto prices",
+        "- GET /v1/fear-greed — Crypto Fear & Greed Index (0-100 scale)",
+        "- GET /v1/global — Global market cap, 24h volume, BTC dominance",
+        "- GET /v1/trending — Trending tokens being searched right now",
+        "- GET /v1/gas — Current Ethereum gas prices (slow/standard/fast in Gwei)",
+        "- GET /v1/swap/quote?chain=ethereum&tokenIn=...&tokenOut=... — DEX swap quote (0x API, 6 chains)",
+        "",
+        "### Prediction Markets",
+        "- GET /v1/predictions — Active Polymarket prediction markets",
+        "- GET /v1/predictions/{slug} — Specific prediction market details",
+        "",
+        "### News & Social",
+        "- GET /v1/news — Latest crypto and blockchain news headlines",
+        "- GET /v1/social — Trending coins, categories, NFTs from social signals",
+        "",
+        "### Utility",
+        "- GET /v1/geo/{ip} — IP geolocation lookup (city, country, ISP, coordinates)",
+        "- GET /v1/policies — List dispute policy templates",
+        "- GET /v1/agent-context — Paste-ready market context for LLM prompts",
+        "- POST /mcp — MCP server (JSON-RPC over SSE, 36 tools)",
+        "",
+        "## Paid Endpoints (x402 / USDC on Base)",
+        "",
+        "### Crypto Data & Analytics ($0.01-$0.04)",
+        "- GET /v1/indicators/{symbol} — Technical indicators: RSI, Bollinger Bands, ATR, Support/Resistance ($0.02)",
+        "- GET /v1/yields — Top DeFi yield pools by TVL across chains ($0.02)",
+        "- GET /v1/metadata?url=... — URL metadata extraction and unfurling ($0.01)",
+        "- GET /v1/search?q=... — AI-powered web search ($0.01)",
+        "- GET /v1/whales — Large whale transactions for BTC/ETH ($0.02)",
+        "- GET /v1/exchange-flows — CEX reserve flows and netflow ($0.02)",
+        "- GET /v1/correlation — 30-day cross-asset correlation matrix ($0.03)",
+        "- GET /v1/defi-tvl — DeFi protocol TVL rankings ($0.02)",
+        "- GET /v1/stablecoin-flows — Stablecoin market caps and supply changes ($0.02)",
+        "- GET /v1/github-velocity — GitHub crypto repo velocity scores ($0.02)",
+        "- GET /v1/macro — Macro economic indicators: CPI, GDP, Fed rate ($0.02)",
+        "- GET /v1/token-risk/{token} — Token risk scoring (0-100) ($0.03)",
+        "- GET /v1/signals/{symbol} — Crypto buy/sell signals with confidence ($0.04)",
+        "- GET /v1/hn-sentiment — Hacker News tech sentiment analysis ($0.02)",
+        "- GET /v1/npm-stats/{package} — NPM download trends ($0.02)",
+        "- GET /v1/github-trending — GitHub trending repos (daily/weekly) ($0.02)",
+        "- GET /v1/yield-comparison — DeFi yield comparison with risk assessment ($0.03)",
+        "",
+        "### Traditional Finance ($0.003-$0.03)",
+        "- GET /v1/stocks/{ticker} — Real-time stock quote ($0.02)",
+        "- GET /v1/stocks/{ticker}/history — Historical OHLCV data ($0.03)",
+        "- GET /v1/sec/{ticker} — SEC filings parser: 10-K, 10-Q, Form 4 ($0.03)",
+        "- GET /v1/commodities — Oil, gold, silver, wheat prices ($0.03)",
+        "- GET /v1/economic — CPI, GDP, unemployment, Fed rate (FRED) ($0.03)",
+        "- GET /v1/fx?base=USD — 30+ currency exchange rates ($0.003)",
+        "",
+        "### Utility ($0.002-$0.02)",
+        "- GET /v1/extract?url=... — Web content extraction, clean text from any URL ($0.002)",
+        "- GET /v1/security/{package} — Package vulnerability scan (PyPI/npm) ($0.02)",
+        "- GET /v1/seo/keywords?keyword=... — SEO keyword research with volume ($0.01)",
+        "",
+        "### AI Inference ($0.03)",
+        "- POST /v1/inference — LLM inference gateway (gpt-5.4, gpt-5.4-mini, gpt-5.5, gemini) ($0.03)",
+        "- POST /v1/complete?prompt=... — Quick text completion ($0.03)",
+        "",
+        "### Bundled Intelligence ($0.05-$0.25)",
+        "- GET /v1/research?q=... — Deep research: search + extract + synthesize ($0.05)",
+        "- GET /v1/portfolio?symbol=... — Portfolio intelligence: price + signal + risk + sentiment ($0.10)",
+        "- GET /v1/defi-strategy?chain=... — DeFi strategy: yields + TVL + comparison + risk ($0.25)",
+        "- GET /v1/market-pulse — Market pulse: sentiment + trending + news + whales + global ($0.05)",
+        "- GET /v1/onchain-overview — On-chain: whales + flows + correlation + DeFi TVL ($0.15)",
+        "- GET /v1/arbitrage?symbols=... — Cross-DEX arbitrage scanner with gas-adjusted profitability ($0.08)",
+        "",
+        "### Marketing Intelligence ($0.03-$0.05)",
+        "- POST /v1/marketing/sentiment — AI brand sentiment analysis ($0.03)",
+        "- POST /v1/marketing/trends — Industry trend detection with velocity ($0.03)",
+        "- POST /v1/marketing/competitors — Competitive intelligence ($0.05)",
+        "- POST /v1/marketing/content-gaps — SEO content gap analysis ($0.04)",
+        "- POST /v1/marketing/ad-copy — AI ad copy generator ($0.05)",
+        "",
+        "### Dispute Resolution",
+        "- POST /v1/disputes — Submit dispute for policy-driven ruling ($0.05)",
+        "",
+        "### Voice",
+        "- GET /v1/phone — AgentServices phone number info (FREE)",
+        "- POST /v1/calls — Make outbound AI voice call ($0.54)",
+        "- GET /v1/lookup/{phone} — Phone number carrier lookup ($0.05)",
+        "",
+        "## Example Usage",
+        "",
+        "```bash",
+        "# Free: Get BTC price",
+        "curl https://agentservices.to/v1/price/BTC",
+        "",
+        "# Paid: Get BTC technical indicators (returns 402 without payment)",
+        "curl https://agentservices.to/v1/indicators/BTC",
+        "",
+        "# Free: Batch prices",
+        "curl 'https://agentservices.to/v1/prices?symbols=BTC,ETH,SOL'",
+        "",
+        "# Free: Trending tokens",
+        "curl https://agentservices.to/v1/trending",
+        "```",
+        "",
+        "## MCP Integration",
+        "",
+        "AgentServices provides a remote MCP server at https://agentservices.to/mcp with 36 tools.",
+"""
+MCP config for Claude Desktop:
+{\"mcpServers\":{\"agentservices\":{\"url\":\"https://agentservices.to/mcp\"}}}
+""",
+        "",
+        "## Payment Protocol",
+        "",
+        "AgentServices uses x402 version 2. Agents pay per call with USDC on Base (chain ID 8453).",
+        "- Discovery: /.well-known/x402.json",
+        "- 402 response includes: payment amount, payTo address, network, asset contract, Bazaar extension",
+        f"- Revenue wallet: {X402_WALLET}",
+        "",
+        "## Discovery Files",
+        "- /.well-known/x402.json — x402 v2 payment manifest",
+        "- /.well-known/x402-service.json — x402 service listing format",
+        "- /.well-known/mcp/server-card.json — MCP server card",
+        "- /.well-known/ai-catalog.json — ARD (Agentic Resource Discovery) catalog",
+        "- /.well-known/ai-plugin.json — OpenAI plugin manifest",
+        "- /.well-known/agent-card.json — Agent identity card",
+        "- /.well-known/agentskills/agentservices/SKILL.md — AgentSkills.io skill",
+        "- /.well-known/agent-skills/index.json — Agent skills index",
+        "- /openapi.json — OpenAPI 3.1 specification with x-payment-info",
+        "- /robots.txt — AI crawler rules with Content-Signal directives",
+        "- /sitemap.xml — XML sitemap",
+        "- /feed.json — JSON Feed",
+        "- /llms.txt — Concise LLM-readable description",
+        "- /examples — Agent integration guide with curl examples",
+        "",
+        "## Links",
+        "- API Docs (Swagger): https://agentservices.to/docs",
+        "- Integration Examples: https://agentservices.to/examples",
+        "- GitHub: https://github.com/vbkotecha/aiservices-api",
+        "- x402 Manifest: https://agentservices.to/.well-known/x402.json",
+        "",
+        "## SDK",
+        "- Python: pip install agentservices (LangChain + CrewAI tools included)",
+        "- MCP: npx agentservices-mcp (pure JavaScript, zero dependencies)",
+        "- ElizaOS: @agentservices/plugin-elizaos (12 actions + market context provider)",
+        "- AgentKit: @agentservices/agentkit-provider (18 actions for Coinbase AgentKit)",
+    ]
+    return PlainTextResponse(content="\n".join(lines), media_type="text/plain")
+
+
+@app.get("/feed.json", include_in_schema=False)
+async def json_feed():
+    """JSON Feed (https://jsonfeed.org/) for content syndication."""
+    return {
+        "version": "https://jsonfeed.org/version/1.1",
+        "title": "AgentServices",
+        "description": "Paid APIs for AI agents — data, search, market intelligence, and services agents pay for via x402.",
+        "home_page_url": "https://agentservices.to",
+        "feed_url": "https://agentservices.to/feed.json",
+        "authors": [{"name": "AgentServices", "url": "https://agentservices.to"}],
+        "items": [
+            {
+                "id": "https://agentservices.to",
+                "url": "https://agentservices.to",
+                "title": "AgentServices — 52 Paid APIs for AI Agents",
+                "content_text": "Paid APIs for AI agents. 52 services, 40 paid. Crypto data, stocks, SEC filings, commodities, FX, inference gateway, market signals, web extraction, security scanning, MCP integration, cross-DEX arbitrage. All via x402 (USDC on Base).",
+                "date_published": "2026-07-08T00:00:00Z",
+                "tags": ["x402", "api", "ai-agents", "crypto", "defi", "mcp"],
+            },
+            {
+                "id": "https://agentservices.to/examples",
+                "url": "https://agentservices.to/examples",
+                "title": "Agent Integration Examples",
+                "content_text": "Step-by-step guide for agents to discover, pay for, and use AgentServices endpoints. Includes MCP config, curl examples, and use cases.",
+                "date_published": "2026-07-08T00:00:00Z",
+            },
+            {
+                "id": "https://agentservices.to/.well-known/x402.json",
+                "url": "https://agentservices.to/.well-known/x402.json",
+                "title": "x402 Payment Discovery Manifest",
+                "content_text": "x402 v2 manifest listing all 53 services with pricing, payment address, and Bazaar metadata.",
+                "date_published": "2026-07-08T00:00:00Z",
+            },
+        ],
+    }
+
+
+@app.get("/.well-known/agent-card.json", include_in_schema=False)
+async def agent_card():
+    """Agent Card — agent identity for inter-agent communication and discovery."""
+    return {
+        "@context": "https://www.w3.org/ns/did/v1",
+        "id": "did:web:agentservices.to",
+        "name": "AgentServices",
+        "description": "Paid APIs for AI agents. 52 services, 40 paid. Data, search, market intelligence, inference, and services agents pay for via x402.",
+        "type": "Service",
+        "version": "5.3.0",
+        "url": "https://agentservices.to",
+        "logo": "https://agentservices.to/favicon.ico",
+        "endpoints": {
+            "api": "https://agentservices.to",
+            "mcp": "https://agentservices.to/mcp",
+            "openapi": "https://agentservices.to/openapi.json",
+            "docs": "https://agentservices.to/docs",
+            "examples": "https://agentservices.to/examples",
+            "health": "https://agentservices.to/health",
+        },
+        "capabilities": {
+            "services": [
+                "crypto_prices", "technical_indicators", "defi_yields", "fear_greed",
+                "market_intelligence", "portfolio_analysis", "defi_strategy",
+                "cross_dex_arbitrage", "onchain_analytics", "ai_inference",
+                "web_search", "web_extraction", "token_risk_scoring",
+                "crypto_signals", "whale_tracking", "exchange_flows",
+                "stock_quotes", "sec_filings", "commodities", "fx_rates",
+                "marketing_intelligence", "dispute_resolution",
+            ],
+            "payment": {
+                "protocol": "x402",
+                "version": 2,
+                "network": "eip155:8453",
+                "asset": "USDC",
+                "payTo": X402_WALLET,
+            },
+            "integration": {
+                "mcp": True,
+                "rest": True,
+                "python_sdk": "pip install agentservices",
+                "mcp_server": "npx agentservices-mcp",
+            },
+        },
+        "serviceCount": 52,
+        "paidServiceCount": 40,
+    }
+
+
+@app.get("/.well-known/agent-skills/index.json", include_in_schema=False)
+async def agent_skills_index():
+    """Agent Skills index — lists all available agent skills per agentskills.io spec."""
+    return {
+        "schemaVersion": "1.0",
+        "name": "AgentServices",
+        "description": "Paid APIs for AI agents.",
+        "url": "https://agentservices.to",
+        "skills": [
+            {
+                "name": "agentservices",
+                "description": "52 paid APIs for AI agents — crypto data, market intelligence, on-chain analytics, DeFi strategy, cross-DEX arbitrage, AI inference, web extraction, and more.",
+                "manifest": "https://agentservices.to/.well-known/agentskills/agentservices/SKILL.md",
+                "version": "5.3.0",
+                "license": "MIT",
+                "payment": {
+                    "protocol": "x402",
+                    "network": "eip155:8453",
+                    "asset": "USDC",
+                },
+            },
+        ],
+    }
+
+
 @app.get("/.well-known/ai-catalog.json")
 async def ai_catalog():
     """Agentic Resource Discovery (ARD) catalog — Google Cloud Agent Registry + federated discovery.
@@ -1484,10 +1836,27 @@ async def robots_txt():
         "",
         "# Key endpoints for AI agents",
         "# /llms.txt — Machine-readable service description",
+        "# /llms-full.txt — Full site content in markdown",
         "# /openapi.json — OpenAPI 3.1 specification",
         "# /mcp — MCP server (SSE)",
+        "# /sitemap.xml — Sitemap",
+        "# /feed.json — JSON Feed",
         "# /.well-known/x402 — x402 payment discovery",
+        "# /.well-known/x402.json — x402 v2 manifest",
         "# /.well-known/mcp/server-card.json — MCP server card",
+        "# /.well-known/ai-catalog.json — ARD catalog",
+        "# /.well-known/agent-card.json — Agent card",
+        "# /.well-known/agent-skills/index.json — Agent skills index",
+        "",
+        "# AI Content Signals",
+        "Content-Signal: llms-txt on",
+        "Content-Signal: llms-full-txt on",
+        "Content-Signal: openapi on",
+        "Content-Signal: mcp on",
+        "Content-Signal: x402 on",
+        "",
+        "# Sitemap",
+        "Sitemap: https://agentservices.to/sitemap.xml",
     ]
     return PlainTextResponse(content="\n".join(lines), media_type="text/plain")
 
@@ -2352,6 +2721,13 @@ AgentServices — Paid APIs for AI agents. 51 services. x402/USDC on Base.
 </body>
 </html>"""
     return _examples_html
+
+
+@app.get("/index.md", include_in_schema=False)
+async def index_markdown():
+    """Serve landing page content as markdown for AI crawlers."""
+    from starlette.responses import PlainTextResponse
+    return PlainTextResponse(content=_get_llms_full_markdown(), media_type="text/markdown")
 
 
 @app.get("/examples", tags=["Developer"], response_class=HTMLResponse)
