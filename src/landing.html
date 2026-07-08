@@ -1065,7 +1065,7 @@ footer {
     <div class="feature-card reveal">
       <div class="feature-icon">📈</div>
       <h3>Crypto Market Data</h3>
-      <p>Live prices for 100+ tokens, batch queries, technical indicators (RSI, Bollinger Bands, ATR), and the Fear & Greed sentiment index.</p>
+      <p>Live prices for 100+ tokens, batch queries, technical indicators (RSI, BB, ATR), Fear & Greed index, whale tracking, exchange flows, on-chain analytics, DeFi TVL, stablecoin flows, and correlation matrices.</p>
       <div class="feature-meta">
         <span class="tag tag-free">FREE</span>
         <span class="tag tag-paid">$0.02</span>
@@ -1073,45 +1073,49 @@ footer {
     </div>
 
     <div class="feature-card reveal">
-      <div class="feature-icon">🌾</div>
-      <h3>DeFi Yield Intelligence</h3>
-      <p>Discover the highest-yielding liquidity pools across major protocols, ranked by TVL. Perfect for yield aggregation strategies.</p>
+      <div class="feature-icon">🧠</div>
+      <h3>LLM Inference Gateway</h3>
+      <p>Chat completions via GPT-5.4, GPT-5.4-mini, and GPT-5.5. OpenAI-compatible. Agents pay per call via x402 — no API keys, no subscriptions.</p>
       <div class="feature-meta">
-        <span class="tag tag-paid">$0.02</span>
+        <span class="tag tag-paid">$0.03</span>
+        <span class="tag tag-paid">2 endpoints</span>
       </div>
     </div>
 
     <div class="feature-card reveal">
-      <div class="feature-icon">⚖️</div>
-      <h3>Agent Dispute Resolution</h3>
-      <p>Policy-driven rulings for agent-to-agent conflicts. Seven policy templates covering freelance delivery, SLAs, bug bounties, and physical commerce.</p>
+      <div class="feature-icon">💹</div>
+      <h3>Stock Market & SEC</h3>
+      <p>Real-time stock quotes and historical OHLCV from Yahoo Finance. SEC EDGAR filings parser — 10-K, 10-Q, 8-K, Form 4. Traditional finance data agents need.</p>
       <div class="feature-meta">
-        <span class="tag tag-paid">$0.05</span>
+        <span class="tag tag-paid">$0.02–$0.03</span>
+        <span class="tag tag-paid">3 endpoints</span>
       </div>
     </div>
 
     <div class="feature-card reveal">
-      <div class="feature-icon">🌍</div>
-      <h3>IP Geolocation</h3>
-      <p>Accurate geolocation data for any IP address — country, city, ISP, and coordinates. Build location-aware agent logic instantly.</p>
+      <div class="feature-icon">🛢️</div>
+      <h3>Commodities & Economics</h3>
+      <p>Oil, gold, silver, copper, wheat prices. CPI, GDP, unemployment, Fed funds rate, Treasury yields — live from FRED. FX rates for 30+ currencies.</p>
       <div class="feature-meta">
-        <span class="tag tag-free">FREE</span>
+        <span class="tag tag-paid">$0.003–$0.03</span>
+        <span class="tag tag-paid">3 endpoints</span>
       </div>
     </div>
 
     <div class="feature-card reveal">
-      <div class="feature-icon">🔗</div>
-      <h3>URL Metadata Extraction</h3>
-      <p>Extract titles, descriptions, OpenGraph data, and favicons from any URL. Perfect for link previews and content enrichment.</p>
+      <div class="feature-icon">🎯</div>
+      <h3>Synthesis & Signals</h3>
+      <p>Token risk scoring (volatility, liquidity, market cap), crypto buy/sell signals from RSI+MA+BB, risk-adjusted DeFi yield comparison, HN sentiment, npm trends, GitHub trending.</p>
       <div class="feature-meta">
-        <span class="tag tag-paid">$0.01</span>
+        <span class="tag tag-paid">$0.02–$0.04</span>
+        <span class="tag tag-paid">6 endpoints</span>
       </div>
     </div>
 
     <div class="feature-card reveal">
       <div class="feature-icon">📊</div>
       <h3>Marketing Intelligence</h3>
-      <p>AI-powered brand sentiment analysis, industry trend detection, competitive intelligence, SEO content gap analysis, and ad copy generation across Google, Meta, TikTok, and Taboola.</p>
+      <p>AI-powered brand sentiment, trend detection, competitive intelligence, SEO content gap analysis, and ad copy generation across Google, Meta, TikTok, and Taboola.</p>
       <div class="feature-meta">
         <span class="tag tag-paid">$0.03–$0.05</span>
         <span class="tag tag-paid">5 endpoints</span>
@@ -1119,9 +1123,19 @@ footer {
     </div>
 
     <div class="feature-card reveal">
+      <div class="feature-icon">🔍</div>
+      <h3>Web Extraction & Security</h3>
+      <p>Clean text extraction from any URL. Package vulnerability scanning via OSV. SEO keyword research with volume estimates. URL metadata and OpenGraph.</p>
+      <div class="feature-meta">
+        <span class="tag tag-paid">$0.002–$0.02</span>
+        <span class="tag tag-paid">4 endpoints</span>
+      </div>
+    </div>
+
+    <div class="feature-card reveal">
       <div class="feature-icon">🤖</div>
       <h3>MCP Integration</h3>
-      <p>Connect directly to Claude, Cursor, or any MCP-compatible client. Thirteen tools available instantly via Streamable HTTP transport.</p>
+      <p>Connect directly to Claude, Cursor, or any MCP-compatible client. 30+ tools available instantly via Streamable HTTP transport. Listed on Smithery and MCP Registry.</p>
       <div class="feature-meta">
         <span class="tag tag-free">FREE</span>
       </div>
@@ -1138,104 +1152,53 @@ footer {
   </div>
 
   <div class="endpoints-wrap reveal">
-    <div class="endpoint-row">
-      <div class="method-badge method-get">GET</div>
-      <div class="endpoint-info">
-        <h4>/v1/price/{symbol}</h4>
-        <p>Current crypto price (BTC, ETH, SOL, XRP...)</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price free">Free</div>
-    </div>
-    <div class="endpoint-row">
-      <div class="method-badge method-get">GET</div>
-      <div class="endpoint-info">
-        <h4>/v1/prices?symbols=BTC,ETH,SOL</h4>
-        <p>Batch crypto prices in a single request</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price free">Free</div>
-    </div>
-    <div class="endpoint-row">
-      <div class="method-badge method-get">GET</div>
-      <div class="endpoint-info">
-        <h4>/v1/indicators/{symbol}</h4>
-        <p>RSI, Bollinger Bands, ATR, Support/Resistance levels</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price">$0.02</div>
-    </div>
-    <div class="endpoint-row">
-      <div class="method-badge method-get">GET</div>
-      <div class="endpoint-info">
-        <h4>/v1/yields</h4>
-        <p>Top DeFi yield pools ranked by TVL across protocols</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price">$0.02</div>
-    </div>
-    <div class="endpoint-row">
-      <div class="method-badge method-get">GET</div>
-      <div class="endpoint-info">
-        <h4>/v1/fear-greed</h4>
-        <p>Crypto Fear & Greed sentiment index (0–100)</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price free">Free</div>
-    </div>
-    <div class="endpoint-row">
-      <div class="method-badge method-get">GET</div>
-      <div class="endpoint-info">
-        <h4>/v1/geo/{ip}</h4>
-        <p>IP geolocation — country, city, ISP, coordinates</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price free">Free</div>
-    </div>
-    <div class="endpoint-row">
-      <div class="method-badge method-get">GET</div>
-      <div class="endpoint-info">
-        <h4>/v1/metadata?url=...</h4>
-        <p>URL metadata extraction, OpenGraph, and unfurling</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price">$0.01</div>
-    </div>
-    <div class="endpoint-row">
-      <div class="method-badge method-post">POST</div>
-      <div class="endpoint-info">
-        <h4>/v1/disputes</h4>
-        <p>Submit a dispute for policy-driven ruling (AgentCourt)</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price">$0.05</div>
-    </div>
-    <div class="endpoint-row">
-      <div class="method-badge method-post">POST</div>
-      <div class="endpoint-info">
-        <h4>/v1/marketing/sentiment</h4>
-        <p>AI brand sentiment analysis across Twitter, Reddit, TikTok</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price">$0.03</div>
-    </div>
-    <div class="endpoint-row">
-      <div class="method-badge method-post">POST</div>
-      <div class="endpoint-info">
-        <h4>/v1/marketing/trends</h4>
-        <p>Detect trending marketing topics with velocity scores</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price">$0.03</div>
-    </div>
-    <div class="endpoint-row">
-      <div class="method-badge method-post">POST</div>
-      <div class="endpoint-info">
-        <h4>/v1/marketing/competitors</h4>
-        <p>AI competitive intelligence — keywords, channels, strategy</p>
-      </div>
-      <div></div>
-      <div class="endpoint-price">$0.05</div>
+    <!-- FREE -->
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/price/{symbol}</h4><p>Current crypto price (BTC, ETH, SOL, XRP...)</p></div><div></div><div class="endpoint-price free">Free</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/prices?symbols=BTC,ETH</h4><p>Batch crypto prices in a single request</p></div><div></div><div class="endpoint-price free">Free</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/fear-greed</h4><p>Crypto Fear & Greed sentiment index (0–100)</p></div><div></div><div class="endpoint-price free">Free</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/geo/{ip}</h4><p>IP geolocation — country, city, ISP, coordinates</p></div><div></div><div class="endpoint-price free">Free</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/global</h4><p>Global market cap, volume, BTC dominance</p></div><div></div><div class="endpoint-price free">Free</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/trending</h4><p>Trending tokens being searched right now</p></div><div></div><div class="endpoint-price free">Free</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/gas</h4><p>Current Ethereum gas prices (slow/standard/fast)</p></div><div></div><div class="endpoint-price free">Free</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/news</h4><p>Latest crypto and blockchain news</p></div><div></div><div class="endpoint-price free">Free</div></div>
+
+    <!-- INFERENCE -->
+    <div class="endpoint-row"><div class="method-badge method-post">POST</div><div class="endpoint-info"><h4>/v1/inference</h4><p>LLM chat completions — GPT-5.4, GPT-5.4-mini, GPT-5.5</p></div><div></div><div class="endpoint-price">$0.03</div></div>
+    <div class="endpoint-row"><div class="method-badge method-post">POST</div><div class="endpoint-info"><h4>/v1/complete</h4><p>Quick text completion — send a prompt, get a response</p></div><div></div><div class="endpoint-price">$0.03</div></div>
+
+    <!-- CRYPTO DATA -->
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/indicators/{symbol}</h4><p>RSI, Bollinger Bands, ATR, Support/Resistance</p></div><div></div><div class="endpoint-price">$0.02</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/yields</h4><p>Top DeFi yield pools by TVL</p></div><div></div><div class="endpoint-price">$0.02</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/whales</h4><p>Large whale transactions on BTC and ETH chains</p></div><div></div><div class="endpoint-price">$0.02</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/correlation</h4><p>30-day cross-asset correlation matrix</p></div><div></div><div class="endpoint-price">$0.03</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/defi-tvl</h4><p>DeFi protocol TVL rankings from DeFi Llama</p></div><div></div><div class="endpoint-price">$0.02</div></div>
+
+    <!-- TRADITIONAL FINANCE -->
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/stocks/{ticker}</h4><p>Real-time stock quote — AAPL, TSLA, GOOGL...</p></div><div></div><div class="endpoint-price">$0.02</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/stocks/{ticker}/history</h4><p>Historical OHLCV data (1d to 5y)</p></div><div></div><div class="endpoint-price">$0.03</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/sec/{ticker}</h4><p>SEC filings parser — 10-K, 10-Q, 8-K, Form 4 from EDGAR</p></div><div></div><div class="endpoint-price">$0.03</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/commodities</h4><p>Oil, gold, silver, copper, wheat, corn, coffee prices</p></div><div></div><div class="endpoint-price">$0.03</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/economic</h4><p>CPI, GDP, unemployment, Fed rate, Treasury yields (FRED)</p></div><div></div><div class="endpoint-price">$0.03</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/fx?base=USD</h4><p>30+ currency exchange rates</p></div><div></div><div class="endpoint-price">$0.003</div></div>
+
+    <!-- SYNTHESIS -->
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/token-risk/{token}</h4><p>Token risk scoring — volatility, liquidity, market cap</p></div><div></div><div class="endpoint-price">$0.03</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/signals/{symbol}</h4><p>Crypto buy/sell signals from RSI, MA, Bollinger Bands</p></div><div></div><div class="endpoint-price">$0.04</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/yield-comparison</h4><p>DeFi yield comparison with risk-adjusted analysis</p></div><div></div><div class="endpoint-price">$0.03</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/hn-sentiment</h4><p>Hacker News tech sentiment analysis</p></div><div></div><div class="endpoint-price">$0.02</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/npm-stats/{package}</h4><p>NPM package download statistics and trends</p></div><div></div><div class="endpoint-price">$0.02</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/github-trending</h4><p>GitHub trending repositories by language</p></div><div></div><div class="endpoint-price">$0.02</div></div>
+
+    <!-- UTILITY -->
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/metadata?url=...</h4><p>URL metadata extraction, OpenGraph, unfurling</p></div><div></div><div class="endpoint-price">$0.01</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/search?q=...</h4><p>AI-powered web search with structured results</p></div><div></div><div class="endpoint-price">$0.01</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/extract?url=...</h4><p>Clean text extraction from any URL</p></div><div></div><div class="endpoint-price">$0.002</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/security/{package}</h4><p>Package vulnerability scan via OSV database</p></div><div></div><div class="endpoint-price">$0.02</div></div>
+    <div class="endpoint-row"><div class="method-badge method-get">GET</div><div class="endpoint-info"><h4>/v1/seo/keywords?keyword=...</h4><p>SEO keyword research with volume estimates</p></div><div></div><div class="endpoint-price">$0.01</div></div>
+
+    <!-- MARKETING -->
+    <div class="endpoint-row"><div class="method-badge method-post">POST</div><div class="endpoint-info"><h4>/v1/marketing/sentiment</h4><p>AI brand sentiment analysis across platforms</p></div><div></div><div class="endpoint-price">$0.03</div></div>
+    <div class="endpoint-row"><div class="method-badge method-post">POST</div><div class="endpoint-info"><h4>/v1/marketing/competitors</h4><p>AI competitive intelligence — keywords, channels, strategy</p></div><div></div><div class="endpoint-price">$0.05</div>
     </div>
     <div class="endpoint-row">
       <div class="method-badge method-post">POST</div>
@@ -1393,7 +1356,7 @@ console.<span class="fn">log</span>(<span class="str">`Market sentiment: </span>
         <div class="section-eyebrow">MCP Protocol</div>
         <h2 class="section-title" style="text-align:left">Connect to<br>Claude & Cursor<br><em>Instantly</em></h2>
         <p style="color:var(--text-light); font-size:1.05rem; margin-top:16px;">
-          AgentServices ships with a built-in MCP (Model Context Protocol) server. Connect any MCP-compatible AI tool and get instant access to all 36 tools — no SDK installation required.
+          AgentServices ships with a built-in MCP (Model Context Protocol) server. Connect any MCP-compatible AI tool and get instant access to all 30+ tools — no SDK installation required.
         </p>
         <div style="margin-top:24px;">
           <a href="https://agentservices.to/mcp" target="_blank" class="btn btn-primary">
