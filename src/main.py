@@ -375,6 +375,11 @@ try:
             mime_type="application/json",
             description="Real-time FX/forex rates for 30+ currencies",
         ),
+        "GET /v1/fx-rates": RouteConfig(
+            accepts=_payment_options(X402_WALLET, "$0.003"),
+            mime_type="application/json",
+            description="Real-time FX/forex rates for 30+ currencies (alias for /v1/fx)",
+        ),
         # --- NEW: Utility (gap fillers) ---
         "GET /v1/extract": RouteConfig(
             accepts=_payment_options(X402_WALLET, "$0.002"),
@@ -1247,21 +1252,41 @@ async def x402_json_manifest():
         {"method": "GET", "path": "/v1/policies", "price": "$0.00"},
         {"method": "POST", "path": "/mcp", "price": "$0.00"},
     ]
+    from datetime import datetime, timezone
     return {
         "x402Version": 2,
         "name": "AgentServices",
         "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, inference gateway, market signals, web extraction, security scanning, MCP integration, cross-DEX arbitrage scanning. 52 services, 40 paid.",
         "network": "eip155:8453",
-        "facilitator": "coinbase",
+        "facilitator": {
+            "type": "coinbase",
+            "url": "https://agentservices.to",
+            "description": "Coinbase Developer Platform (CDP) x402 facilitator on Base mainnet"
+        },
         "payTo": X402_WALLET,
         "currency": "USDC",
         "website": "https://agentservices.to",
         "apiBaseUrl": "https://agentservices.to",
         "repository": "https://github.com/vbkotecha/aiservices-api",
         "documentation": "https://agentservices.to/docs",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "services": paid_services + free_services,
         "extensions": {
-            "bazaar": {"discoverable": True}
+            "bazaar": {
+                "discoverable": True,
+                "name": "AgentServices",
+                "description": "Paid APIs for AI agents — crypto data, market intelligence, on-chain analytics, DeFi strategy, cross-DEX arbitrage, AI inference. 52 services, 40 paid.",
+                "category": "data",
+                "tags": ["data", "crypto", "defi", "search", "inference", "market-intelligence", "onchain", "analytics"],
+            },
+            "listing": {
+                "name": "AgentServices",
+                "description": "52 paid APIs for AI agents. Data, search, market intelligence, and services agents pay for via x402.",
+                "category": "Data & APIs",
+                "pricing_model": "per-request",
+                "price_range": "$0.002 - $0.25",
+                "tags": ["crypto", "defi", "market-data", "analytics", "inference", "search", "onchain", "x402"],
+            }
         },
     }
 
@@ -1960,6 +1985,15 @@ async def economic_indicators(indicator: str = "all"):
          description="Real-time exchange rates for 30+ currencies. Only 1 provider on Bazaar. $0.003 USDC via x402.")
 async def fx_rates(base: str = "USD"):
     """FX rates ($0.003 per call via x402)"""
+    return get_fx_rates(base)
+
+
+@app.get("/v1/fx-rates", tags=["Traditional Finance"],
+         summary="FX / Forex Rates (alias)",
+         description="Alias for /v1/fx. Real-time exchange rates for 30+ currencies. $0.003 USDC via x402.",
+         include_in_schema=False)
+async def fx_rates_alias(base: str = "USD"):
+    """FX rates alias ($0.003 per call via x402)"""
     return get_fx_rates(base)
 
 
