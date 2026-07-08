@@ -385,7 +385,7 @@ MCP_RESOURCES = [
 SERVER_CARD = {
     "serverInfo": {
         "name": "AgentServices",
-        "version": "5.1.0",
+        "version": "5.3.0",
         "description": "Paid APIs for AI agents — 50 services, 38 paid. Crypto, stocks, SEC, commodities, FX, inference, signals, extraction, security, portfolio intelligence, DeFi strategy, market pulse, on-chain overview. x402 on Base."
     },
     "transport": {
@@ -461,8 +461,8 @@ async def mcp_handler(request: Request):
                 },
                 "serverInfo": {
                     "name": "AgentServices",
-                    "version": "5.1.0",
-                    "description": "Paid APIs for AI agents — 47 services, 35 paid. x402 on Base.",
+                    "version": "5.3.0",
+                    "description": "Paid APIs for AI agents — 50 services, 38 paid. x402 on Base.",
                 },
                 "instructions": "Use tools/list to see available tools. Free tools: crypto_prices, fear_greed, ip_geolocation, list_policies, agent_context. Paid tools return HTTP 402 for x402 payment.",
             }
@@ -481,7 +481,7 @@ async def mcp_handler(request: Request):
                 },
                 "serverInfo": {
                     "name": "AgentServices",
-                    "version": "5.1.0",
+                    "version": "5.3.0",
                 }
             }
         }
