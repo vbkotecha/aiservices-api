@@ -1143,6 +1143,7 @@ async def x402_json_manifest():
         {"method": "GET", "path": "/v1/defi-strategy", "price": "$0.25"},
         {"method": "GET", "path": "/v1/market-pulse", "price": "$0.05"},
         {"method": "GET", "path": "/v1/onchain-overview", "price": "$0.15"},
+        {"method": "GET", "path": "/v1/arbitrage", "price": "$0.08"},
     ]
     free_services = [
         {"method": "GET", "path": "/v1/price/{symbol}", "price": "$0.00"},
@@ -1162,12 +1163,12 @@ async def x402_json_manifest():
     return {
         "x402Version": 2,
         "name": "AgentServices",
-        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, inference gateway, market signals, web extraction, security scanning, and MCP integration. 47 services, 35 paid.",
+        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, inference gateway, market signals, web extraction, security scanning, MCP integration, cross-DEX arbitrage scanning. 52 services, 40 paid.",
         "network": "eip155:8453",
         "facilitator": "coinbase",
         "payTo": X402_WALLET,
         "currency": "USDC",
-        "website": "https://aiservices.to",
+        "website": "https://agentservices.to",
         "apiBaseUrl": "https://agentservices.to",
         "repository": "https://github.com/vbkotecha/aiservices-api",
         "documentation": "https://agentservices.to/docs",
