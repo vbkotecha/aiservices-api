@@ -1179,6 +1179,74 @@ async def x402_json_manifest():
     }
 
 
+@app.get("/.well-known/ai-catalog.json")
+async def ai_catalog():
+    """Agentic Resource Discovery (ARD) catalog — Google Cloud Agent Registry + federated discovery.
+    Spec: github.com/ards-project/ard-spec — makes AgentServices discoverable by Gemini Enterprise agents."""
+    return {
+        "specVersion": "1.0",
+        "host": {
+            "displayName": "AgentServices",
+            "identifier": "urn:ai:::agentservices.to",
+            "documentationUrl": "https://agentservices.to",
+        },
+        "entries": [
+            {
+                "identifier": "urn:ai:::agentservices.to/mcp",
+                "displayName": "AgentServices MCP Server",
+                "type": "application/mcp-server-card+json",
+                "url": "https://agentservices.to/mcp",
+                "description": "52 paid APIs for AI agents — crypto data, market intelligence, on-chain analytics, cross-DEX arbitrage, AI inference, DeFi strategy, portfolio intelligence. 37 MCP tools. x402 payments (USDC on Base).",
+                "tags": ["crypto", "defi", "market-data", "x402", "payments", "analytics", "inference", "mcp", "agents", "blockchain"],
+                "capabilities": [
+                    "crypto_prices", "technical_indicators", "defi_yields", "fear_greed",
+                    "market_intelligence", "portfolio_analysis", "defi_strategy",
+                    "cross_dex_arbitrage", "onchain_analytics", "ai_inference",
+                    "web_search", "web_extraction", "token_risk_scoring",
+                    "crypto_signals", "whale_tracking", "exchange_flows",
+                ],
+                "representativeQueries": [
+                    "get Bitcoin price and technical indicators",
+                    "find the best DeFi yield opportunities",
+                    "analyze my crypto portfolio risk",
+                    "scan for cross-DEX arbitrage opportunities",
+                    "run AI inference with GPT or Gemini models",
+                ],
+                "version": "5.3.0",
+                "updatedAt": "2026-07-08T07:00:00Z",
+                "metadata": {
+                    "pricing": "freemium ($0.01-$0.25 per call, USDC on Base)",
+                    "paymentProtocol": "x402",
+                    "chain": "base",
+                    "endpointCount": "52",
+                    "freeEndpoints": "12",
+                    "paidEndpoints": "40",
+                    "openapiSpec": "https://agentservices.to/openapi.json",
+                    "skillCard": "https://agentservices.to/.well-known/agentskills/agentservices/SKILL.md",
+                    "x402Manifest": "https://agentservices.to/.well-known/x402.json",
+                },
+            },
+            {
+                "identifier": "urn:ai:::agentservices.to/api",
+                "displayName": "AgentServices REST API",
+                "type": "application/vnd.oai.openapi+json",
+                "url": "https://agentservices.to/openapi.json",
+                "description": "REST API with 52 endpoints for crypto data, stocks, SEC filings, commodities, FX rates, web search, extraction, SEO analysis, package security, GitHub trending, HN sentiment, npm stats, and more.",
+                "tags": ["api", "rest", "crypto", "finance", "data", "analytics"],
+                "capabilities": ["rest_api", "data_endpoints", "synthesis", "market_data"],
+                "representativeQueries": [
+                    "get crypto prices and market data",
+                    "analyze stock fundamentals and SEC filings",
+                    "extract content from web pages",
+                    "check npm package security",
+                ],
+                "version": "5.3.0",
+                "updatedAt": "2026-07-08T07:00:00Z",
+            },
+        ],
+    }
+
+
 @app.get("/llms.txt")
 async def llms_txt():
     """LLM-friendly API description for agent crawlers and AI discovery."""
@@ -1489,6 +1557,7 @@ Full list at https://agentservices.to/docs
 - x402 Manifest: https://agentservices.to/.well-known/x402.json
 - OpenAPI Spec: https://agentservices.to/openapi.json
 - Agent Skill Card: https://agentservices.to/.well-known/mcp/server-card.json
+- ARD Catalog: https://agentservices.to/.well-known/ai-catalog.json
 - MCP Registry: to.agentservices/agentservices
 - Network: Base (eip155:8453)
 - Facilitator: Coinbase CDP (https://api.cdp.coinbase.com/platform/v2/x402)
