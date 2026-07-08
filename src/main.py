@@ -2410,3 +2410,33 @@ async def privacy_policy():
         }
     }
 
+
+@app.get("/.well-known/oauth-protected-resource")
+async def oauth_protected_resource():
+    """OAuth Protected Resource metadata (RFC 9728).
+    Declares that our MCP server uses no authentication for free tools.
+    Required for Anthropic Connector Directory compliance."""
+    return {
+        "resource": "https://agentservices.to/mcp",
+        "authorization_servers": [],
+        "bearer_methods_supported": [],
+        "resource_documentation": "https://agentservices.to/docs",
+        "resource_name": "AgentServices MCP Server",
+        "resource_description": "Free tools require no auth. Paid tools use x402 (HTTP 402) payment. No OAuth required for discovery or free tool access.",
+    }
+
+
+@app.get("/.well-known/oauth-authorization-server")
+async def oauth_authorization_server():
+    """OAuth Authorization Server metadata.
+    AgentServices does not operate an OAuth server — free tools are public, paid tools use x402."""
+    return {
+        "issuer": "https://agentservices.to",
+        "authorization_endpoint": None,
+        "token_endpoint": None,
+        "response_types_supported": [],
+        "grant_types_supported": [],
+        "note": "AgentServices does not use OAuth. Free tools are publicly accessible. Paid tools use x402 micropayments (HTTP 402).",
+    }
+
+
