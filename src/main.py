@@ -16,7 +16,7 @@ if env_file.exists():
 from fastapi import FastAPI, Request, Query
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from typing import List
 import sys
 
