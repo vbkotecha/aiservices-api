@@ -9,4 +9,5 @@ COPY src/ ./src/
 
 EXPOSE 8000
 
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use startup_check.py which tries imports, captures errors, starts uvicorn
+CMD ["python", "/app/src/startup_check.py"]
