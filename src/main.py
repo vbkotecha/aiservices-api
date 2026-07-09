@@ -3122,6 +3122,72 @@ Website: https://agentservices.to
 """, media_type="text/plain")
 
 
+# --- agents.json (structured agent discovery per agents-txt spec) ---
+@app.get("/agents.json", tags=["Discovery"],
+         summary="Structured agent discovery metadata",
+         include_in_schema=False)
+async def agents_json():
+    """Structured metadata for agent discovery per the agents-txt.com specification."""
+    return {
+        "name": "AgentServices",
+        "description": "Paid APIs for AI agents. 53 services covering crypto data, market intelligence, on-chain analytics, DeFi strategy, AI inference, web extraction, and more. All via x402 (USDC on Base).",
+        "url": "https://agentservices.to",
+        "version": "5.3.0",
+        "contact": {
+            "email": "hustlemode@agentmail.to",
+        },
+        "capabilities": {
+            "payment": {
+                "protocol": "x402",
+                "version": 2,
+                "network": "eip155:8453",
+                "asset": "USDC",
+            },
+            "mcp": {
+                "endpoint": "https://agentservices.to/mcp",
+                "transport": "streamable-http",
+                "tools": 38,
+            },
+            "api": {
+                "openapi": "https://agentservices.to/openapi.json",
+                "docs": "https://agentservices.to/docs",
+                "health": "https://agentservices.to/health",
+            },
+        },
+        "endpoints": {
+            "free": [
+                "GET /v1/prices — Crypto prices",
+                "GET /v1/fear-greed — Market sentiment",
+                "GET /v1/trending — Trending tokens",
+                "GET /v1/gas — Gas prices",
+                "GET /v1/global — Global market stats",
+            ],
+            "paid": [
+                "GET /v1/indicators/{symbol} — Technical indicators ($0.02)",
+                "GET /v1/yields — DeFi yields ($0.02)",
+                "GET /v1/search?q=... — Web search ($0.01)",
+                "GET /v1/portfolio?address=... — Portfolio intelligence ($0.10)",
+                "GET /v1/market-pulse — Market pulse ($0.05)",
+                "GET /v1/onchain-overview — On-chain overview ($0.15)",
+                "GET /v1/defi-strategy — DeFi strategy ($0.25)",
+            ],
+        },
+        "integrations": {
+            "python_sdk": "pip install agentservices",
+            "npm": "npx agentservices-mcp",
+            "mcp_server": "https://agentservices.to/mcp",
+        },
+    }
+
+
+# --- 402 Index domain verification ---
+@app.get("/.well-known/402index-verify.txt", include_in_schema=False)
+async def forty_two_index_verify():
+    """402 Index domain verification file."""
+    from starlette.responses import PlainTextResponse
+    return PlainTextResponse(content="d570ef2b5d152ae5c898973566093300216490b3c0557613fbaa5073ff7c978a", media_type="text/plain")
+
+
 # --- Custom OpenAPI with x-payment-info (x402 v2 discovery convention) ---
 # Modern x402 indexers scan OpenAPI specs for x-payment-info per operation
 # instead of relying solely on /.well-known/x402.json
