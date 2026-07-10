@@ -1697,9 +1697,18 @@ async def agent_card():
         "name": "AgentServices",
         "description": "Paid APIs for AI agents. 53 services, 41 paid. Data, search, market intelligence, inference, and services agents pay for via x402.",
         "type": "Service",
+        "protocolVersion": "1.0",
         "version": "5.3.0",
         "url": "https://agentservices.to",
         "logo": "https://agentservices.to/favicon.ico",
+        "skills": [
+            {
+                "id": "agent-initiated-checkout",
+                "name": "Agent-Initiated Checkout (AP2)",
+                "description": "Paid APIs for AI agents over x402: market data, research, inference, portfolio intelligence, and payment-aware tooling.",
+                "tags": ["x402", "payments", "market-intelligence", "research", "inference", "mcp"],
+            }
+        ],
         "endpoints": {
             "api": "https://agentservices.to",
             "mcp": "https://agentservices.to/mcp",
