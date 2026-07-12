@@ -587,7 +587,7 @@ async def mcp_handler(request: Request):
                 "serverInfo": {
                     "name": "AgentServices",
                     "version": "5.3.0",
-                    "description": "Paid APIs for AI agents — 50 services, 38 paid. x402 on Base.",
+                    "description": "Paid APIs for AI agents — 53 services, 41 paid. x402 on Base.",
                 },
                 "instructions": "Use tools/list to see available tools. Free tools: crypto_prices, fear_greed, ip_geolocation, list_policies, agent_context. Paid tools return HTTP 402 for x402 payment.",
             }

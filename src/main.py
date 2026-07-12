@@ -1741,8 +1741,8 @@ async def agent_card():
                 "mcp_server": "npx agentservices-mcp",
             },
         },
-        "serviceCount": 52,
-        "paidServiceCount": 40,
+        "serviceCount": 53,
+        "paidServiceCount": 41,
     }
 
 
