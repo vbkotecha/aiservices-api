@@ -1198,6 +1198,15 @@ async def api_health():
     return await health()
 
 
+@app.get("/favicon.ico")
+async def favicon():
+    from fastapi.responses import FileResponse
+    favicon_path = Path(__file__).parent.parent / "favicon.ico"
+    if favicon_path.exists():
+        return FileResponse(favicon_path, media_type="image/x-icon")
+    return {"detail": "not found"}, 404
+
+
 @app.get("/.well-known/x402")
 async def x402_manifest():
     """x402 payment manifest for agent discovery."""
