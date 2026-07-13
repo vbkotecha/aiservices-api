@@ -1113,7 +1113,7 @@ async def api_discovery():
     return {
         "name": "AgentServices",
         "tagline": "Paid APIs for AI agents — data, inference, and market intelligence",
-        "version": "3.0.0",
+        "version": "5.3.0",
         "payment": "x402 / USDC on Base",
         "wallet": X402_WALLET,
         "services": {
@@ -1191,6 +1191,11 @@ async def health():
         "x402_facilitator": X402_FACILITATOR_URL,
         "services": ["crypto_prices", "indicators", "defi_yields", "fear_greed", "geo", "metadata", "search", "swap_quote", "trending", "gas", "predictions", "news", "social_trending", "global", "disputes", "policies", "marketing_sentiment", "marketing_trends", "marketing_competitors", "marketing_content_gaps", "marketing_ad_copy", "whales", "exchange_flows", "correlation", "defi_tvl", "stablecoin_flows", "github_velocity", "agent_context", "macro", "inference", "quick_complete", "token_risk", "crypto_signals", "hn_sentiment", "npm_stats", "github_trending", "yield_comparison", "stock_quote", "stock_history", "sec_filings", "commodities", "economic_indicators", "fx_rates", "web_extract", "package_security", "seo_keywords", "deep_research", "portfolio_intelligence", "defi_strategy", "market_pulse", "onchain_overview", "arbitrage_scanner", "liquidation_map"],
     }
+
+
+@app.get("/api/health")
+async def api_health():
+    return await health()
 
 
 @app.get("/.well-known/x402")

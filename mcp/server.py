@@ -8,7 +8,7 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import Tool, TextContent
 
-SERVER = Server("aiservices")
+SERVER = Server("agentservices")
 BASE_URL = "https://agentservices.to"
 
 ENDPOINTS = {

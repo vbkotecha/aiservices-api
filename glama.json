@@ -1,6 +1,6 @@
 {
   "$schema": "https://glama.ai/mcp/schemas/server.json",
-  "name": "aiservices",
+  "name": "agentservices",
   "display_name": "AgentServices — Paid APIs for AI Agents",
   "description": "50 paid and free APIs for AI agents. Crypto prices, technical indicators, DeFi yields, on-chain analytics, market intelligence, AI inference, deep research, portfolio intelligence, and bundled endpoints. Micropayments via x402 USDC on Base and Solana. MCP endpoint with 36 tools.",
   "repository": "https://github.com/vbkotecha/aiservices-api",
