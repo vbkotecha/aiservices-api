@@ -1267,7 +1267,7 @@ async def x402_service_json():
     return {
         "x402": "1.0",
         "name": "AgentServices",
-        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, DeFi, on-chain analytics, search, marketing intelligence, and more. 53 services, 38 paid. All via x402 (USDC on Base).",
+        "description": "Paid APIs for AI agents — crypto data, stocks, SEC filings, commodities, FX, DeFi, on-chain analytics, search, marketing intelligence, and more. 53 services, 41 paid. All via x402 (USDC on Base).",
         "capabilities": ["data", "crypto", "defi", "onchain", "search", "marketing", "stocks", "commodities", "fx", "inference"],
         "pricing": {"currency": "USDC", "base": "0.01", "unit": "request"},
         "payment": {"address": X402_WALLET, "chain": "base", "facilitator": X402_FACILITATOR_URL},

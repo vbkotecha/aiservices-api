@@ -488,7 +488,7 @@ SERVER_CARD = {
     "serverInfo": {
         "name": "AgentServices",
         "version": "5.3.0",
-        "description": "Paid APIs for AI agents — 50 services, 38 paid. Crypto, stocks, SEC, commodities, FX, inference, signals, extraction, security, portfolio intelligence, DeFi strategy, market pulse, on-chain overview. x402 on Base."
+        "description": "Paid APIs for AI agents — 53 services, 41 paid. 37 MCP tools. Crypto, stocks, SEC, commodities, FX, inference, signals, extraction, security, portfolio intelligence, DeFi strategy, market pulse, on-chain overview. x402 on Base."
     },
     "transport": {
         "type": "streamable-http",
