@@ -58,6 +58,14 @@ WALLET = os.environ.get("WALLET_ADDRESS", AISERVICES_PAY_TO)
 app = FastAPI(
     title="AgentServices",
     version="5.3.0",
+    contact={
+        "name": "AgentServices",
+        "url": "https://agentservices.to",
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://github.com/vbkotecha/aiservices-api",
+    },
     description="""Paid APIs for AI agents — data, intelligence, inference, and more.
 Crypto market data, DeFi yields, DEX quotes, prediction markets, news, search, IP geolocation,
 URL metadata, on-chain analytics, whale tracking, correlation matrix, DeFi TVL, stablecoin flows,
