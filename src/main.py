@@ -3383,6 +3383,15 @@ def _custom_openapi():
                         "network": "base",
                         "free": True,
                     }
+    # Inject x-bazaar-info into each operation for CDP Bazaar indexing
+    for path, path_item in schema.get("paths", {}).items():
+        for method, operation in path_item.items():
+            if method in ("get", "post", "put", "delete", "patch"):
+                route_desc = operation.get("summary", "") or operation.get("description", "")
+                bazaar_ext = _build_bazaar_extension(path, route_desc)
+                if bazaar_ext.get("info"):
+                    operation["x-bazaar-info"] = bazaar_ext
+
     app.openapi_schema = schema
     return schema
 
