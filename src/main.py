@@ -1028,7 +1028,7 @@ def _get_llms_full_markdown():
 - **AI Inference**: LLM gateway (GPT-5.4, GPT-5.5, Gemini) via x402 micropayments
 - **Traditional Finance**: Stock quotes, SEC filings, commodities, FX rates, economic indicators
 - **Utility**: Web extraction, package security scans, SEO keyword research
-- **MCP Integration**: 36 tools via remote MCP server at /mcp
+- **MCP Integration**: 37 tools via remote MCP server at /mcp
 
 ## Quick Start
 
@@ -1531,7 +1531,7 @@ async def llms_full_txt():
         "- GET /v1/geo/{ip} — IP geolocation lookup (city, country, ISP, coordinates)",
         "- GET /v1/policies — List dispute policy templates",
         "- GET /v1/agent-context — Paste-ready market context for LLM prompts",
-        "- POST /mcp — MCP server (JSON-RPC over SSE, 36 tools)",
+        "- POST /mcp — MCP server (JSON-RPC over SSE, 37 tools)",
         "",
         "## Paid Endpoints (x402 / USDC on Base)",
         "",
@@ -1612,7 +1612,7 @@ async def llms_full_txt():
         "",
         "## MCP Integration",
         "",
-        "AgentServices provides a remote MCP server at https://agentservices.to/mcp with 36 tools.",
+        "AgentServices provides a remote MCP server at https://agentservices.to/mcp with 37 tools.",
 """
 MCP config for Claude Desktop:
 {\"mcpServers\":{\"agentservices\":{\"url\":\"https://agentservices.to/mcp\"}}}
@@ -2109,7 +2109,7 @@ Add to claude_desktop_config.json:
     Server URL: https://agentservices.to/mcp
     Transport: SSE (Server-Sent Events)
 
-36 tools available covering all endpoints.
+37 tools available covering all endpoints.
 
 ## Endpoint Reference
 
@@ -3069,7 +3069,7 @@ async def llms_txt():
 ## Quick Start
 - Free endpoints: GET https://agentservices.to/v1/prices (crypto prices), GET https://agentservices.to/v1/fear-greed (market sentiment)
 - Paid endpoints: GET https://agentservices.to/v1/indicators/BTC (0.02 USDC), GET https://agentservices.to/v1/search?q=... (0.01 USDC)
-- MCP server: https://agentservices.to/mcp (38 tools, Streamable HTTP)
+- MCP server: https://agentservices.to/mcp (37 tools, Streamable HTTP)
 - Full docs: https://agentservices.to/docs
 - OpenAPI spec: https://agentservices.to/openapi.json
 - Health check: https://agentservices.to/health
