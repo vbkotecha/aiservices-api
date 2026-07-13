@@ -1850,7 +1850,7 @@ async def llms_txt():
     lines = [
         "# AgentServices",
         "",
-        "> Paid APIs for AI agents. 51 services, 39 paid. Crypto data, stocks, SEC filings, commodities, FX, inference gateway (gpt-5.4/5.5), token risk scoring, crypto signals, cross-DEX arbitrage scanner, web extraction, package security, SEO research, and more. All via x402 (USDC on Base).",
+        "> Paid APIs for AI agents. 53 services, 41 paid. 37 MCP tools. Crypto data, stocks, SEC filings, commodities, FX, inference gateway (gpt-5.4/5.5), token risk scoring, crypto signals, cross-DEX arbitrage scanner, web extraction, package security, SEO research, and more. All via x402 (USDC on Base).",
         "",
         "## Base URL",
         "https://agentservices.to",
@@ -2868,7 +2868,7 @@ curl https://agentservices.to/v1/search?q=base+chain
 <a href="https://github.com/vbkotecha/aiservices-api">GitHub</a>
 </p>
 <p style="margin-top:8px;color:#555;font-size:0.8em">
-AgentServices — Paid APIs for AI agents. 51 services. x402/USDC on Base.
+AgentServices — Paid APIs for AI agents. 53 services. x402/USDC on Base.
 </p>
 </div>
 
