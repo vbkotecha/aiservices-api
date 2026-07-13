@@ -210,7 +210,7 @@ _BAZAAR_ENDPOINT_INFO = {
     "/v1/geo": {"method": "GET", "route": "/v1/geo/:ip", "path_params": {"ip": "8.8.8.8"}, "query": {}, "body": None,
         "output_example": {"ip": "8.8.8.8", "city": "Mountain View", "region": "CA", "country": "US", "lat": 37.4056, "lon": -122.0775}},
     "/v1/phone": {"method": "GET", "route": "/v1/phone", "path_params": {}, "query": {"number": "+14155551234"}, "body": None,
-        "output_example": {"number": "+14155551234", "valid": true, "carrier": "Verizon", "line_type": "mobile", "country": "US"}},
+        "output_example": {"number": "+14155551234", "valid": True, "carrier": "Verizon", "line_type": "mobile", "country": "US"}},
     "/v1/swap/quote": {"method": "GET", "route": "/v1/swap/quote", "path_params": {}, "query": {"from": "USDC", "to": "ETH", "amount": "1000"}, "body": None,
         "output_example": {"from": "USDC", "to": "ETH", "amount_in": "1000", "amount_out": "0.314", "price_impact": "0.01%", "route": ["Uniswap V3"]}},
     "/v1/calls": {"method": "POST", "route": "/v1/calls", "path_params": {}, "query": {}, "body": {"to": "+14155551234", "message": "Hello"},
