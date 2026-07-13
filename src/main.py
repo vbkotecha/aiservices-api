@@ -1288,6 +1288,60 @@ async def favicon():
     return {"detail": "not found"}, 404
 
 
+@app.get("/.well-known/ai-plugin.json")
+async def ai_plugin():
+    return {
+        "schema_version": "v1",
+        "name_for_model": "agentservices",
+        "name_for_human": "AgentServices",
+        "description_for_model": "Paid APIs for AI agents. Crypto, DeFi, stocks, FX, research, 37 MCP tools. x402 payments on Base.",
+        "description_for_human": "Financial data APIs for AI agents.",
+        "auth": {"type": "none"},
+        "api": {"type": "openapi", "url": "https://agentservices.to/openapi.json"},
+        "logo_url": "https://agentservices.to/favicon.ico",
+        "contact_email": "vbkotecha@gmail.com",
+        "legal_info_url": "https://agentservices.to/",
+    }
+
+
+@app.get("/skill.md")
+async def skill_md():
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(
+        """---
+name: agentservices
+description: Access paid APIs for AI agents — crypto, DeFi, stocks, research. 37 MCP tools. x402 payments (USDC on Base).
+---
+
+# AgentServices — Paid APIs for AI Agents
+
+53 API endpoints (41 paid). Agents pay per-request via x402 (USDC on Base).
+
+## Free Endpoints
+- GET /v1/price/{symbol} — Crypto prices
+- GET /v1/prices — Batch crypto prices
+- GET /v1/fear-greed — Fear & Greed index
+- GET /v1/gas — Gas prices
+- GET /v1/trending — Trending tokens
+
+## Paid Endpoints (x402)
+- GET /v1/indicators/{symbol} ($0.02) — Technical indicators
+- GET /v1/yields ($0.02) — DeFi yield pools
+- GET /v1/whales ($0.02) — Whale transactions
+- GET /v1/portfolio?symbol=BTC ($0.10) — Portfolio intelligence
+- GET /v1/market-pulse ($0.05) — Market snapshot
+- POST /v1/deep-research ($0.05) — Research brief
+
+## MCP
+Connect: https://agentservices.to/mcp (37 tools, Streamable HTTP)
+
+## Base URL
+https://agentservices.to
+""",
+        media_type="text/markdown",
+    )
+
+
 @app.get("/.well-known/x402")
 async def x402_manifest():
     """x402 payment manifest for agent discovery."""
