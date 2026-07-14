@@ -1383,6 +1383,7 @@ async def x402_manifest():
         {"path": "/v1/onchain-overview", "method": "GET", "price": "$0.15", "description": "On-chain overview — whales + exchange flows + stablecoin flows + correlation + DeFi TVL"},
     ]
     paid_endpoints = [endpoint for endpoint in endpoints if endpoint["price"] != "$0.00"]
+    resources = [f"https://agentservices.to{e['path']}" for e in endpoints]
     return {
         "version": "1.0",
         "name": "AgentServices",
@@ -1391,6 +1392,7 @@ async def x402_manifest():
         "chain_id": X402_NETWORKS[0] if X402_NETWORKS else "eip155:8453",
         "currency": "USDC",
         "endpoints": endpoints,
+        "resources": resources,
         "paid_endpoints": paid_endpoints,
         "paid_endpoint_count": len(paid_endpoints),
         "categories": ["Data", "Market Data", "On-chain Analytics", "Geolocation", "DEX", "Prediction Markets", "Search", "News", "Governance", "Dispute Resolution", "MCP", "Marketing Intelligence"],
@@ -1586,6 +1588,7 @@ async def x402_json_manifest():
         "documentation": "https://agentservices.to/docs",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "services": paid_services + free_services,
+        "resources": [f"https://agentservices.to{s['path']}" for s in paid_services + free_services],
         "extensions": {
             "bazaar": {
                 "discoverable": True,
