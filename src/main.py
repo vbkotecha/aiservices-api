@@ -1535,6 +1535,18 @@ async def agent_json():
     }
 
 
+@app.get("/.well-known/mcp.json")
+async def mcp_well_known():
+    """MCP discovery file for mcpub and other MCP directory crawlers."""
+    return {
+        "name": "AgentServices",
+        "version": "5.3.0",
+        "description": "50+ x402-paid crypto/market data APIs for AI agents. 37 MCP tools across 54 services.",
+        "mcp_endpoint": "https://agentservices.to/mcp",
+        "website": "https://agentservices.to",
+    }
+
+
 @app.get("/.well-known/x402.json")
 async def x402_json_manifest():
     """x402 v2 discovery manifest — what AgentGrade, Open 402 Directory, and x402.direct crawlers look for."""
