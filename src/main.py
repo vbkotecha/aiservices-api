@@ -383,7 +383,37 @@ try:
         facilitator_config_kwargs["url"] = CDP_FACILITATOR_URL
         facilitator_config_kwargs["auth_provider"] = CreateHeadersAuthProvider(create_cdp_auth_headers)
 
-    facilitator = HTTPFacilitatorClient(FacilitatorConfig(**facilitator_config_kwargs))
+    # CDP Bazaar indexing fix (x402-foundation/x402#2832):
+    # CDP facilitator /verify rejects payloads with resource/extensions.
+    # Subclass HTTPFacilitatorClient to strip those fields before POST.
+    # This restores CDP Bazaar indexing and x402scan marketplace visibility.
+    import httpx
+
+    class CDPFixedFacilitatorClient(HTTPFacilitatorClient):
+        """HTTPFacilitatorClient that strips resource/extensions from paymentPayload
+        before sending to CDP /verify — fixes x402-foundation/x402#2832."""
+
+        async def verify(self, payment_payload, payment_requirements):
+            payload_dict = payment_payload.model_dump(by_alias=True, exclude_none=True) if hasattr(payment_payload, 'model_dump') else dict(payment_payload)
+            payload_dict.pop("resource", None)
+            payload_dict.pop("extensions", None)
+            if hasattr(payment_payload, 'model_validate'):
+                cleaned = type(payment_payload).model_validate(payload_dict)
+            else:
+                cleaned = payload_dict
+            return await super().verify(cleaned, payment_requirements)
+
+        async def settle(self, payment_payload, payment_requirements):
+            payload_dict = payment_payload.model_dump(by_alias=True, exclude_none=True) if hasattr(payment_payload, 'model_dump') else dict(payment_payload)
+            payload_dict.pop("resource", None)
+            payload_dict.pop("extensions", None)
+            if hasattr(payment_payload, 'model_validate'):
+                cleaned = type(payment_payload).model_validate(payload_dict)
+            else:
+                cleaned = payload_dict
+            return await super().settle(cleaned, payment_requirements)
+
+    facilitator = CDPFixedFacilitatorClient(FacilitatorConfig(**facilitator_config_kwargs))
     payment_server = x402ResourceServer(facilitator)
     # Register EVM networks (Base, BSC)
     payment_server.register(X402_BASE_NETWORK, ExactEvmServerScheme())
