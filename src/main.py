@@ -793,14 +793,6 @@ try:
                         updated_b64 = _b64_enrich.b64encode(updated_json.encode()).decode()
                         response.headers["payment-required"] = updated_b64
 
-                        # ALSO write the x402 metadata into the response BODY
-                        # (CDP Bazaar crawlers and x402-conform check the body, not just header)
-                        import json as _body_json
-                        body_bytes = _body_json.dumps(payload, separators=(',', ':')).encode()
-                        response._body = body_bytes
-                        response.body = body_bytes
-                        response.headers["content-length"] = str(len(body_bytes))
-
                         print(f"[bazaar-enrich] Enriched 402 for {resource.get('url', 'unknown')}", flush=True)
 
                     except Exception as e:
